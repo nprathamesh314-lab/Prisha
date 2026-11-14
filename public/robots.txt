@@ -1,0 +1,9 @@
+# Prisha Xpress Pvt. Ltd. - Robots Exclusion File
+# https://prishaxpress.com
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: https://prishaxpress.com/sitemap.xml

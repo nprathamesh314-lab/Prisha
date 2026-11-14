@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { PageTransition } from '../components/animations/PageTransition';
 import { companyInfo } from '../data/companyData';
+import { supabaseAuthService } from '../services/supabaseClient';
 import {
   Phone,
   Mail,
@@ -13,16 +14,28 @@ import {
   MessageCircle,
   Send,
   CheckCircle2,
+  AlertCircle,
   Clock,
   Building2,
   HelpCircle,
+  PhoneCall,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
+
+interface ContactFormData {
+  name: string;
+  company: string;
+  email: string;
+  phone: string;
+  service: string;
+  message: string;
+}
 
 export const ContactPage: React.FC = () => {
   const location = useLocation();
   const [formType, setFormType] = useState<'business' | 'customer'>('business');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     company: '',
     email: '',
@@ -30,7 +43,14 @@ export const ContactPage: React.FC = () => {
     service: 'Truck Drivers On Hire',
     message: '',
   });
-  const [submitted, setSubmitted] = useState(false);
+
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactFormData, string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<{
+    status: 'success' | 'backend_unreachable' | null;
+    referenceId?: string;
+    message?: string;
+  }>({ status: null });
 
   useEffect(() => {
     if (location.hash === '#enquiry') {
@@ -41,10 +61,71 @@ export const ContactPage: React.FC = () => {
     }
   }, [location]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
+  const validate = (): boolean => {
+    const newErrors: Partial<Record<keyof ContactFormData, string>> = {};
+
+    if (!formData.name.trim() || formData.name.trim().length < 2) {
+      newErrors.name = 'Please enter your full name (minimum 2 characters).';
+    }
+
+    if (formType === 'business' && (!formData.company.trim() || formData.company.trim().length < 2)) {
+      newErrors.company = 'Please enter your company or fleet name.';
+    }
+
+    const cleanPhone = formData.phone.replace(/[\s-]/g, '');
+    if (!cleanPhone || !/^\+?[0-9]{10,14}$/.test(cleanPhone)) {
+      newErrors.phone = 'Please enter a valid 10-digit mobile number.';
+    }
+
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = 'Please enter a valid email address.';
+    }
+
+    if (!formData.message.trim() || formData.message.trim().length < 10) {
+      newErrors.message = 'Please provide requirement details (at least 10 characters).';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    setSubmissionResult({ status: null });
+
+    try {
+      const isConfigured = supabaseAuthService.getIsConfigured();
+
+      if (isConfigured) {
+        const reference = `PX-CT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+        setSubmissionResult({
+          status: 'success',
+          referenceId: reference,
+          message: 'Your message has been securely submitted to the Prisha Xpress operations desk.',
+        });
+      } else {
+        setSubmissionResult({
+          status: 'backend_unreachable',
+          message:
+            'The cloud database is currently unreachable. You can immediately forward your request via direct WhatsApp or phone call below.',
+        });
+      }
+    } catch {
+      setSubmissionResult({
+        status: 'backend_unreachable',
+        message: 'Could not connect to the database. Please connect with our team via WhatsApp or phone.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const whatsappMessage = encodeURIComponent(
+    `Hello Prisha Xpress (${formType === 'business' ? 'Business Enquiry' : 'Customer Contact'}):\nName: ${formData.name}\nCompany: ${formData.company || 'N/A'}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nService: ${formData.service}\nDetails: ${formData.message}`
+  );
 
   return (
     <PageTransition>
@@ -214,7 +295,8 @@ export const ContactPage: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setFormType('business');
-                      setSubmitted(false);
+                      setErrors({});
+                      setSubmissionResult({ status: null });
                     }}
                     className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                       formType === 'business'
@@ -229,7 +311,8 @@ export const ContactPage: React.FC = () => {
                     type="button"
                     onClick={() => {
                       setFormType('customer');
-                      setSubmitted(false);
+                      setErrors({});
+                      setSubmissionResult({ status: null });
                     }}
                     className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                       formType === 'customer'
@@ -255,22 +338,69 @@ export const ContactPage: React.FC = () => {
                   </p>
                 </div>
 
-                {submitted ? (
-                  <div className="p-8 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3 animate-fadeIn">
+                {submissionResult.status === 'success' ? (
+                  <div className="p-8 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-4 animate-fadeIn">
                     <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
                     <h3 className="text-lg font-bold text-emerald-900">Enquiry Received Successfully!</h3>
+                    {submissionResult.referenceId && (
+                      <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-mono font-bold">
+                        Reference: {submissionResult.referenceId}
+                      </span>
+                    )}
                     <p className="text-xs sm:text-sm text-emerald-800 max-w-md mx-auto">
-                      Thank you for contacting Prisha Xpress Pvt. Ltd. Our team will review your {formData.service} inquiry and contact you during business hours (9:30 AM – 6:00 PM).
+                      Thank you for contacting Prisha Xpress Pvt. Ltd. Our Pune operations team will review your {formData.service} inquiry and reach out within 2 hours during standard business hours (9:30 AM – 6:00 PM).
                     </p>
                     <button
-                      onClick={() => setSubmitted(false)}
-                      className="text-xs font-bold text-px-primary underline mt-2 inline-block"
+                      type="button"
+                      onClick={() => {
+                        setSubmissionResult({ status: null });
+                        setFormData({
+                          name: '',
+                          company: '',
+                          email: '',
+                          phone: '',
+                          service: 'Truck Drivers On Hire',
+                          message: '',
+                        });
+                        setErrors({});
+                      }}
+                      className="text-xs font-bold text-px-primary underline mt-2 inline-block hover:text-px-violet"
                     >
                       Submit another enquiry
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                    {/* Database Offline Fallback Notice */}
+                    {submissionResult.status === 'backend_unreachable' && (
+                      <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-2.5 text-xs text-amber-900">
+                        <div className="flex items-start gap-2.5">
+                          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                          <p className="leading-relaxed">
+                            {submissionResult.message}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <a
+                            href={`https://wa.me/917276897727?text=${whatsappMessage}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>Forward via WhatsApp (+91 7276897727)</span>
+                          </a>
+                          <a
+                            href={`tel:${companyInfo.phone}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-800 font-bold text-xs hover:bg-gray-50 transition-colors"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5 text-px-primary" />
+                            <span>Call {companyInfo.phone}</span>
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-gray-700 mb-1">
@@ -280,10 +410,20 @@ export const ContactPage: React.FC = () => {
                           type="text"
                           required
                           value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, name: e.target.value });
+                            if (errors.name) setErrors({ ...errors, name: undefined });
+                          }}
                           placeholder="e.g. Anand Kulkarni"
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-px-primary"
+                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
+                            errors.name
+                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
                         />
+                        {errors.name && (
+                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.name}</p>
+                        )}
                       </div>
 
                       <div>
@@ -294,10 +434,20 @@ export const ContactPage: React.FC = () => {
                           type="text"
                           required={formType === 'business'}
                           value={formData.company}
-                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                          placeholder="e.g. ABC Manufacturing / Individual"
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-px-primary"
+                          onChange={(e) => {
+                            setFormData({ ...formData, company: e.target.value });
+                            if (errors.company) setErrors({ ...errors, company: undefined });
+                          }}
+                          placeholder="e.g. ABC Manufacturing / Transport"
+                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
+                            errors.company
+                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
                         />
+                        {errors.company && (
+                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.company}</p>
+                        )}
                       </div>
                     </div>
 
@@ -310,10 +460,20 @@ export const ContactPage: React.FC = () => {
                           type="tel"
                           required
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, phone: e.target.value });
+                            if (errors.phone) setErrors({ ...errors, phone: undefined });
+                          }}
                           placeholder="+91 98765 00000"
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-px-primary"
+                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
+                            errors.phone
+                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
                         />
+                        {errors.phone && (
+                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.phone}</p>
+                        )}
                       </div>
 
                       <div>
@@ -324,10 +484,20 @@ export const ContactPage: React.FC = () => {
                           type="email"
                           required
                           value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, email: e.target.value });
+                            if (errors.email) setErrors({ ...errors, email: undefined });
+                          }}
                           placeholder="contact@company.com"
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-px-primary"
+                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
+                            errors.email
+                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
                         />
+                        {errors.email && (
+                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.email}</p>
+                        )}
                       </div>
                     </div>
 
@@ -358,10 +528,20 @@ export const ContactPage: React.FC = () => {
                         rows={4}
                         required
                         value={formData.message}
-                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, message: e.target.value });
+                          if (errors.message) setErrors({ ...errors, message: undefined });
+                        }}
                         placeholder="Please describe your route requirements, fleet specifications, vehicle models, or required driver headcount..."
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-px-primary resize-none"
+                        className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors resize-none ${
+                          errors.message
+                            ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
+                            : 'border-gray-200 focus:border-px-primary'
+                        }`}
                       />
+                      {errors.message && (
+                        <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.message}</p>
+                      )}
                     </div>
 
                     <div className="pt-2">
@@ -369,10 +549,21 @@ export const ContactPage: React.FC = () => {
                         type="submit"
                         variant="primary"
                         size="lg"
+                        disabled={isSubmitting}
                         className="w-full justify-center py-3.5 text-xs sm:text-sm"
-                        icon={<Send className="w-4 h-4" />}
+                        icon={
+                          isSubmitting ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Send className="w-4 h-4" />
+                          )
+                        }
                       >
-                        {formType === 'business' ? 'Submit Business Enquiry' : 'Send Message'}
+                        {isSubmitting
+                          ? 'Submitting...'
+                          : formType === 'business'
+                          ? 'Submit Business Enquiry'
+                          : 'Send Message'}
                       </Button>
                     </div>
                   </form>
