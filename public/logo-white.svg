@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 90" fill="none">
+  <defs>
+    <linearGradient id="pxpl-grad-white" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C084FC" />
+      <stop offset="50%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Speed Arc / Swoosh -->
+  <path d="M 52 14 C 18 18 6 42 12 62 C 18 80 44 86 64 80 C 82 74 88 58 84 50 C 80 42 70 38 64 42 C 58 46 62 56 68 56 C 74 56 74 62 66 66 C 54 72 32 68 26 52 C 20 36 32 24 54 22 C 68 20 82 26 88 32 L 94 24 C 84 16 68 12 52 14 Z" fill="url(#pxpl-grad-white)" />
+  
+  <!-- Dynamic Inner Swirl / Motion Line -->
+  <path d="M 38 34 C 44 26 56 22 66 26 C 76 30 76 40 70 44 C 64 48 54 44 56 38 C 58 32 68 32 68 36 C 68 38 66 40 62 38 C 56 36 50 38 46 44 C 42 50 48 58 58 56 C 66 54 74 48 76 42 L 84 46 C 80 56 68 64 54 64 C 38 64 30 50 34 38 Z" fill="#E8DCF3" />
+
+  <!-- PXPL Bold Monogram -->
+  <text x="102" y="58" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-weight="900" font-size="44" fill="#FFFFFF" letter-spacing="-1">PX</text>
+  <text x="168" y="58" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-weight="900" font-size="44" fill="#D8B4FE" letter-spacing="-1">PL</text>
+
+  <!-- Divider Line -->
+  <line x1="230" y1="22" x2="230" y2="70" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round" />
+
+  <!-- Corporate Name -->
+  <text x="242" y="44" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-weight="800" font-size="16" fill="#FFFFFF" letter-spacing="1.5">PRISHA XPRESS</text>
+  <text x="243" y="62" font-family="'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" font-weight="600" font-size="11" fill="#E9D8F6" letter-spacing="3.5">PVT. LTD.</text>
+</svg>
