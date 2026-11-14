@@ -158,7 +158,7 @@ export const HeroSliderSection: React.FC = () => {
                 to="#enquiry"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('enquiry')?.scrollIntoView({ behavior: 'smooth' });
+                  document.getElementById('enquiry')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
                 variant="glass"
                 size="md"

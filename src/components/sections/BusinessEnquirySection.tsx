@@ -204,7 +204,7 @@ export const BusinessEnquirySection: React.FC = () => {
           </div>
 
           {/* Right Column: Interactive Business Enquiry Form (7 cols) */}
-          <div className="lg:col-span-7">
+          <div id="enquiry-form" className="lg:col-span-7">
             <FadeIn direction="left" delay={0.2}>
               <div className="p-6 sm:p-10 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple">
                 <div className="mb-6">

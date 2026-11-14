@@ -206,8 +206,8 @@ export const ContactPage: React.FC = () => {
             </div>
 
             {/* Form Section (7 cols) */}
-            <div id="enquiry-form" className="lg:col-span-7">
-              <div className="p-8 sm:p-12 rounded-3xl bg-white border border-px-border shadow-soft-purple space-y-6">
+            <div id="enquiry" className="scroll-mt-28 lg:col-span-7">
+              <div id="enquiry-form" className="p-8 sm:p-12 rounded-3xl bg-white border border-px-border shadow-soft-purple space-y-6">
                 {/* Form Tabs: Business Enquiry vs Customer Support */}
                 <div className="flex p-1.5 rounded-2xl bg-px-bg border border-px-border max-w-sm">
                   <button

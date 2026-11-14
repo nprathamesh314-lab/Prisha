@@ -293,7 +293,7 @@ export const Navbar: React.FC = () => {
                 onClick={(e) => {
                   if (isHomePage) {
                     e.preventDefault();
-                    document.getElementById('enquiry')?.scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('enquiry')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }
                 }}
                 variant={isNavbarTransparent ? 'white' : 'primary'}
@@ -434,11 +434,12 @@ export const Navbar: React.FC = () => {
                   to={isHomePage ? '#enquiry' : '/#enquiry'}
                   variant="primary"
                   className="w-full justify-center py-3 text-sm font-bold shadow-md"
-                  onClick={() => {
+                  onClick={(e) => {
                     setMobileMenuOpen(false);
                     if (isHomePage) {
+                      e.preventDefault();
                       setTimeout(() => {
-                        document.getElementById('enquiry')?.scrollIntoView({ behavior: 'smooth' });
+                        document.getElementById('enquiry')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }, 200);
                     }
                   }}

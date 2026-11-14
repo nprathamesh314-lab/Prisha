@@ -4,15 +4,35 @@ import { ArrowUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const ScrollToTop: React.FC = () => {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    if (hash) {
+      const targetId = hash.replace('#', '');
+      const scrollToHashElement = () => {
+        const element =
+          document.getElementById(targetId) ||
+          document.getElementById(`${targetId}-form`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return true;
+        }
+        return false;
+      };
+
+      if (!scrollToHashElement()) {
+        const timer = setTimeout(scrollToHashElement, 200);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
-  }, [pathname]);
+  }, [pathname, hash]);
 
   useEffect(() => {
     const toggleVisibility = () => {

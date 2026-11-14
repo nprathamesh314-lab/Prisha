@@ -25,6 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
   iconPosition = 'right',
   className = '',
   disabled,
+  onClick,
   ...props
 }) => {
   const baseStyles =
@@ -68,7 +69,12 @@ export const Button: React.FC<ButtonProps> = ({
 
   if (to) {
     return (
-      <Link to={to} className={combinedClasses}>
+      <Link
+        to={to}
+        className={combinedClasses}
+        onClick={onClick as any}
+        {...(props as any)}
+      >
         {content}
       </Link>
     );
@@ -81,6 +87,8 @@ export const Button: React.FC<ButtonProps> = ({
         target={isExternal ? '_blank' : undefined}
         rel={isExternal ? 'noopener noreferrer' : undefined}
         className={combinedClasses}
+        onClick={onClick as any}
+        {...(props as any)}
       >
         {content}
       </a>
