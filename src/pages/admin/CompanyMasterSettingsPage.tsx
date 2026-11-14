@@ -502,7 +502,7 @@ export const CompanyMasterSettingsPage: React.FC = () => {
               <span>Company Information Clarification Questionnaire</span>
             </h2>
             <p className="text-xs text-purple-200 leading-relaxed">
-              To guarantee total accuracy and corporate legal compliance, the following items from the legacy website require formal confirmation from Prisha Xpress Pvt. Ltd. executive management. All items are documented in detail in <code>COMPANY_INFORMATION_REQUIRED.md</code>.
+              To guarantee total accuracy and corporate legal compliance, the following items from the legacy website require formal confirmation from Prisha Xpress Pvt. Ltd. executive management.
             </p>
           </div>
 
