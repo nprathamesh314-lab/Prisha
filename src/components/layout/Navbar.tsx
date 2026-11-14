@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { companyInfo } from '../../data/companyData';
 import { Button } from '../common/Button';
+import { MobileAnimatedTruck } from './MobileAnimatedTruck';
 
 interface NavItem {
   label: string;
@@ -112,7 +113,7 @@ export const Navbar: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group focus:outline-none">
+            <Link to="/" className="flex items-center gap-3 group focus:outline-none shrink-0 z-10">
               <div className="flex items-center gap-2.5 bg-white py-1.5 px-3 rounded-2xl shadow-sm border border-px-border/80 group-hover:shadow-md transition-all">
                 <img
                   src="/prisha-logo.png"
@@ -129,6 +130,9 @@ export const Navbar: React.FC = () => {
                 </div>
               </div>
             </Link>
+
+            {/* Mobile Animated Delivery Truck (Visible ONLY on mobile devices < sm; hidden on tablet and desktop) */}
+            <MobileAnimatedTruck isTransparent={isNavbarTransparent} />
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5" aria-label="Main Navigation">
@@ -302,7 +306,7 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Mobile Hamburger Button */}
-            <div className="flex lg:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-2 shrink-0 z-10">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className={`p-2 rounded-xl focus:outline-none ${
