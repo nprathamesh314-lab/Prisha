@@ -15,6 +15,8 @@ import { StaffApplicationPage } from '../pages/careers/StaffApplicationPage';
 import { DriverRegistrationPage } from '../pages/careers/DriverRegistrationPage';
 import { CsrPage } from '../pages/CsrPage';
 import { ContactPage } from '../pages/ContactPage';
+import { PrivacyPolicyPage } from '../pages/PrivacyPolicyPage';
+import { TermsAndConditionsPage } from '../pages/TermsAndConditionsPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 
 // Admin Dashboard Components
@@ -56,6 +58,12 @@ export const AppRoutes: React.FC = () => {
       {/* Corporate Responsibility & Contact */}
       <Route path="/csr" element={<CsrPage />} />
       <Route path="/contact" element={<ContactPage />} />
+
+      {/* Legal & Policy Pages */}
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
+      <Route path="/terms" element={<TermsAndConditionsPage />} />
 
       {/* Private Admin Dashboard Routes */}
       <Route path="/admin" element={<AdminLayout />}>

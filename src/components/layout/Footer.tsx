@@ -188,7 +188,7 @@ export const Footer: React.FC = () => {
               Privacy Policy
             </Link>
             <span className="text-purple-300/60">•</span>
-            <Link to="/terms" className="hover:text-white transition-colors">
+            <Link to="/terms-and-conditions" className="hover:text-white transition-colors">
               Terms & Conditions
             </Link>
             <span className="text-purple-300/60">•</span>
