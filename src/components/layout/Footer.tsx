@@ -18,7 +18,7 @@ export const Footer: React.FC = () => {
       <div className="absolute bottom-0 left-10 w-80 h-80 bg-px-violet/15 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
           {/* Column 1: Company Profile (4 cols) */}
           <div className="lg:col-span-4 space-y-5">
@@ -179,7 +179,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar: Copyright & Policies */}
-        <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+        <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
           <p>
             © {new Date().getFullYear()} {companyInfo.name}. All rights reserved.
           </p>

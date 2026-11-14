@@ -109,31 +109,31 @@ export const BusinessEnquirySection: React.FC = () => {
   );
 
   return (
-    <section id="enquiry" className="scroll-mt-28 py-20 lg:py-28 bg-white relative overflow-hidden">
+    <section id="enquiry" className="scroll-mt-28 py-14 lg:py-18 bg-px-bg relative overflow-hidden">
       {/* Background Subtle Accent Gradients */}
       <div className="absolute top-1/4 -right-40 w-96 h-96 bg-px-lavender/50 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 -left-40 w-96 h-96 bg-purple-50 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Column: Value Proposition & Direct Contact (5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
+          <div className="lg:col-span-5 space-y-5">
             <FadeIn direction="right">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-px-lavender text-px-primary border border-purple-200">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-px-primary border border-purple-200">
                 <ShieldCheck className="w-4 h-4 text-px-primary" />
                 Corporate Fleet Partnership
               </span>
             </FadeIn>
 
             <FadeIn direction="right" delay={0.1}>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-px-dark tracking-tight leading-tight">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-px-dark tracking-tight leading-tight">
                 Request a Tailored{' '}
                 <span className="text-gradient-purple">Logistics & Fleet SLA</span>
               </h2>
             </FadeIn>
 
             <FadeIn direction="right" delay={0.2}>
-              <p className="text-base text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 Whether deploying commercial drivers on hire, transitioning to 3PL fleet supervision, or booking regular freight line-hauls, our Pune operations team will review your requirements and provide transparent corporate rates.
               </p>
             </FadeIn>

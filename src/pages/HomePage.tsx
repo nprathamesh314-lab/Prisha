@@ -1,48 +1,48 @@
 import React from 'react';
 import { PageTransition } from '../components/animations/PageTransition';
-import { HeroSection } from '../components/sections/HeroSection';
+import { HeroSliderSection } from '../components/sections/HeroSliderSection';
+import { StatsStripSection } from '../components/sections/StatsStripSection';
 import { CompanyIntroSection } from '../components/sections/CompanyIntroSection';
-import { ServicesSection } from '../components/sections/ServicesSection';
+import { ServicesCarouselSection } from '../components/sections/ServicesCarouselSection';
 import { WhyChooseUsSection } from '../components/sections/WhyChooseUsSection';
-import { TestimonialsSection } from '../components/sections/TestimonialsSection';
-import { OurNetworkSection } from '../components/sections/OurNetworkSection';
-import { HowWeWorkSection } from '../components/sections/HowWeWorkSection';
+import { WorkflowTimelineSection } from '../components/sections/WorkflowTimelineSection';
+import { FleetGallerySection } from '../components/sections/FleetGallerySection';
+import { TestimonialSliderSection } from '../components/sections/TestimonialSliderSection';
 import { CareersSection } from '../components/sections/CareersSection';
 import { BusinessEnquirySection } from '../components/sections/BusinessEnquirySection';
-import { ContactPreviewSection } from '../components/sections/ContactPreviewSection';
 
 export const HomePage: React.FC = () => {
   return (
     <PageTransition>
-      {/* Section A: Hero Experience */}
-      <HeroSection />
+      {/* 2. Hero: Full-Width Truck Image Slider */}
+      <HeroSliderSection />
 
-      {/* Section B: Company Introduction */}
+      {/* 3. Company Highlights: One-Line Animated Statistics Strip */}
+      <StatsStripSection />
+
+      {/* 4. About Prisha: Image + Short Company Introduction */}
       <CompanyIntroSection />
 
-      {/* Section C: Our Services */}
-      <ServicesSection />
+      {/* 5. Services: Swipeable Service Carousel (2-3 cards at a time) */}
+      <ServicesCarouselSection />
 
-      {/* Section D: Why Choose Prisha Xpress? */}
+      {/* 6. Why Choose Us: Three Compact Animated Features */}
       <WhyChooseUsSection />
 
-      {/* Section E: Published Client Voice & Testimonials */}
-      <TestimonialsSection />
+      {/* 7. Workflow: Animated Transportation Timeline */}
+      <WorkflowTimelineSection />
 
-      {/* Section F: Our Network */}
-      <OurNetworkSection />
+      {/* 8. Fleet Gallery: Photography Showcase Slider */}
+      <FleetGallerySection />
 
-      {/* Section F: How We Work */}
-      <HowWeWorkSection />
+      {/* 9. Testimonials: Single-Card Testimonial Slider */}
+      <TestimonialSliderSection />
 
-      {/* Section G: Careers */}
+      {/* 10. Careers: Two Compact Recruitment Panels */}
       <CareersSection />
 
-      {/* Section H: Business Enquiry */}
+      {/* 11. Business Enquiry: Short Validated Corporate Form */}
       <BusinessEnquirySection />
-
-      {/* Section I: Contact Preview */}
-      <ContactPreviewSection />
     </PageTransition>
   );
 };
