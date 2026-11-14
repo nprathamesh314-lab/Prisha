@@ -9,7 +9,7 @@ import { SectionHeading } from '../components/common/SectionHeading';
 import { CTASection } from '../components/common/CTASection';
 import { Button } from '../components/common/Button';
 import { AboutStrengthsSlider } from '../components/about/AboutStrengthsSlider';
-import { AboutFleetGallerySlider } from '../components/about/AboutFleetGallerySlider';
+import { AboutStatisticsSection } from '../components/about/AboutStatisticsSection';
 import { companyInfo } from '../data/companyData';
 import {
   Target,
@@ -310,8 +310,8 @@ export const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 6: REAL COMPANY FLEET GALLERY (HORIZONTAL IMAGE SLIDER) */}
-      <AboutFleetGallerySlider />
+      {/* SECTION 6: OUR IMPACT IN NUMBERS (PREMIUM STATISTICS) */}
+      <AboutStatisticsSection />
 
       {/* SECTION 7: BUSINESS ENQUIRY CTA */}
       <CTASection
