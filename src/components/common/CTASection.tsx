@@ -55,14 +55,14 @@ export const CTASection: React.FC<CTASectionProps> = ({
           </FadeIn>
 
           <FadeIn direction="up" delay={0.2}>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 max-w-2xl mx-auto leading-relaxed font-normal">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-100 max-w-2xl mx-auto leading-relaxed font-medium">
               {subtitle}
             </p>
           </FadeIn>
 
           {/* Value badges */}
           <FadeIn direction="up" delay={0.3}>
-            <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 text-xs sm:text-sm text-gray-200">
+            <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 text-xs sm:text-sm text-white font-medium">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>Disciplined Highway Operations</span>

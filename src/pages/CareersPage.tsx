@@ -45,7 +45,7 @@ export const CareersPage: React.FC = () => {
               Build Your Future with <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-px-accent">Prisha Xpress</span>
             </h1>
 
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 max-w-2xl mx-auto leading-relaxed font-normal">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-100 max-w-2xl mx-auto leading-relaxed font-medium">
               Explore professional opportunities and become part of our growing transportation and logistics operations.
             </p>
 
@@ -86,7 +86,7 @@ export const CareersPage: React.FC = () => {
             <h2 className="text-3xl sm:text-4xl font-black text-px-dark mt-2 tracking-tight">
               Select Your Application Stream
             </h2>
-            <p className="mt-3 text-gray-600 text-sm sm:text-base">
+            <p className="mt-3 text-gray-700 text-sm sm:text-base font-normal">
               Our recruitment workflows and verification pathways are strictly dedicated. Please choose the module matching your professional background.
             </p>
           </div>

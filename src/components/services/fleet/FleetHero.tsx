@@ -37,7 +37,7 @@ export const FleetHero: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-purple-200"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/25 text-xs sm:text-sm font-bold text-white"
               >
                 <Cpu className="w-4 h-4 text-purple-300" />
                 <span>Next-Gen Fleet Operations & 3PL Coordination</span>
@@ -59,7 +59,7 @@ export const FleetHero: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-base sm:text-lg text-gray-200 leading-relaxed font-normal"
+                className="text-base sm:text-lg text-gray-100 leading-relaxed font-medium"
               >
                 Transform your commercial fleet from a cost center into a predictable, high-utilization asset. We integrate proactive preventive maintenance, verified driver staffing, and disciplined dispatch coordination.
               </motion.p>

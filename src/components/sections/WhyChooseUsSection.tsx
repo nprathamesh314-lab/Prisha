@@ -62,15 +62,15 @@ export const WhyChooseUsSection: React.FC = () => {
                     </div>
 
                     <div>
-                      <h3 className="text-base sm:text-lg font-bold text-px-dark">
+                      <h3 className="text-lg sm:text-xl font-black text-px-dark">
                         {item.title}
                       </h3>
-                      <p className="text-xs font-semibold text-px-violet mt-0.5">
+                      <p className="text-xs sm:text-sm font-bold text-px-primary mt-0.5">
                         {item.subtitle}
                       </p>
                     </div>
 
-                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                       {item.desc}
                     </p>
                   </div>

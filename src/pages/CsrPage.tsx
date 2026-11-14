@@ -89,7 +89,7 @@ export const CsrPage: React.FC = () => {
                           <Icon className="w-6 h-6" />
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-black text-gray-300 group-hover:text-px-violet transition-colors">
+                          <span className="text-xs font-black text-px-violet">
                             Theme {item.themeNumber}
                           </span>
                           <span
@@ -106,7 +106,7 @@ export const CsrPage: React.FC = () => {
 
                       {/* Title & Category */}
                       <div>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-px-violet">
+                        <span className="text-xs font-bold uppercase tracking-wider text-px-violet">
                           {item.category}
                         </span>
                         <h3 className="text-xl font-black text-px-dark mt-0.5 group-hover:text-px-primary transition-colors">
@@ -115,17 +115,17 @@ export const CsrPage: React.FC = () => {
                       </div>
 
                       {/* Description */}
-                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                      <p className="text-sm text-gray-700 leading-relaxed">
                         {item.description}
                       </p>
 
                       {/* Key Activities */}
                       <div className="pt-3 border-t border-gray-100 space-y-2">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        <p className="text-xs font-bold uppercase tracking-wider text-px-violet">
                           Focus Activities:
                         </p>
                         {item.keyActivities.map((act, aIdx) => (
-                          <div key={aIdx} className="flex items-start gap-2 text-xs text-gray-700">
+                          <div key={aIdx} className="flex items-start gap-2 text-xs sm:text-sm text-gray-800 font-medium">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                             <span>{act}</span>
                           </div>
@@ -147,7 +147,7 @@ export const CsrPage: React.FC = () => {
             <h3 className="text-xl font-bold text-px-deep">
               Driving Tangible Social Progress Across Maharashtra & Beyond
             </h3>
-            <p className="text-xs sm:text-sm text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm text-gray-700 max-w-3xl mx-auto leading-relaxed font-normal">
               Prisha Xpress Pvt. Ltd. adheres to responsible corporate governance principles. Our CSR activities are planned directly with driver communities and local transport associations to ensure every program delivers realistic, verifiable welfare on Indian highways.
             </p>
           </div>

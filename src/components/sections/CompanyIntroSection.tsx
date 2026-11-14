@@ -30,7 +30,7 @@ export const CompanyIntroSection: React.FC = () => {
                     <MapPin className="w-4 h-4 text-px-primary shrink-0" />
                     <div>
                       <p className="font-bold text-px-dark">Headquarters</p>
-                      <p className="text-gray-500 text-[11px] sm:text-xs">{companyInfo.headquarters}</p>
+                      <p className="text-gray-700 text-xs font-medium">{companyInfo.headquarters}</p>
                     </div>
                   </div>
                   <span className="px-2.5 py-1 rounded-full font-bold bg-px-lavender text-px-primary text-[10px] sm:text-[11px]">
@@ -61,7 +61,7 @@ export const CompanyIntroSection: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-xs sm:text-sm font-bold text-px-dark">Driver Cell</p>
-                  <p className="text-[10px] sm:text-[11px] text-gray-500">Trained & RTO Verified</p>
+                  <p className="text-xs text-gray-700 font-medium">Trained & RTO Verified</p>
                 </div>
               </div>
             </div>
@@ -84,7 +84,7 @@ export const CompanyIntroSection: React.FC = () => {
             </FadeIn>
 
             <FadeIn direction="left" delay={0.2} duration={0.6}>
-              <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+              <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                 <strong>Prisha Xpress Pvt. Ltd. (PXPL)</strong> is an Indian corporate logistics enterprise headquartered in Pune. We bridge critical operational gaps in the supply chain by delivering structured commercial driver staffing, 3PL fleet supervision, dedicated maintenance hubs, and line-haul transit across western routes.
               </p>
             </FadeIn>
@@ -97,7 +97,7 @@ export const CompanyIntroSection: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-px-dark">Micro-Entrepreneur Driver Model</h4>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                       RTO-verified commercial pilots with safety training and disciplined electronic trip settlements.
                     </p>
                   </div>
@@ -109,7 +109,7 @@ export const CompanyIntroSection: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-px-dark">3PL Fleet & Asset Supervision</h4>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                       Eliminating idle times with dedicated dispatch control, telematics coordination, and scheduled maintenance.
                     </p>
                   </div>
@@ -121,7 +121,7 @@ export const CompanyIntroSection: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-px-dark">Integrated Service Stations & Spares</h4>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
                       Commercial vehicle workshop bays and OEM replacement parts to keep enterprise fleets highway-ready.
                     </p>
                   </div>

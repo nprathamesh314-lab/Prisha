@@ -228,7 +228,7 @@ export const AboutFleetGallerySlider: React.FC = () => {
                     <h3 className="text-base sm:text-lg font-bold leading-snug group-hover:text-purple-200 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-xs text-gray-200 mt-1 line-clamp-2 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-gray-100 mt-1 line-clamp-2 leading-relaxed font-medium">
                       {item.description}
                     </p>
                   </div>
@@ -256,7 +256,7 @@ export const AboutFleetGallerySlider: React.FC = () => {
 
         {/* Transparency note */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500 inline-flex items-center gap-1.5">
+          <p className="text-xs sm:text-sm text-gray-700 inline-flex items-center gap-1.5 font-medium">
             <ShieldCheck className="w-4 h-4 text-px-primary" />
             <span>
               Real fleet operations and facility photography. No artificial or exaggerated claims.

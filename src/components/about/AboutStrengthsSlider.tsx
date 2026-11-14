@@ -243,18 +243,18 @@ export const AboutStrengthsSlider: React.FC = () => {
                       </h3>
 
                       {/* Description */}
-                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                      <p className="text-sm text-gray-700 leading-relaxed font-normal">
                         {item.description}
                       </p>
                     </div>
 
                     {/* Bottom Tag */}
-                    <div className="pt-5 mt-5 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500 font-medium">
+                    <div className="pt-5 mt-5 border-t border-gray-100 flex items-center justify-between text-xs text-gray-700 font-semibold">
                       <span className="flex items-center gap-1.5 text-px-violet">
                         <Sparkles className="w-3.5 h-3.5 text-px-primary" />
                         {item.tag}
                       </span>
-                      <span className="text-gray-400 group-hover:text-px-primary transition-colors">
+                      <span className="text-px-violet group-hover:text-px-primary transition-colors font-bold">
                         Verified Pillar
                       </span>
                     </div>

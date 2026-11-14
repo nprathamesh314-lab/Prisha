@@ -176,18 +176,18 @@ export const ServicesOverviewPage: React.FC = () => {
                       </h2>
                     </div>
 
-                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                    <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-normal">
                       {service.description}
                     </p>
 
                     {/* Key Highlights Checklist */}
                     <div className="space-y-2 pt-1 border-t border-px-border/70">
-                      <p className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                      <p className="text-xs font-bold uppercase tracking-wider text-px-violet">
                         Operational Highlights
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {service.highlights.map((hl, hIdx) => (
-                          <div key={hIdx} className="flex items-center gap-2 text-xs font-semibold text-gray-700">
+                          <div key={hIdx} className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-800">
                             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                             <span className="truncate">{hl}</span>
                           </div>

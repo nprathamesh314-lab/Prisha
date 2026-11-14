@@ -115,12 +115,12 @@ export const FleetGallerySection: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-px-deep/90 via-px-deep/30 to-transparent" />
 
               {/* Bottom Caption Card */}
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 p-4 sm:p-6 rounded-2xl bg-px-deep/80 backdrop-blur-md border border-white/20 text-white max-w-xl">
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 p-4 sm:p-6 rounded-2xl bg-px-deep/85 backdrop-blur-md border border-white/25 text-white max-w-xl">
                 <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-px-primary text-white inline-block mb-2">
                   {current.category}
                 </span>
                 <h3 className="text-base sm:text-xl font-bold">{current.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-200 mt-1 line-clamp-2 leading-relaxed">
+                <p className="text-xs sm:text-sm text-gray-100 mt-1 line-clamp-2 leading-relaxed font-medium">
                   {current.description}
                 </p>
               </div>

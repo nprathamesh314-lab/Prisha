@@ -38,7 +38,7 @@ export const DriverHero: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-purple-200"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/25 text-xs sm:text-sm font-bold text-white"
               >
                 <Heart className="w-4 h-4 text-pink-400" />
                 <span>Human-Centred Logistics • Respecting the Hands on the Wheel</span>
@@ -60,7 +60,7 @@ export const DriverHero: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
-                className="text-base sm:text-lg text-gray-200 leading-relaxed font-normal"
+                className="text-base sm:text-lg text-gray-100 leading-relaxed font-medium"
               >
                 Connecting commercial fleet operators and logistics enterprises with trained, verified commercial truck drivers. Rigorous RTO licence validation, highway discipline coaching, and dedicated transit coordination for dependable operations.
               </motion.p>

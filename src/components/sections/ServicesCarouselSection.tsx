@@ -125,21 +125,21 @@ export const ServicesCarouselSection: React.FC = () => {
 
                       {/* Content */}
                       <div className="p-5 sm:p-6 space-y-2.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-px-violet block">
+                        <span className="text-xs font-bold uppercase tracking-wider text-px-violet block">
                           {service.subtitle}
                         </span>
-                        <h3 className="text-lg font-bold text-px-dark group-hover:text-px-primary transition-colors">
+                        <h3 className="text-lg sm:text-xl font-bold text-px-dark group-hover:text-px-primary transition-colors">
                           {service.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                        <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
                           {service.description}
                         </p>
 
                         {/* Top 2 Highlights */}
                         <div className="pt-2 space-y-1">
                           {service.highlights.slice(0, 2).map((hl, i) => (
-                            <div key={i} className="flex items-center gap-1.5 text-xs text-gray-500">
-                              <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <div key={i} className="flex items-center gap-1.5 text-xs text-gray-700">
+                              <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                               <span className="truncate font-medium">{hl}</span>
                             </div>
                           ))}

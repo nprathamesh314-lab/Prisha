@@ -133,7 +133,7 @@ export const BusinessEnquirySection: React.FC = () => {
             </FadeIn>
 
             <FadeIn direction="right" delay={0.2}>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-normal">
                 Whether deploying commercial drivers on hire, transitioning to 3PL fleet supervision, or booking regular freight line-hauls, our Pune operations team will review your requirements and provide transparent corporate rates.
               </p>
             </FadeIn>
@@ -147,7 +147,7 @@ export const BusinessEnquirySection: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-px-dark">2-Hour Rapid Response</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs sm:text-sm text-gray-700 mt-0.5">
                       Commercial dispatch queries evaluated promptly by logistics supervisors.
                     </p>
                   </div>
@@ -159,7 +159,7 @@ export const BusinessEnquirySection: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-px-dark">Direct Corporate Billing</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs sm:text-sm text-gray-700 mt-0.5">
                       GST-compliant invoicing, structured SLAs, and transparent trip-rate matrices.
                     </p>
                   </div>
@@ -171,7 +171,7 @@ export const BusinessEnquirySection: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-px-dark">RTO-Screened Crews</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs sm:text-sm text-gray-700 mt-0.5">
                       Trained heavy commercial vehicle pilots with verified background checks.
                     </p>
                   </div>
@@ -465,7 +465,7 @@ export const BusinessEnquirySection: React.FC = () => {
                       >
                         {isSubmitting ? 'Verifying with System...' : 'Submit Business Enquiry'}
                       </Button>
-                      <p className="text-[11px] text-gray-400 text-center mt-2.5">
+                      <p className="text-xs text-gray-600 text-center mt-2.5 font-medium">
                         Confidential corporate handling. No marketing spam.
                       </p>
                     </div>

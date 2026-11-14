@@ -411,7 +411,7 @@ export const StaffApplicationPage: React.FC = () => {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
               Build Your Career With Prisha Xpress
             </h1>
-            <p className="text-sm sm:text-base text-gray-200 max-w-2xl mx-auto font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-100 max-w-2xl mx-auto font-medium leading-relaxed">
               Join our team and become part of a growing transportation and logistics organization.
             </p>
           </div>
@@ -442,7 +442,7 @@ export const StaffApplicationPage: React.FC = () => {
 
               {/* Reference Card */}
               <div className="my-8 max-w-md mx-auto p-6 rounded-2xl bg-px-lavender/60 border border-purple-200 text-left">
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block">
+                <span className="text-xs font-bold text-px-violet uppercase tracking-widest block">
                   Official Application Reference Number
                 </span>
                 <div className="flex items-center justify-between gap-3 mt-1.5">

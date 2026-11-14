@@ -99,18 +99,18 @@ export const HeroSliderSection: React.FC = () => {
           <div className="p-6 sm:p-9 lg:p-11 rounded-3xl bg-px-deep/80 backdrop-blur-md border border-white/15 shadow-2xl space-y-5 text-white">
             {/* Top Badge */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-px-lavender">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/25 text-xs font-bold text-white">
                 <ShieldCheck className="w-3.5 h-3.5 text-purple-300" />
                 PRISHA XPRESS PVT. LTD.
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-medium">
-                <MapPin className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 text-xs font-semibold">
+                <MapPin className="w-3.5 h-3.5" />
                 Kharadi, Pune
               </span>
             </div>
 
             {/* Official Headline */}
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white">
               Driving Your Business Forward.{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-purple-300 to-pink-200">
                 Delivering with Confidence.
@@ -118,16 +118,16 @@ export const HeroSliderSection: React.FC = () => {
             </h1>
 
             {/* Concise Supporting Text */}
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 font-normal leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-base lg:text-lg text-gray-100 font-medium leading-relaxed max-w-2xl">
               Reliable transportation, professional driver solutions and fleet management for your business. Operating across Pune, Maharashtra, and India's vital western freight corridors.
             </p>
 
             {/* Slide Context Indicator */}
             <div className="py-1 flex items-center gap-2 text-xs text-purple-200">
               <span className="w-2 h-2 rounded-full bg-px-violet animate-pulse" />
-              <span className="font-semibold">{slides[currentSlide].tag}</span>
+              <span className="font-bold">{slides[currentSlide].tag}</span>
               <span className="text-white/40 hidden sm:inline">•</span>
-              <span className="text-gray-300 text-[11px] hidden sm:inline">{slides[currentSlide].caption}</span>
+              <span className="text-purple-100 text-xs font-medium hidden sm:inline">{slides[currentSlide].caption}</span>
             </div>
 
             {/* Action Buttons */}

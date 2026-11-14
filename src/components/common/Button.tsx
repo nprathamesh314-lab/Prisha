@@ -28,27 +28,27 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/40 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none select-none';
+    'inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none select-none';
 
   const sizeStyles = {
-    sm: 'text-xs px-4 py-2 gap-1.5',
-    md: 'text-sm px-6 py-3 gap-2.5',
-    lg: 'text-base px-8 py-3.5 gap-3 shadow-md',
+    sm: 'text-xs sm:text-sm px-4 py-2 gap-1.5',
+    md: 'text-sm sm:text-base px-6 py-3 gap-2.5',
+    lg: 'text-base sm:text-lg px-8 py-3.5 gap-3 shadow-md',
   };
 
   const variantStyles = {
     primary:
-      'bg-px-primary hover:bg-px-violet text-white shadow-soft-purple hover:shadow-glow-purple border border-px-primary/30',
+      'bg-px-primary hover:bg-px-violet text-white shadow-soft-purple hover:shadow-glow-purple border border-px-primary/40',
     secondary:
-      'bg-px-deep hover:bg-px-primary text-white border border-px-deep/30 shadow-md',
+      'bg-px-deep hover:bg-px-primary text-white border border-px-deep/40 shadow-md',
     outline:
-      'bg-transparent hover:bg-px-lavender/50 text-px-primary border-2 border-px-primary/40 hover:border-px-primary',
+      'bg-transparent hover:bg-px-lavender text-px-primary border-2 border-px-primary shadow-xs',
     white:
-      'bg-white hover:bg-px-lavender text-px-deep hover:text-px-primary shadow-lg border border-white/50 font-bold',
+      'bg-white hover:bg-px-lavender text-px-deep hover:text-px-primary shadow-lg border border-white/60 font-bold',
     ghost:
-      'bg-transparent hover:bg-px-lavender/40 text-px-dark hover:text-px-primary',
+      'bg-transparent hover:bg-px-lavender/60 text-px-dark hover:text-px-primary',
     glass:
-      'bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border border-white/30 shadow-lg',
+      'bg-white/25 hover:bg-white/35 text-white backdrop-blur-md border border-white/40 shadow-lg font-bold',
   };
 
   const combinedClasses = cn(

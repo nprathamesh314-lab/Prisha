@@ -133,7 +133,7 @@ export const NetworkPage: React.FC = () => {
                     <Users className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-extrabold text-px-dark">Driver Network</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-700 leading-relaxed font-normal">
                     Over 1,000 thoroughly verified, safety-trained commercial drivers positioned near critical highway hubs.
                   </p>
                 </div>
@@ -151,7 +151,7 @@ export const NetworkPage: React.FC = () => {
                     <Truck className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-extrabold text-px-dark">Fleet Operations</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-700 leading-relaxed font-normal">
                     Telematics-ready heavy commercial vehicles maintained through preventive checks and dedicated service bays.
                   </p>
                 </div>
@@ -169,7 +169,7 @@ export const NetworkPage: React.FC = () => {
                     <Activity className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-extrabold text-px-dark">Operational Support</h3>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-700 leading-relaxed font-normal">
                     Centralized Pune control room providing 24/7 journey monitoring, driver coordination, and incident support.
                   </p>
                 </div>
@@ -263,13 +263,13 @@ export const NetworkPage: React.FC = () => {
                     <span>Illustrative corridor routing: {selectedCorridor.regions}</span>
                   </div>
 
-                  <div className="absolute bottom-4 left-4 right-4 text-xs text-gray-300">
+                  <div className="absolute bottom-4 left-4 right-4 text-xs text-gray-200">
                     <p className="font-semibold text-white">Central Transit Node: Pune, Maharashtra</p>
-                    <p className="text-[11px] text-gray-400">All routes monitored with centralized driver check-ins.</p>
+                    <p className="text-xs text-purple-200 font-medium">All routes monitored with centralized driver check-ins.</p>
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-200 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-100 leading-relaxed font-normal">
                   {selectedCorridor.description}
                 </p>
 
@@ -279,7 +279,7 @@ export const NetworkPage: React.FC = () => {
                     Operational Highlights
                   </p>
                   {selectedCorridor.activeFeatures.map((feat, fIdx) => (
-                    <div key={fIdx} className="flex items-center gap-2.5 text-xs text-gray-300">
+                    <div key={fIdx} className="flex items-center gap-2.5 text-xs sm:text-sm text-white font-medium">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                       <span>{feat}</span>
                     </div>

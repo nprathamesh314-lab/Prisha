@@ -219,7 +219,7 @@ export const Navbar: React.FC = () => {
                                           </span>
                                         )}
                                       </div>
-                                      <p className="text-xs text-px-muted line-clamp-1 mt-0.5">
+                                      <p className="text-xs text-gray-600 line-clamp-1 mt-0.5 font-normal">
                                         {service.desc}
                                       </p>
                                     </div>
@@ -359,7 +359,7 @@ export const Navbar: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 focus:outline-none"
+                  className="p-2 rounded-xl text-gray-700 hover:bg-gray-100 focus:outline-none"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
@@ -447,12 +447,12 @@ export const Navbar: React.FC = () => {
                   Business Enquiry
                 </Button>
 
-                <div className="pt-2 text-center text-xs text-gray-500">
-                  <p className="font-semibold text-px-dark">Prisha Xpress Pvt. Ltd.</p>
-                  <p className="mt-1">CIN: {companyInfo.cin}</p>
+                <div className="pt-2 text-center text-xs text-gray-700">
+                  <p className="font-bold text-px-dark">Prisha Xpress Pvt. Ltd.</p>
+                  <p className="mt-1 font-medium">CIN: {companyInfo.cin}</p>
                   <a
                     href={`tel:${companyInfo.phone}`}
-                    className="mt-2 inline-flex items-center gap-1.5 text-px-primary font-bold"
+                    className="mt-2 inline-flex items-center gap-1.5 text-px-primary font-bold hover:underline"
                   >
                     <Phone className="w-3.5 h-3.5" /> {companyInfo.phone}
                   </a>

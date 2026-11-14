@@ -70,7 +70,7 @@ export const ContactPage: React.FC = () => {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
               Contact Prisha Xpress Pvt. Ltd.
             </h1>
-            <p className="text-sm sm:text-base text-gray-200 max-w-2xl mx-auto font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-100 max-w-2xl mx-auto font-medium leading-relaxed">
               Headquartered in Kharadi, Pune. Speak with our team for commercial driver staffing, 3PL fleet operations, transportation planning, or workshop servicing.
             </p>
           </div>

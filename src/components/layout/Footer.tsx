@@ -35,7 +35,7 @@ export const Footer: React.FC = () => {
                 </div>
               </div>
             </Link>
-            <p className="text-gray-300 text-sm leading-relaxed">
+            <p className="text-gray-200 text-sm leading-relaxed">
               Prisha Xpress Pvt. Ltd. is a modern technology-driven logistics and
               transportation enterprise delivering high-efficiency 3PL fleet
               management, certified driver staffing, dedicated service stations,
@@ -66,7 +66,7 @@ export const Footer: React.FC = () => {
             <h3 className="text-sm font-bold uppercase tracking-wider text-px-lavender">
               Quick Links
             </h3>
-            <ul className="space-y-2.5 text-sm text-gray-300">
+            <ul className="space-y-2.5 text-sm text-gray-200">
               <li>
                 <Link to="/" className="hover:text-white transition-colors flex items-center gap-1.5 group">
                   <ArrowRight className="w-3.5 h-3.5 text-px-accent transition-transform group-hover:translate-x-1" />
@@ -111,7 +111,7 @@ export const Footer: React.FC = () => {
             <h3 className="text-sm font-bold uppercase tracking-wider text-px-lavender">
               Our Services
             </h3>
-            <ul className="space-y-2.5 text-sm text-gray-300">
+            <ul className="space-y-2.5 text-sm text-gray-200">
               {servicesData.map((svc) => (
                 <li key={svc.id}>
                   <Link
@@ -131,7 +131,7 @@ export const Footer: React.FC = () => {
             <h3 className="text-sm font-bold uppercase tracking-wider text-px-lavender">
               Contact & Registered Office
             </h3>
-            <div className="space-y-3 text-sm text-gray-300">
+            <div className="space-y-3 text-sm text-gray-200">
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-px-accent shrink-0 mt-1" />
                 <p className="leading-snug">
@@ -164,14 +164,14 @@ export const Footer: React.FC = () => {
             <div className="pt-2 space-y-3">
               <div className="p-3 rounded-xl bg-px-primary/30 border border-px-primary/40 flex items-center gap-3">
                 <Shield className="w-5 h-5 text-purple-300 shrink-0" />
-                <p className="text-xs text-gray-200">
+                <p className="text-xs text-gray-100">
                   <strong className="text-white">Trusted Logistics Partner:</strong>{' '}
                   100% verified crew & insured commercial transit.
                 </p>
               </div>
 
               {/* Social Channels Policy Notice */}
-              <p className="text-[11px] text-gray-400 leading-relaxed italic">
+              <p className="text-[11px] text-purple-200/90 leading-relaxed italic">
                 *Official company social media channels are undergoing formal corporate verification and will be published upon launch.
               </p>
             </div>
@@ -179,20 +179,20 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar: Copyright & Policies */}
-        <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
+        <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-purple-200">
           <p>
             © {new Date().getFullYear()} {companyInfo.name}. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link to="/privacy-policy" className="hover:text-gray-200 transition-colors">
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <span className="text-gray-600">•</span>
-            <Link to="/terms" className="hover:text-gray-200 transition-colors">
+            <span className="text-purple-300/60">•</span>
+            <Link to="/terms" className="hover:text-white transition-colors">
               Terms & Conditions
             </Link>
-            <span className="text-gray-600">•</span>
-            <Link to="/contact" className="hover:text-gray-200 transition-colors">
+            <span className="text-purple-300/60">•</span>
+            <Link to="/contact" className="hover:text-white transition-colors">
               Support
             </Link>
           </div>

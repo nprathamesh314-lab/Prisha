@@ -44,16 +44,16 @@ export const CareersSection: React.FC = () => {
                   <h3 className="text-lg sm:text-xl font-bold text-px-dark group-hover:text-px-primary transition-colors">
                     Staff & Management Opportunities
                   </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-700 leading-relaxed">
                     Lead dispatch operations, freight account management, supply chain analytics, and enterprise IT from our Pune headquarters.
                   </p>
 
                   <div className="pt-1 space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs text-gray-700">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>Corporate culture with structured career progression</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-700">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>Exposure to telematics and logistics technology</span>
                     </div>
@@ -105,16 +105,16 @@ export const CareersSection: React.FC = () => {
                   <h3 className="text-lg sm:text-xl font-bold text-px-dark group-hover:text-emerald-700 transition-colors">
                     Professional Driver Registration
                   </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  <p className="text-sm text-gray-700 leading-relaxed">
                     Drive commercial rigids and multi-axles as a valued micro-entrepreneur with regular dispatches, transparent earnings, and roadside safety support.
                   </p>
 
                   <div className="pt-1 space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs text-gray-700">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>Disciplined electronic settlements and transparent earnings</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-700">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-700 font-medium">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>Accident coverage support & dedicated highway assistance</span>
                     </div>

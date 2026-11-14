@@ -77,7 +77,7 @@ export const AboutPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-bold text-px-dark">Headquarters</p>
-                      <p className="text-[11px] text-gray-500">Kharadi, Pune – 411014</p>
+                      <p className="text-xs text-gray-700 font-medium">Kharadi, Pune – 411014</p>
                     </div>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-px-lavender text-px-primary font-bold text-[10px] tracking-wide">
@@ -112,15 +112,15 @@ export const AboutPage: React.FC = () => {
               {/* Verified Metadata Quick Badges */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
                 <div className="p-3 rounded-2xl bg-px-bg border border-px-border">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Incorporation</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">Incorporation</p>
                   <p className="text-xs font-bold text-px-dark mt-0.5">{companyInfo.founded}</p>
                 </div>
                 <div className="p-3 rounded-2xl bg-px-bg border border-px-border">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Headquarters</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">Headquarters</p>
                   <p className="text-xs font-bold text-px-dark mt-0.5">Kharadi, Pune (MH)</p>
                 </div>
                 <div className="p-3 rounded-2xl bg-px-bg border border-px-border col-span-2 sm:col-span-1">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Operations</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">Operations</p>
                   <p className="text-xs font-bold text-emerald-600 mt-0.5">Active Western Corridors</p>
                 </div>
               </div>
@@ -161,12 +161,12 @@ export const AboutPage: React.FC = () => {
                 <h3 className="text-xl sm:text-2xl font-black text-px-dark">
                   Deliver Dependable Fleet Operations
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed font-normal">
                   To empower Indian transport enterprises with skilled commercial drivers, proactive vehicle maintenance and transparent fleet management, improving efficiency across their operations.
                 </p>
               </div>
 
-              <ul className="space-y-2.5 pt-4 border-t border-gray-100 text-xs sm:text-sm text-gray-700">
+              <ul className="space-y-2.5 pt-4 border-t border-gray-100 text-xs sm:text-sm text-gray-800 font-medium">
                 <li className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Dignified, fair working practices for commercial drivers</span>
@@ -192,12 +192,12 @@ export const AboutPage: React.FC = () => {
                 <h3 className="text-xl sm:text-2xl font-black text-px-dark">
                   India's Most Trusted Logistics Partner
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-700 leading-relaxed font-normal">
                   To become a trusted logistics and fleet management partner recognized for integrity, operational discipline, technological readiness and respect for the driver community.
                 </p>
               </div>
 
-              <ul className="space-y-2.5 pt-4 border-t border-gray-100 text-xs sm:text-sm text-gray-700">
+              <ul className="space-y-2.5 pt-4 border-t border-gray-100 text-xs sm:text-sm text-gray-800 font-medium">
                 <li className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Integrated multi-service hubs along major national corridors</span>
@@ -241,12 +241,12 @@ export const AboutPage: React.FC = () => {
                     </h3>
                   </div>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-5">
+                <p className="text-sm text-gray-700 leading-relaxed font-normal mb-5">
                   We partner with enterprise clients and fleet owners to deliver predictable freight movements with strict operational governance.
                 </p>
               </div>
 
-              <ul className="space-y-3 pt-4 border-t border-purple-100/60 text-xs sm:text-sm text-gray-700">
+              <ul className="space-y-3 pt-4 border-t border-purple-100/60 text-xs sm:text-sm text-gray-800 font-medium">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>Transparent commercial communication and clear pricing</span>
@@ -282,12 +282,12 @@ export const AboutPage: React.FC = () => {
                     </h3>
                   </div>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-5">
+                <p className="text-sm text-gray-700 leading-relaxed font-normal mb-5">
                   Commercial drivers are the backbone of our economy. We champion dignity, fair treatment, and health security on every highway journey.
                 </p>
               </div>
 
-              <ul className="space-y-3 pt-4 border-t border-purple-100/60 text-xs sm:text-sm text-gray-700">
+              <ul className="space-y-3 pt-4 border-t border-purple-100/60 text-xs sm:text-sm text-gray-800 font-medium">
                 <li className="flex items-start gap-2.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <span>Respectful workplace practices and dignified highway conditions</span>

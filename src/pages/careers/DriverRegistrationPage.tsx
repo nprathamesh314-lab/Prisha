@@ -436,7 +436,7 @@ export const DriverRegistrationPage: React.FC = () => {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
               Join Prisha Xpress as a Professional Driver
             </h1>
-            <p className="text-sm sm:text-base text-gray-200 max-w-2xl mx-auto font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-100 max-w-2xl mx-auto font-medium leading-relaxed">
               Apply to drive for one of Maharashtra's premier logistics operations. Competitive compensation, modern fleet, and professional working environment.
             </p>
           </div>
@@ -461,13 +461,13 @@ export const DriverRegistrationPage: React.FC = () => {
                 Thank you for registering with Prisha Xpress.
               </h2>
 
-              <p className="mt-2 text-gray-600 text-sm max-w-lg mx-auto">
+              <p className="mt-2 text-gray-700 text-sm sm:text-base max-w-lg mx-auto font-normal leading-relaxed">
                 Your driver application has been submitted successfully. Our team will review your details and documents.
               </p>
 
               {/* Reference Card */}
               <div className="my-8 max-w-md mx-auto p-6 rounded-2xl bg-px-lavender/60 border border-purple-200 text-left">
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest block">
+                <span className="text-xs font-bold text-px-violet uppercase tracking-widest block">
                   Driver Application Reference Number
                 </span>
                 <div className="flex items-center justify-between gap-3 mt-1.5">

@@ -52,7 +52,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
       <FadeIn direction="up" delay={0.1} duration={0.5}>
         <h2
           className={cn(
-            'text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight max-w-4xl',
+            'text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight max-w-4xl',
             isDark ? 'text-white' : 'text-px-dark'
           )}
         >
@@ -64,8 +64,8 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
         <FadeIn direction="up" delay={0.2} duration={0.5}>
           <p
             className={cn(
-              'mt-4 text-base sm:text-lg max-w-2xl leading-relaxed',
-              isDark ? 'text-gray-300' : 'text-px-muted'
+              'mt-3.5 text-sm sm:text-base md:text-lg max-w-2xl leading-relaxed',
+              isDark ? 'text-gray-100 font-medium' : 'text-gray-700 font-normal'
             )}
           >
             {subtitle}

@@ -79,10 +79,10 @@ export const WorkflowTimelineSection: React.FC = () => {
                         </div>
                       </div>
 
-                      <h3 className="text-base font-bold text-px-dark group-hover:text-px-primary transition-colors">
+                      <h3 className="text-base sm:text-lg font-bold text-px-dark group-hover:text-px-primary transition-colors">
                         {item.title}
                       </h3>
-                      <p className="text-xs text-gray-600 mt-2 leading-relaxed">
+                      <p className="text-xs sm:text-sm text-gray-700 mt-2 leading-relaxed">
                         {item.desc}
                       </p>
                     </div>
@@ -112,12 +112,12 @@ export const WorkflowTimelineSection: React.FC = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-bold text-px-dark">
+                      <h4 className="text-sm sm:text-base font-bold text-px-dark">
                         {item.title}
                       </h4>
                       <Icon className="w-4 h-4 text-px-violet shrink-0" />
                     </div>
-                    <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-gray-700 mt-1 leading-relaxed">
                       {item.desc}
                     </p>
                   </div>

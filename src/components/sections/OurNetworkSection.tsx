@@ -57,11 +57,11 @@ export const OurNetworkSection: React.FC = () => {
                   </div>
                   <p className="text-2xl sm:text-3xl lg:text-4xl font-black text-px-dark mt-2 font-mono">{stat.value}</p>
                   <p className="text-xs sm:text-sm font-bold text-px-violet mt-1">{stat.label}</p>
-                  <p className="text-[11px] sm:text-xs text-gray-500 mt-1.5 leading-relaxed">{stat.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-700 mt-1.5 leading-relaxed font-medium">{stat.description}</p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-400">
+                <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-600 font-medium">
                   <span>Audit Pending</span>
-                  <span className="text-px-primary font-semibold">Ref: 2024</span>
+                  <span className="text-px-primary font-bold">Ref: 2024</span>
                 </div>
               </div>
             </FadeIn>

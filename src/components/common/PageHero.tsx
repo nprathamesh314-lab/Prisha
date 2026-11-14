@@ -64,7 +64,7 @@ export const PageHero: React.FC<PageHeroProps> = ({
           </h1>
 
           {/* Subtitle */}
-          <p className="text-sm sm:text-base lg:text-lg text-gray-200 max-w-2xl mx-auto leading-relaxed font-normal">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-100 max-w-2xl mx-auto leading-relaxed font-medium">
             {subtitle}
           </p>
 

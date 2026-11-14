@@ -52,20 +52,20 @@ export const ContactPreviewSection: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-px-primary shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-px-dark text-xs uppercase tracking-wider text-gray-400">
+                      <p className="font-bold text-xs uppercase tracking-wider text-px-violet">
                         Registered Location
                       </p>
-                      <p className="mt-0.5 leading-relaxed text-gray-700">{companyInfo.address}</p>
+                      <p className="mt-0.5 leading-relaxed text-gray-700 font-medium">{companyInfo.address}</p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <Navigation className="w-5 h-5 text-px-primary shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-px-dark text-xs uppercase tracking-wider text-gray-400">
+                      <p className="font-bold text-xs uppercase tracking-wider text-px-violet">
                         Operational Depots
                       </p>
-                      <p className="mt-0.5 text-gray-700">Kharadi & Talegaon Dabhade Hubs, Pune</p>
+                      <p className="mt-0.5 text-gray-700 font-medium">Kharadi & Talegaon Dabhade Hubs, Pune</p>
                     </div>
                   </div>
                 </div>
@@ -100,7 +100,7 @@ export const ContactPreviewSection: React.FC = () => {
 
                 <div>
                   <h3 className="text-xl font-bold text-px-dark">Connect Directly</h3>
-                  <p className="text-xs text-gray-500 mt-1">Official communication helplines</p>
+                  <p className="text-xs text-gray-700 font-medium mt-1">Official communication helplines</p>
                 </div>
 
                 <div className="space-y-3.5 pt-2">
@@ -114,7 +114,7 @@ export const ContactPreviewSection: React.FC = () => {
                         <Phone className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">
                           Corporate Helpline
                         </p>
                         <p className="text-sm font-bold text-px-dark group-hover:text-px-primary">
@@ -135,7 +135,7 @@ export const ContactPreviewSection: React.FC = () => {
                         <Mail className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">
                           Official Email
                         </p>
                         <p className="text-xs sm:text-sm font-bold text-px-dark group-hover:text-px-primary truncate max-w-[160px] sm:max-w-none">
@@ -197,8 +197,8 @@ export const ContactPreviewSection: React.FC = () => {
                 <div className="space-y-3 pt-2 text-xs">
                   <div className="p-3 rounded-2xl bg-px-bg border border-px-border">
                     <p className="font-bold text-px-dark text-xs">Corporate Office Hours</p>
-                    <p className="text-gray-600 mt-0.5 font-medium">{companyInfo.businessHours}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Administrative & contract discussions</p>
+                    <p className="text-gray-700 mt-0.5 font-medium">{companyInfo.businessHours}</p>
+                    <p className="text-xs text-gray-600 font-medium mt-0.5">Administrative & contract discussions</p>
                   </div>
 
                   <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
@@ -206,15 +206,15 @@ export const ContactPreviewSection: React.FC = () => {
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                       24/7 Line-Haul Fleet Monitoring
                     </p>
-                    <p className="text-emerald-800 text-[11px] mt-0.5">
+                    <p className="text-emerald-900 text-xs mt-0.5 font-medium">
                       Round-the-clock emergency support for dispatched vehicles and active drivers.
                     </p>
                   </div>
 
                   <div className="p-3 rounded-2xl bg-px-bg border border-px-border">
                     <p className="font-bold text-px-dark text-xs">Driver Walk-In Onboarding</p>
-                    <p className="text-gray-600 mt-0.5 font-medium">Monday – Friday: 10:00 AM – 5:00 PM</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">At Talegaon & Kharadi driver desks</p>
+                    <p className="text-gray-700 mt-0.5 font-medium">Monday – Friday: 10:00 AM – 5:00 PM</p>
+                    <p className="text-xs text-gray-600 font-medium mt-0.5">At Talegaon & Kharadi driver desks</p>
                   </div>
                 </div>
               </div>
