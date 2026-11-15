@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Shield,
   MessageCircle,
+  Lock,
 } from 'lucide-react';
 import { companyInfo, servicesData } from '../../data/companyData';
 import { prefetchRoute } from '../../utils/prefetchRoute';
@@ -231,6 +232,15 @@ export const Footer: React.FC = () => {
               className="hover:text-white transition-colors"
             >
               Support
+            </Link>
+            <span className="text-purple-300/60">•</span>
+            <Link
+              to="/admin"
+              className="hover:text-white transition-colors inline-flex items-center gap-1 opacity-75 hover:opacity-100"
+              title="Prisha Xpress Administrator Clearance"
+            >
+              <Lock className="w-3 h-3 text-purple-300" />
+              <span>Admin Portal</span>
             </Link>
           </div>
         </div>
