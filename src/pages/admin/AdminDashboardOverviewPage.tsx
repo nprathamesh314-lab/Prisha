@@ -25,8 +25,15 @@ export const AdminDashboardOverviewPage: React.FC = () => {
   const isDriverAllowed = recruitmentService.canAccessDrivers();
 
   useEffect(() => {
-    setStaffStats(recruitmentService.getStaffStats());
-    setDriverStats(recruitmentService.getDriverStats());
+    const syncAndRefresh = async () => {
+      await Promise.all([
+        recruitmentService.syncStaffApplicationsFromDb(),
+        recruitmentService.syncDriverApplicationsFromDb(),
+      ]);
+      setStaffStats(recruitmentService.getStaffStats());
+      setDriverStats(recruitmentService.getDriverStats());
+    };
+    syncAndRefresh();
   }, [currentRole]);
 
   return (

@@ -19,6 +19,7 @@ import {
   Eye,
   ShieldCheck,
   ArrowRight,
+  RefreshCw,
 } from 'lucide-react';
 
 const APP_STATUS_CLASSES: Record<DriverApplicationStatus, string> = {
@@ -52,10 +53,16 @@ export const DriverApplicationsAdminPage: React.FC = () => {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<DriverApplicationStatus>('Under Review');
   const [statusReason, setStatusReason] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const currentUser = recruitmentService.getCurrentUser();
 
-  const loadData = () => {
+  const loadData = async (syncWithDb = false) => {
+    if (syncWithDb) {
+      setIsSyncing(true);
+      await recruitmentService.syncDriverApplicationsFromDb();
+      setIsSyncing(false);
+    }
     const list = recruitmentService.getDriverApplications({
       search: searchQuery,
       category: selectedCategory,
@@ -66,7 +73,11 @@ export const DriverApplicationsAdminPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    loadData(true);
+  }, []);
+
+  useEffect(() => {
+    loadData(false);
   }, [searchQuery, selectedCategory, selectedStatus, selectedVerification]);
 
   const maskLicence = (lic: string) => {
@@ -152,7 +163,17 @@ export const DriverApplicationsAdminPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => loadData(true)}
+            disabled={isSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-purple-200 bg-purple-50/80 hover:bg-purple-100/80 text-xs font-bold text-px-primary transition-all disabled:opacity-50"
+            title="Fetch latest online driver registrations from Supabase Cloud Database"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'Syncing...' : 'Sync Cloud DB'}</span>
+          </button>
+
           <Link
             to="/admin/driver-verification"
             className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-px-primary font-bold text-xs border border-purple-200 transition-all"

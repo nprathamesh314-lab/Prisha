@@ -20,6 +20,7 @@ import {
   Mail,
   MapPin,
   Clock,
+  RefreshCw,
 } from 'lucide-react';
 
 const STATUS_BADGE_CLASSES: Record<StaffApplicationStatus, string> = {
@@ -41,10 +42,16 @@ export const StaffApplicationsAdminPage: React.FC = () => {
   const [statusUpdateModalOpen, setStatusUpdateModalOpen] = useState(false);
   const [newStatus, setNewStatus] = useState<StaffApplicationStatus>('Under Review');
   const [statusReason, setStatusReason] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const currentUser = recruitmentService.getCurrentUser();
 
-  const loadData = () => {
+  const loadData = async (syncWithDb = false) => {
+    if (syncWithDb) {
+      setIsSyncing(true);
+      await recruitmentService.syncStaffApplicationsFromDb();
+      setIsSyncing(false);
+    }
     const list = recruitmentService.getStaffApplications({
       search: searchQuery,
       department: selectedDept,
@@ -54,7 +61,11 @@ export const StaffApplicationsAdminPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    loadData(true);
+  }, []);
+
+  useEffect(() => {
+    loadData(false);
   }, [searchQuery, selectedDept, selectedStatus]);
 
   const handleUpdateStatus = () => {
@@ -133,7 +144,17 @@ export const StaffApplicationsAdminPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => loadData(true)}
+            disabled={isSyncing}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-purple-200 bg-purple-50/80 hover:bg-purple-100/80 text-xs font-bold text-px-primary transition-all disabled:opacity-50"
+            title="Fetch latest online submissions from Supabase Cloud Database"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+            <span>{isSyncing ? 'Syncing...' : 'Sync Cloud DB'}</span>
+          </button>
+
           <button
             onClick={exportReport}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-xs transition-all"

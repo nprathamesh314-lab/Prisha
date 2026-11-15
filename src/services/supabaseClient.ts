@@ -562,6 +562,240 @@ export class SupabaseRecruitmentDbService {
       return { data: null, error: err.message };
     }
   }
+
+  public getIsConfigured(): boolean {
+    return this.isConfigured;
+  }
+
+  private getAuthHeaders(): Record<string, string> {
+    try {
+      const stored = localStorage.getItem('pxpl_admin_auth_session_v1');
+      if (stored) {
+        const session = JSON.parse(stored);
+        if (session?.token) {
+          return {
+            apikey: this.supabaseAnonKey,
+            Authorization: `Bearer ${session.token}`,
+          };
+        }
+      }
+    } catch {
+      // Fallback
+    }
+    return {
+      apikey: this.supabaseAnonKey,
+      Authorization: `Bearer ${this.supabaseAnonKey}`,
+    };
+  }
+
+  /**
+   * Fetches all staff applications from Supabase with documents and status history
+   */
+  public async fetchStaffApplicationsFromDb(): Promise<{ data: any[] | null; error: string | null }> {
+    if (!this.isConfigured) {
+      return { data: null, error: null };
+    }
+
+    try {
+      const url = `${this.supabaseUrl}/rest/v1/staff_applications?select=*,staff_application_documents(*),staff_application_status_history(*)&order=created_at.desc`;
+      const res = await fetch(url, {
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { data: null, error: err.message || 'Error fetching staff applications from Supabase' };
+      }
+
+      const list = await res.json();
+      const formatted = list.map((item: any) => ({
+        ...item,
+        documents: (item.staff_application_documents || []).map((d: any) => ({
+          id: d.id,
+          staff_application_id: d.staff_application_id,
+          document_type: d.document_type,
+          storage_path: d.storage_path,
+          original_filename: d.original_filename,
+          file_type: d.file_type,
+          file_size: d.file_size,
+          uploaded_at: d.uploaded_at,
+        })),
+        status_history: item.staff_application_status_history || [],
+      }));
+
+      return { data: formatted, error: null };
+    } catch (err: any) {
+      return { data: null, error: err.message };
+    }
+  }
+
+  /**
+   * Fetches all driver applications from Supabase with categories, experience, documents, and history
+   */
+  public async fetchDriverApplicationsFromDb(): Promise<{ data: any[] | null; error: string | null }> {
+    if (!this.isConfigured) {
+      return { data: null, error: null };
+    }
+
+    try {
+      const url = `${this.supabaseUrl}/rest/v1/driver_applications?select=*,driver_application_documents(*),driver_vehicle_categories(*),driver_vehicle_experience(*),driver_application_status_history(*)&order=created_at.desc`;
+      const res = await fetch(url, {
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { data: null, error: err.message || 'Error fetching driver applications from Supabase' };
+      }
+
+      const list = await res.json();
+      const formatted = list.map((item: any) => ({
+        ...item,
+        vehicle_categories: (item.driver_vehicle_categories || []).map((c: any) => c.vehicle_category),
+        types_of_vehicles_driven: (item.driver_vehicle_experience || []).map((v: any) => v.vehicle_type),
+        documents: (item.driver_application_documents || []).map((d: any) => ({
+          id: d.id,
+          driver_application_id: d.driver_application_id,
+          document_type: d.document_type,
+          storage_path: d.storage_path,
+          original_filename: d.original_filename,
+          file_type: d.file_type,
+          file_size: d.file_size,
+          document_status: d.document_status || 'Pending',
+          uploaded_at: d.uploaded_at,
+        })),
+        status_history: item.driver_application_status_history || [],
+      }));
+
+      return { data: formatted, error: null };
+    } catch (err: any) {
+      return { data: null, error: err.message };
+    }
+  }
+
+  /**
+   * Updates staff application status and appends status history in Supabase
+   */
+  public async updateStaffStatusInDb(
+    id: string,
+    newStatus: string,
+    reason: string,
+    changedBy: string
+  ): Promise<void> {
+    if (!this.isConfigured) return;
+
+    try {
+      const headers = {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
+      };
+
+      await fetch(`${this.supabaseUrl}/rest/v1/staff_applications?id=eq.${id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          application_status: newStatus,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+
+      await fetch(`${this.supabaseUrl}/rest/v1/staff_application_status_history`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          staff_application_id: id,
+          new_status: newStatus,
+          changed_by: changedBy,
+          reason,
+        }),
+      });
+    } catch (e) {
+      console.warn('Error updating staff status in Supabase:', e);
+    }
+  }
+
+  /**
+   * Updates driver application status and appends status history in Supabase
+   */
+  public async updateDriverStatusInDb(
+    id: string,
+    newStatus: string,
+    reason: string,
+    changedBy: string
+  ): Promise<void> {
+    if (!this.isConfigured) return;
+
+    try {
+      const headers = {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
+      };
+
+      await fetch(`${this.supabaseUrl}/rest/v1/driver_applications?id=eq.${id}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          application_status: newStatus,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+
+      await fetch(`${this.supabaseUrl}/rest/v1/driver_application_status_history`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          driver_application_id: id,
+          new_status: newStatus,
+          changed_by: changedBy,
+          reason,
+        }),
+      });
+    } catch (e) {
+      console.warn('Error updating driver status in Supabase:', e);
+    }
+  }
+
+  /**
+   * Updates document verification status in Supabase
+   */
+  public async verifyDriverDocInDb(
+    driverId: string,
+    documentId: string,
+    status: string,
+    notes: string,
+    verifiedBy: string
+  ): Promise<void> {
+    if (!this.isConfigured) return;
+
+    try {
+      const headers = {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
+      };
+
+      await fetch(`${this.supabaseUrl}/rest/v1/driver_application_documents?id=eq.${documentId}`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({
+          document_status: status,
+        }),
+      });
+
+      await fetch(`${this.supabaseUrl}/rest/v1/driver_document_verifications`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          driver_application_id: driverId,
+          document_id: documentId,
+          verification_status: status,
+          verification_notes: notes,
+          verified_by: verifiedBy,
+        }),
+      });
+    } catch (e) {
+      console.warn('Error verifying driver document in Supabase:', e);
+    }
+  }
 }
 
 export const supabaseRecruitmentDbService = new SupabaseRecruitmentDbService();

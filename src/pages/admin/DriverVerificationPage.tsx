@@ -49,7 +49,10 @@ export const DriverVerificationPage: React.FC = () => {
 
   const currentUser = recruitmentService.getCurrentUser();
 
-  const loadData = () => {
+  const loadData = async (syncWithDb = false) => {
+    if (syncWithDb) {
+      await recruitmentService.syncDriverApplicationsFromDb();
+    }
     const list = recruitmentService.getDriverApplications();
     setDrivers(list);
 
@@ -73,7 +76,7 @@ export const DriverVerificationPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
+    loadData(true);
   }, [driverIdParam]);
 
   useEffect(() => {

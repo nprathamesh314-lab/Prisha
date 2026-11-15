@@ -627,6 +627,43 @@ class RecruitmentService {
     return newApp;
   }
 
+  /**
+   * Synchronizes staff applications from live Supabase database with local storage.
+   */
+  public async syncStaffApplicationsFromDb(): Promise<StaffApplication[]> {
+    try {
+      const { data, error } = await supabaseRecruitmentDbService.fetchStaffApplicationsFromDb();
+      if (error || !data || data.length === 0) return this.staffApps;
+
+      const existingRefs = new Set(this.staffApps.map((a) => a.application_reference));
+      const newItems: StaffApplication[] = [];
+
+      for (const item of data) {
+        if (!existingRefs.has(item.application_reference)) {
+          newItems.push(item);
+          existingRefs.add(item.application_reference);
+        } else {
+          const idx = this.staffApps.findIndex((a) => a.application_reference === item.application_reference);
+          if (idx !== -1) {
+            this.staffApps[idx] = {
+              ...this.staffApps[idx],
+              ...item,
+            };
+          }
+        }
+      }
+
+      if (newItems.length > 0) {
+        this.staffApps = [...newItems, ...this.staffApps];
+      }
+
+      this.saveStaffToStorage();
+    } catch (e) {
+      console.warn('Error syncing staff applications from Supabase:', e);
+    }
+    return this.staffApps;
+  }
+
   public getStaffApplications(filters?: {
     search?: string;
     department?: StaffDepartment | 'All';
@@ -696,6 +733,15 @@ class RecruitmentService {
     });
 
     this.saveStaffToStorage();
+
+    // Sync to Supabase in background
+    supabaseRecruitmentDbService.updateStaffStatusInDb(
+      id,
+      newStatus,
+      reason,
+      `${user.name} (${user.role.toUpperCase()})`
+    );
+
     return app;
   }
 
@@ -818,6 +864,43 @@ class RecruitmentService {
     return newApp;
   }
 
+  /**
+   * Synchronizes driver applications from live Supabase database with local storage.
+   */
+  public async syncDriverApplicationsFromDb(): Promise<DriverApplication[]> {
+    try {
+      const { data, error } = await supabaseRecruitmentDbService.fetchDriverApplicationsFromDb();
+      if (error || !data || data.length === 0) return this.driverApps;
+
+      const existingRefs = new Set(this.driverApps.map((a) => a.application_reference));
+      const newItems: DriverApplication[] = [];
+
+      for (const item of data) {
+        if (!existingRefs.has(item.application_reference)) {
+          newItems.push(item);
+          existingRefs.add(item.application_reference);
+        } else {
+          const idx = this.driverApps.findIndex((a) => a.application_reference === item.application_reference);
+          if (idx !== -1) {
+            this.driverApps[idx] = {
+              ...this.driverApps[idx],
+              ...item,
+            };
+          }
+        }
+      }
+
+      if (newItems.length > 0) {
+        this.driverApps = [...newItems, ...this.driverApps];
+      }
+
+      this.saveDriverToStorage();
+    } catch (e) {
+      console.warn('Error syncing driver applications from Supabase:', e);
+    }
+    return this.driverApps;
+  }
+
   public getDriverApplications(filters?: {
     search?: string;
     category?: VehicleCategory | 'All';
@@ -901,6 +984,16 @@ class RecruitmentService {
 
     app.updated_at = new Date().toISOString();
     this.saveDriverToStorage();
+
+    // Sync verification to Supabase
+    supabaseRecruitmentDbService.verifyDriverDocInDb(
+      driverId,
+      documentId,
+      status,
+      notes,
+      `${user.name} (${user.role})`
+    );
+
     return app;
   }
 
@@ -930,6 +1023,15 @@ class RecruitmentService {
     });
 
     this.saveDriverToStorage();
+
+    // Sync status update to Supabase
+    supabaseRecruitmentDbService.updateDriverStatusInDb(
+      id,
+      newStatus,
+      reason,
+      `${user.name} (${user.role.toUpperCase()})`
+    );
+
     return app;
   }
 
