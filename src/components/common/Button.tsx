@@ -101,6 +101,7 @@ export const Button: React.FC<ButtonProps> = ({
       whileTap={{ y: 1 }}
       className={combinedClasses}
       disabled={disabled}
+      onClick={onClick}
       {...(props as any)}
     >
       {content}

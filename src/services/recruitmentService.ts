@@ -669,6 +669,14 @@ class RecruitmentService {
     department?: StaffDepartment | 'All';
     status?: StaffApplicationStatus | 'All';
   }): StaffApplication[] {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_STAFF);
+      if (stored) {
+        this.staffApps = JSON.parse(stored);
+      }
+    } catch {
+      // retain in-memory state
+    }
     let list = [...this.staffApps];
 
     if (filters?.department && filters.department !== 'All') {
@@ -907,6 +915,14 @@ class RecruitmentService {
     status?: DriverApplicationStatus | 'All';
     verification?: DriverVerificationStatus | 'All';
   }): DriverApplication[] {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_DRIVER);
+      if (stored) {
+        this.driverApps = JSON.parse(stored);
+      }
+    } catch {
+      // retain in-memory state
+    }
     let list = [...this.driverApps];
 
     if (filters?.category && filters.category !== 'All') {

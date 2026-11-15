@@ -1591,25 +1591,23 @@ export const DriverRegistrationPage: React.FC = () => {
                   )}
 
                   {currentStep < 6 ? (
-                    <Button
+                    <button
                       type="button"
-                      variant="primary"
                       onClick={nextStep}
-                      className="px-6 py-2.5 text-xs sm:text-sm bg-px-deep hover:bg-px-primary"
+                      className="inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] px-6 py-2.5 text-xs sm:text-sm bg-px-deep hover:bg-px-primary text-white shadow-md border border-px-deep/40 gap-1.5 cursor-pointer"
                     >
                       <span>Next Step</span>
                       <ArrowRight className="w-4 h-4" />
-                    </Button>
+                    </button>
                   ) : (
-                    <Button
+                    <button
                       type="button"
-                      variant="primary"
                       onClick={handleSubmit}
                       disabled={submitting}
-                      className="px-8 py-3 text-xs sm:text-sm bg-px-deep hover:bg-px-primary shadow-lg"
+                      className="inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none px-8 py-3 text-xs sm:text-sm bg-px-deep hover:bg-px-primary text-white shadow-lg border border-px-deep/40 gap-1.5 cursor-pointer"
                     >
                       {submitting ? 'Submitting Registration...' : 'SUBMIT DRIVER REGISTRATION'}
-                    </Button>
+                    </button>
                   )}
                 </div>
               </div>
