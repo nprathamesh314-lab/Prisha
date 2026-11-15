@@ -274,6 +274,7 @@ export const StaffApplicationPage: React.FC = () => {
         setErrorMsg('PIN code must be exactly 6 digits.');
         return false;
       }
+      return true;
     } else if (step === 2) {
       if (!formData.course_degree.trim()) {
         setErrorMsg('Please enter your course / degree title.');
@@ -287,11 +288,13 @@ export const StaffApplicationPage: React.FC = () => {
         setErrorMsg('Please enter your percentage or CGPA.');
         return false;
       }
+      return true;
     } else if (step === 3) {
       if (!formData.position_applied_for.trim()) {
         setErrorMsg('Please select a position applied for.');
         return false;
       }
+      return true;
     } else if (step === 4) {
       if (!formData.is_fresher) {
         if (!formData.previous_company.trim()) {
@@ -303,12 +306,14 @@ export const StaffApplicationPage: React.FC = () => {
           return false;
         }
       }
+      return true;
     } else if (step === 5) {
       // Required: Resume (PDF, DOC or DOCX). Other documents are optional.
       if (!documents.resume.filename) {
         setErrorMsg('Resume (PDF, DOC or DOCX) is mandatory. Please upload your resume.');
         return false;
       }
+      return true;
     } else if (step === 6) {
       if (!formData.declaration_accepted) {
         setErrorMsg('Please confirm that the information provided is accurate.');
@@ -322,6 +327,7 @@ export const StaffApplicationPage: React.FC = () => {
         setErrorMsg('Please agree to the applicable Privacy Policy.');
         return false;
       }
+      return true;
     }
     return true;
   };

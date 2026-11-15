@@ -268,6 +268,7 @@ export const DriverRegistrationPage: React.FC = () => {
           return false;
         }
       }
+      return true;
     } else if (step === 2) {
       if (!formData.licence_number.trim() || formData.licence_number.trim().length < 5) {
         setErrorMsg('Please enter a valid Driving Licence Number (e.g. MH14 20120045612).');
@@ -297,6 +298,7 @@ export const DriverRegistrationPage: React.FC = () => {
         setErrorMsg('Please enter the Issuing RTO authority name.');
         return false;
       }
+      return true;
     } else if (step === 3) {
       if (!formData.preferred_work_location.trim()) {
         setErrorMsg('Please enter your preferred transport route or city location.');
@@ -306,8 +308,9 @@ export const DriverRegistrationPage: React.FC = () => {
         setErrorMsg('Please specify your availability to join.');
         return false;
       }
+      return true;
     } else if (step === 4) {
-      // Required: Driving Licence front & back, Recent Photograph, Address Proof
+      // Required: Driving Licence front & back, Recent Photograph
       if (!documents.driving_licence_front.filename && !documents.driving_licence_back.filename) {
         setErrorMsg('Driving Licence documents (Front and Back) are mandatory. Please upload clear photos or PDF.');
         return false;
@@ -324,6 +327,9 @@ export const DriverRegistrationPage: React.FC = () => {
         setErrorMsg('Recent driver photograph is mandatory for profile verification.');
         return false;
       }
+      return true;
+    } else if (step === 5) {
+      return true;
     } else if (step === 6) {
       if (!formData.declaration_accepted) {
         setErrorMsg('Please confirm that the information provided is accurate.');
@@ -341,6 +347,7 @@ export const DriverRegistrationPage: React.FC = () => {
         setErrorMsg('Please agree to the applicable Privacy Policy.');
         return false;
       }
+      return true;
     }
     return true;
   };
