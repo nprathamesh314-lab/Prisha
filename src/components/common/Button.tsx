@@ -97,6 +97,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <motion.button
+      type={props.type || 'button'}
       whileHover={{ y: -1 }}
       whileTap={{ y: 1 }}
       className={combinedClasses}
