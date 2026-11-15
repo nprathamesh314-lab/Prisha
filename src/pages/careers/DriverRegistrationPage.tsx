@@ -257,18 +257,16 @@ export const DriverRegistrationPage: React.FC = () => {
         return false;
       }
       const pinRegex = /^\d{6}$/;
-      if (!pinRegex.test(formData.pin_code.trim())) {
+      if (formData.pin_code.trim() && !pinRegex.test(formData.pin_code.trim())) {
         setErrorMsg('PIN code must be exactly 6 digits.');
         return false;
       }
-      if (!formData.emergency_contact_name.trim()) {
-        setErrorMsg('Emergency contact name is mandatory for highway driver safety.');
-        return false;
-      }
-      const cleanEmerg = formData.emergency_contact_number.replace(/\D/g, '');
-      if (cleanEmerg.length < 10) {
-        setErrorMsg('Emergency contact phone number must be a valid 10-digit number.');
-        return false;
+      if (formData.emergency_contact_number.trim()) {
+        const cleanEmerg = formData.emergency_contact_number.replace(/\D/g, '');
+        if (cleanEmerg.length < 10) {
+          setErrorMsg('Emergency contact phone number must be a valid 10-digit number.');
+          return false;
+        }
       }
     } else if (step === 2) {
       if (!formData.licence_number.trim() || formData.licence_number.trim().length < 5) {
@@ -326,10 +324,6 @@ export const DriverRegistrationPage: React.FC = () => {
         setErrorMsg('Recent driver photograph is mandatory for profile verification.');
         return false;
       }
-      if (!documents.address_proof.filename) {
-        setErrorMsg('Address proof (e.g. Electricity bill, Voter ID or Ration Card) is mandatory.');
-        return false;
-      }
     } else if (step === 6) {
       if (!formData.declaration_accepted) {
         setErrorMsg('Please confirm that the information provided is accurate.');
@@ -355,6 +349,13 @@ export const DriverRegistrationPage: React.FC = () => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 6));
       window.scrollTo({ top: 220, behavior: 'smooth' });
+    } else {
+      const errorEl = document.getElementById('driver-wizard-error-banner');
+      if (errorEl) {
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        window.scrollTo({ top: 220, behavior: 'smooth' });
+      }
     }
   };
 
@@ -583,7 +584,7 @@ export const DriverRegistrationPage: React.FC = () => {
 
               {/* Validation Error Banner */}
               {errorMsg && (
-                <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2">
+                <div id="driver-wizard-error-banner" className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
@@ -761,27 +762,26 @@ export const DriverRegistrationPage: React.FC = () => {
                     {/* Emergency Contacts */}
                     <div className="sm:col-span-2 pt-3 border-t border-gray-100">
                       <p className="text-xs font-bold text-px-deep uppercase tracking-wider mb-2">
-                        Emergency Contact (Mandatory for Highway Safety)
+                        Emergency Contact (Optional)
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">
-                            Emergency Contact Name & Relation <span className="text-rose-500">*</span>
+                            Emergency Contact Name & Relation (Optional)
                           </label>
                           <input
                             type="text"
                             name="emergency_contact_name"
                             value={formData.emergency_contact_name}
                             onChange={handleInputChange}
-                            placeholder="e.g. Sunita Shinde (Wife) or Father"
+                            placeholder="e.g. Sunita Shinde (Wife) or Father (Optional)"
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                            required
                           />
                         </div>
 
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">
-                            Emergency Contact Phone <span className="text-rose-500">*</span>
+                            Emergency Contact Phone (Optional)
                           </label>
                           <input
                             type="tel"
@@ -790,7 +790,6 @@ export const DriverRegistrationPage: React.FC = () => {
                             onChange={handleInputChange}
                             placeholder="+91 98901 00000"
                             className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                            required
                           />
                         </div>
                       </div>
@@ -1198,15 +1197,15 @@ export const DriverRegistrationPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 4. Address Proof (Required) */}
-                    <div className="p-4 rounded-2xl border border-dashed border-purple-300 bg-purple-50/40">
+                    {/* 4. Address Proof (Optional) */}
+                    <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50/50">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div>
-                          <p className="text-xs font-bold text-px-dark flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-px-primary" />
-                            Address Proof (Voter ID / Light Bill / Ration Card) <span className="text-rose-500">*</span>
+                          <p className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                            <MapPin className="w-4 h-4 text-gray-400" />
+                            Address Proof (Voter ID / Light Bill / Ration Card) <span className="text-gray-400 font-normal">(Optional)</span>
                           </p>
-                          <p className="text-[11px] text-gray-500">Official proof of residential address</p>
+                          <p className="text-[11px] text-gray-500">Official proof of residential address if available</p>
                         </div>
                         {documents.address_proof.filename ? (
                           <div className="flex items-center gap-3">
@@ -1222,8 +1221,8 @@ export const DriverRegistrationPage: React.FC = () => {
                             </button>
                           </div>
                         ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-px-primary text-white text-xs font-bold hover:bg-px-violet transition-all shadow-sm">
-                            <span>Upload Address Proof</span>
+                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-white border border-gray-300 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all">
+                            <span>Upload Address Proof (Optional)</span>
                             <input
                               type="file"
                               accept=".pdf,.jpg,.jpeg,.png"
@@ -1563,41 +1562,49 @@ export const DriverRegistrationPage: React.FC = () => {
               )}
 
               {/* Bottom Buttons */}
-              <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
-                {currentStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold text-xs sm:text-sm hover:bg-gray-50 flex items-center gap-1.5 transition-all"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>Previous</span>
-                  </button>
-                ) : (
-                  <div />
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                {errorMsg && (
+                  <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2 animate-fadeIn">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+                    <span className="font-semibold">{errorMsg}</span>
+                  </div>
                 )}
+                <div className="flex items-center justify-between">
+                  {currentStep > 1 ? (
+                    <button
+                      type="button"
+                      onClick={prevStep}
+                      className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold text-xs sm:text-sm hover:bg-gray-50 flex items-center gap-1.5 transition-all"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Previous</span>
+                    </button>
+                  ) : (
+                    <div />
+                  )}
 
-                {currentStep < 6 ? (
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={nextStep}
-                    className="px-6 py-2.5 text-xs sm:text-sm bg-px-deep hover:bg-px-primary"
-                  >
-                    <span>Next Step</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                    className="px-8 py-3 text-xs sm:text-sm bg-px-deep hover:bg-px-primary shadow-lg"
-                  >
-                    {submitting ? 'Submitting Registration...' : 'SUBMIT DRIVER REGISTRATION'}
-                  </Button>
-                )}
+                  {currentStep < 6 ? (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={nextStep}
+                      className="px-6 py-2.5 text-xs sm:text-sm bg-px-deep hover:bg-px-primary"
+                    >
+                      <span>Next Step</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                      className="px-8 py-3 text-xs sm:text-sm bg-px-deep hover:bg-px-primary shadow-lg"
+                    >
+                      {submitting ? 'Submitting Registration...' : 'SUBMIT DRIVER REGISTRATION'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           )}

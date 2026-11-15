@@ -261,10 +261,6 @@ export const StaffApplicationPage: React.FC = () => {
         setErrorMsg('Please enter a valid email address.');
         return false;
       }
-      if (!formData.current_address.trim()) {
-        setErrorMsg('Current address is required.');
-        return false;
-      }
       if (!formData.city.trim()) {
         setErrorMsg('City is required.');
         return false;
@@ -274,7 +270,7 @@ export const StaffApplicationPage: React.FC = () => {
         return false;
       }
       const pinRegex = /^\d{6}$/;
-      if (!pinRegex.test(formData.pin_code.trim())) {
+      if (formData.pin_code.trim() && !pinRegex.test(formData.pin_code.trim())) {
         setErrorMsg('PIN code must be exactly 6 digits.');
         return false;
       }
@@ -334,6 +330,13 @@ export const StaffApplicationPage: React.FC = () => {
     if (validateStep(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 6));
       window.scrollTo({ top: 220, behavior: 'smooth' });
+    } else {
+      const errorEl = document.getElementById('staff-wizard-error-banner');
+      if (errorEl) {
+        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        window.scrollTo({ top: 220, behavior: 'smooth' });
+      }
     }
   };
 
@@ -552,7 +555,7 @@ export const StaffApplicationPage: React.FC = () => {
 
               {/* Validation Error Banner */}
               {errorMsg && (
-                <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2">
+                <div id="staff-wizard-error-banner" className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
@@ -660,16 +663,15 @@ export const StaffApplicationPage: React.FC = () => {
 
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Current Residential Address <span className="text-rose-500">*</span>
+                        Current Residential Address (Optional)
                       </label>
                       <textarea
                         name="current_address"
                         rows={2}
                         value={formData.current_address}
                         onChange={handleInputChange}
-                        placeholder="House / Flat No., Street, Landmark..."
+                        placeholder="House / Flat No., Street, Landmark (Optional)..."
                         className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm resize-none"
-                        required
                       />
                     </div>
 
@@ -1439,7 +1441,14 @@ export const StaffApplicationPage: React.FC = () => {
               )}
 
               {/* Wizard Bottom Buttons */}
-              <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                {errorMsg && (
+                  <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2 animate-fadeIn">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+                    <span className="font-semibold">{errorMsg}</span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between">
                 {currentStep > 1 ? (
                   <button
                     type="button"
@@ -1474,6 +1483,7 @@ export const StaffApplicationPage: React.FC = () => {
                     {submitting ? 'Submitting Application...' : 'SUBMIT STAFF APPLICATION'}
                   </Button>
                 )}
+                </div>
               </div>
             </div>
           )}

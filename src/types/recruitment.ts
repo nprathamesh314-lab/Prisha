@@ -90,7 +90,7 @@ export interface StaffApplication {
   mobile_number: string;
   alternate_mobile_number?: string;
   email: string;
-  current_address: string;
+  current_address?: string;
   city: string;
   state: string;
   pin_code: string;
@@ -243,8 +243,8 @@ export interface DriverApplication {
   city: string;
   state: string;
   pin_code: string;
-  emergency_contact_name: string;
-  emergency_contact_number: string;
+  emergency_contact_name?: string;
+  emergency_contact_number?: string;
   // Driving Licence Details
   licence_number: string;
   licence_type: string;
