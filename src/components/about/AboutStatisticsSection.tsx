@@ -30,6 +30,7 @@ const CountUp: React.FC<CountUpProps> = ({
 
     let startTimestamp: number | null = null;
     let animationFrameId: number;
+    let lastRenderedValue = -1;
 
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
@@ -38,7 +39,10 @@ const CountUp: React.FC<CountUpProps> = ({
       const easedProgress = easeOutCubic(progress);
 
       const currentValue = Math.round(0 + end * easedProgress);
-      setDisplayValue(currentValue.toLocaleString('en-US'));
+      if (currentValue !== lastRenderedValue) {
+        lastRenderedValue = currentValue;
+        setDisplayValue(currentValue.toLocaleString('en-US'));
+      }
 
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(step);

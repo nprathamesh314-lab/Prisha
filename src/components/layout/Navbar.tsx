@@ -16,6 +16,7 @@ import {
 import { companyInfo } from '../../data/companyData';
 import { Button } from '../common/Button';
 import { MobileAnimatedTruck } from './MobileAnimatedTruck';
+import { prefetchRoute } from '../../utils/prefetchRoute';
 
 interface NavItem {
   label: string;
@@ -80,11 +81,8 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 30) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      const scrolled = window.scrollY > 30;
+      setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -202,6 +200,8 @@ export const Navbar: React.FC = () => {
                                     key={service.title}
                                     to={service.href}
                                     role="menuitem"
+                                    onMouseEnter={() => prefetchRoute(service.href)}
+                                    onTouchStart={() => prefetchRoute(service.href)}
                                     onClick={() => setServicesDropdownOpen(false)}
                                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-px-lavender/40 transition-colors group focus:outline-none focus-visible:bg-px-lavender/50"
                                   >
@@ -231,6 +231,8 @@ export const Navbar: React.FC = () => {
                               <Link
                                 to="/services"
                                 role="menuitem"
+                                onMouseEnter={() => prefetchRoute('/services')}
+                                onTouchStart={() => prefetchRoute('/services')}
                                 onClick={() => setServicesDropdownOpen(false)}
                                 className="flex items-center justify-between text-xs font-bold text-px-primary hover:text-px-deep py-1"
                               >
@@ -249,6 +251,8 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={item.label}
                     to={item.href}
+                    onMouseEnter={() => prefetchRoute(item.href)}
+                    onTouchStart={() => prefetchRoute(item.href)}
                     className={`relative px-2.5 xl:px-3 py-2 text-xs xl:text-sm font-semibold rounded-lg transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-px-primary ${
                       isNavbarTransparent
                         ? isActive
@@ -393,6 +397,8 @@ export const Navbar: React.FC = () => {
                               <Link
                                 key={s.title}
                                 to={s.href}
+                                onMouseEnter={() => prefetchRoute(s.href)}
+                                onTouchStart={() => prefetchRoute(s.href)}
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="block py-2 px-3 text-sm font-medium text-gray-700 hover:text-px-primary hover:bg-px-lavender/30 rounded-lg"
                               >
@@ -401,6 +407,8 @@ export const Navbar: React.FC = () => {
                             ))}
                             <Link
                               to="/services"
+                              onMouseEnter={() => prefetchRoute('/services')}
+                              onTouchStart={() => prefetchRoute('/services')}
                               onClick={() => setMobileMenuOpen(false)}
                               className="block py-2 px-3 text-xs font-bold text-px-primary"
                             >
@@ -416,6 +424,8 @@ export const Navbar: React.FC = () => {
                     <Link
                       key={item.label}
                       to={item.href}
+                      onMouseEnter={() => prefetchRoute(item.href)}
+                      onTouchStart={() => prefetchRoute(item.href)}
                       onClick={() => setMobileMenuOpen(false)}
                       className={`block p-3 font-bold rounded-xl text-base transition-colors ${
                         isActive

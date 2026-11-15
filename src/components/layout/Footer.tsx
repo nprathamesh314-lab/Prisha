@@ -9,6 +9,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { companyInfo, servicesData } from '../../data/companyData';
+import { prefetchRoute } from '../../utils/prefetchRoute';
 
 export const Footer: React.FC = () => {
   return (
@@ -68,37 +69,61 @@ export const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-2.5 text-sm text-gray-200">
               <li>
-                <Link to="/" className="hover:text-white transition-colors flex items-center gap-1.5 group">
+                <Link
+                  to="/"
+                  onMouseEnter={() => prefetchRoute('/')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 group"
+                >
                   <ArrowRight className="w-3.5 h-3.5 text-px-accent transition-transform group-hover:translate-x-1" />
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="hover:text-white transition-colors flex items-center gap-1.5 group">
+                <Link
+                  to="/about"
+                  onMouseEnter={() => prefetchRoute('/about')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 group"
+                >
                   <ArrowRight className="w-3.5 h-3.5 text-px-accent transition-transform group-hover:translate-x-1" />
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/network" className="hover:text-white transition-colors flex items-center gap-1.5 group">
+                <Link
+                  to="/network"
+                  onMouseEnter={() => prefetchRoute('/network')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 group"
+                >
                   <ArrowRight className="w-3.5 h-3.5 text-px-accent transition-transform group-hover:translate-x-1" />
                   Our Network
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="hover:text-white transition-colors flex items-center gap-1.5 group">
+                <Link
+                  to="/careers"
+                  onMouseEnter={() => prefetchRoute('/careers')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 group"
+                >
                   <ArrowRight className="w-3.5 h-3.5 text-px-accent transition-transform group-hover:translate-x-1" />
                   Careers
                 </Link>
               </li>
               <li>
-                <Link to="/csr" className="hover:text-white transition-colors flex items-center gap-1.5 group">
+                <Link
+                  to="/csr"
+                  onMouseEnter={() => prefetchRoute('/csr')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 group"
+                >
                   <ArrowRight className="w-3.5 h-3.5 text-px-accent transition-transform group-hover:translate-x-1" />
                   CSR Initiatives
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-white transition-colors flex items-center gap-1.5 group">
+                <Link
+                  to="/contact"
+                  onMouseEnter={() => prefetchRoute('/contact')}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 group"
+                >
                   <ArrowRight className="w-3.5 h-3.5 text-px-accent transition-transform group-hover:translate-x-1" />
                   Contact Us
                 </Link>
@@ -184,15 +209,27 @@ export const Footer: React.FC = () => {
             © {new Date().getFullYear()} {companyInfo.name}. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link to="/privacy-policy" className="hover:text-white transition-colors">
+            <Link
+              to="/privacy-policy"
+              onMouseEnter={() => prefetchRoute('/privacy-policy')}
+              className="hover:text-white transition-colors"
+            >
               Privacy Policy
             </Link>
             <span className="text-purple-300/60">•</span>
-            <Link to="/terms-and-conditions" className="hover:text-white transition-colors">
+            <Link
+              to="/terms-and-conditions"
+              onMouseEnter={() => prefetchRoute('/terms-and-conditions')}
+              className="hover:text-white transition-colors"
+            >
               Terms & Conditions
             </Link>
             <span className="text-purple-300/60">•</span>
-            <Link to="/contact" className="hover:text-white transition-colors">
+            <Link
+              to="/contact"
+              onMouseEnter={() => prefetchRoute('/contact')}
+              className="hover:text-white transition-colors"
+            >
               Support
             </Link>
           </div>

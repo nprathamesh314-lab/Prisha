@@ -58,6 +58,18 @@ export const HeroSliderSection: React.FC = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   }, []);
 
+  // Preload slides in background for zero-latency, buttery-smooth transitions
+  useEffect(() => {
+    slides.forEach((slide) => {
+      const img = new Image();
+      img.src = slide.image;
+      if (slide.mobileImage) {
+        const mob = new Image();
+        mob.src = slide.mobileImage;
+      }
+    });
+  }, []);
+
   useEffect(() => {
     if (isPaused) return;
     const timer = setInterval(() => {
@@ -78,11 +90,11 @@ export const HeroSliderSection: React.FC = () => {
         <AnimatePresence initial={false}>
           <motion.div
             key={slides[currentSlide].id}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1, ease: 'easeOut' }}
-            className="absolute inset-0"
+            transition={{ duration: 0.65, ease: 'easeInOut' }}
+            className="absolute inset-0 will-change-[opacity]"
           >
             <picture className="w-full h-full block">
               <source
@@ -92,6 +104,9 @@ export const HeroSliderSection: React.FC = () => {
               <img
                 src={slides[currentSlide].image}
                 alt={slides[currentSlide].alt}
+                loading={currentSlide === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchPriority={currentSlide === 0 ? 'high' : 'auto'}
                 className="w-full h-full object-cover object-[75%_bottom] sm:object-[70%_bottom] md:object-center filter brightness-100 contrast-100"
               />
             </picture>

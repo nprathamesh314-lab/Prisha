@@ -36,11 +36,8 @@ export const ScrollToTop: React.FC = () => {
 
   useEffect(() => {
     const toggleVisibility = () => {
-      if (window.scrollY > 400) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
+      const visible = window.scrollY > 400;
+      setIsVisible((prev) => (prev !== visible ? visible : prev));
     };
 
     window.addEventListener('scroll', toggleVisibility, { passive: true });

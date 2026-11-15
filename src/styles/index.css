@@ -90,6 +90,20 @@
       radial-gradient(at 100% 100%, rgba(139, 53, 181, 0.1) 0px, transparent 50%),
       radial-gradient(at 50% 50%, rgba(242, 232, 248, 0.6) 0px, transparent 60%);
   }
+
+  /* GPU Hardware Acceleration for 60FPS Animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    will-change: transform, opacity;
+  }
+
+  /* Mobile Inertial Scrolling */
+  .momentum-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
 }
 
 /* Accessibility: Reduced Motion Support */
