@@ -399,7 +399,7 @@ export const DriverApplicationsAdminPage: React.FC = () => {
                 <p><strong>Mobile:</strong> {selectedDriver.mobile_number}</p>
                 <p><strong>Emergency:</strong> {selectedDriver.emergency_contact_name} ({selectedDriver.emergency_contact_number})</p>
                 <p><strong>DOB / Gender:</strong> {selectedDriver.date_of_birth} ({selectedDriver.gender})</p>
-                <p><strong>Address:</strong> {selectedDriver.current_address}, {selectedDriver.city}, {selectedDriver.state} - {selectedDriver.pin_code}</p>
+                <p><strong>Address:</strong> {selectedDriver.current_address ? `${selectedDriver.current_address}, ` : ''}{selectedDriver.city}, {selectedDriver.state} - {selectedDriver.pin_code}</p>
               </div>
 
               <div className="p-4 rounded-2xl bg-px-bg space-y-2">

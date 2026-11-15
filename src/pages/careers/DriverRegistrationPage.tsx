@@ -248,10 +248,6 @@ export const DriverRegistrationPage: React.FC = () => {
         setErrorMsg('Please enter a valid 10-digit primary mobile number.');
         return false;
       }
-      if (!formData.current_address.trim()) {
-        setErrorMsg('Current address is required.');
-        return false;
-      }
       if (!formData.city.trim()) {
         setErrorMsg('City is required.');
         return false;
@@ -702,16 +698,15 @@ export const DriverRegistrationPage: React.FC = () => {
 
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Current Residential Address <span className="text-rose-500">*</span>
+                        Current Residential Address (Optional)
                       </label>
                       <textarea
                         name="current_address"
                         rows={2}
                         value={formData.current_address}
                         onChange={handleInputChange}
-                        placeholder="Village / Town, Post, Taluka, District..."
+                        placeholder="Village / Town, Post, Taluka, District (Optional)..."
                         className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm resize-none"
-                        required
                       />
                     </div>
 
@@ -1374,7 +1369,7 @@ export const DriverRegistrationPage: React.FC = () => {
                       <p><strong>Name:</strong> {formData.full_name || '—'}</p>
                       <p><strong>DOB:</strong> {formData.date_of_birth || '—'}</p>
                       <p><strong>Gender:</strong> {formData.gender}</p>
-                      <p className="sm:col-span-3"><strong>Address:</strong> {formData.current_address}, {formData.city}, {formData.state} - {formData.pin_code}</p>
+                      <p className="sm:col-span-3"><strong>Address:</strong> {formData.current_address ? `${formData.current_address}, ` : ''}{formData.city}, {formData.state} - {formData.pin_code}</p>
                     </div>
                   </div>
 

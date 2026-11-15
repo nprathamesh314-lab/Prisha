@@ -239,7 +239,7 @@ export interface DriverApplication {
   mobile_number: string;
   alternate_mobile_number?: string;
   email?: string;
-  current_address: string;
+  current_address?: string;
   city: string;
   state: string;
   pin_code: string;

@@ -351,7 +351,7 @@ export const StaffApplicationsAdminPage: React.FC = () => {
                 </p>
                 <p className="flex items-start gap-2 text-gray-700">
                   <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
-                  <span>{selectedApp.current_address}, {selectedApp.city}, {selectedApp.state} - {selectedApp.pin_code}</span>
+                  <span>{selectedApp.current_address ? `${selectedApp.current_address}, ` : ''}{selectedApp.city}, {selectedApp.state} - {selectedApp.pin_code}</span>
                 </p>
               </div>
 
