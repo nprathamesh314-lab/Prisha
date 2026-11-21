@@ -311,34 +311,35 @@ export const AboutStrengthsSlider: React.FC = () => {
       <div className="absolute inset-0 bg-[radial-gradient(#68139A_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.035] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section Header with Controls */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 lg:mb-12 gap-4">
-          <div>
-            <SectionHeading
-              badge={t.badge}
-              title={t.title}
-              subtitle={t.subtitle}
-              className="mb-0 text-left"
-            />
-          </div>
+        {/* Centered Section Header Area */}
+        <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-8 sm:mb-10">
+          <SectionHeading
+            badge={t.badge}
+            title={t.title}
+            subtitle={t.subtitle}
+            align="center"
+            className="mb-0 text-center items-center"
+          />
+        </div>
 
-          {/* Slider Controls */}
-          <div className="flex items-center gap-3 self-start md:self-end">
-            <div className="text-xs font-semibold text-gray-500 mr-2 hidden sm:block">
-              <span className="text-px-primary font-bold">{currentPage + 1}</span> {t.pageOf}{' '}
-              {totalPages}
-            </div>
+        {/* Slider Controls Bar */}
+        <div className="flex items-center justify-between sm:justify-end gap-3 mb-4 sm:mb-6 px-1">
+          <div className="text-xs font-semibold text-gray-500 mr-2">
+            <span className="text-px-primary font-bold">{currentPage + 1}</span> {t.pageOf}{' '}
+            {totalPages}
+          </div>
+          <div className="flex items-center gap-2">
             <button
               onClick={prevSlide}
               aria-label={t.prevLabel}
-              className="p-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-purple-200/80 text-px-dark hover:bg-px-primary hover:text-white hover:border-px-primary transition-all duration-200 active:scale-95 shadow-xs"
+              className="p-2.5 sm:p-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-purple-200/80 text-px-dark hover:bg-px-primary hover:text-white hover:border-px-primary transition-all duration-200 active:scale-95 shadow-xs"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={nextSlide}
               aria-label={t.nextLabel}
-              className="p-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-purple-200/80 text-px-dark hover:bg-px-primary hover:text-white hover:border-px-primary transition-all duration-200 active:scale-95 shadow-xs"
+              className="p-2.5 sm:p-3 rounded-2xl bg-white/80 backdrop-blur-sm border border-purple-200/80 text-px-dark hover:bg-px-primary hover:text-white hover:border-px-primary transition-all duration-200 active:scale-95 shadow-xs"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
