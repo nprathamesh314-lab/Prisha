@@ -2,7 +2,7 @@
 // ROUTE: /about
 // REDESIGNED 8-SECTION HIGH-PERFORMANCE CORPORATE PAGE
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageTransition } from '../components/animations/PageTransition';
 import { PageHero } from '../components/common/PageHero';
 import { SectionHeading } from '../components/common/SectionHeading';
@@ -23,32 +23,82 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
+// Multilingual translations for the About Us Hero Section
+const heroTranslations = {
+  en: {
+    badge: 'ABOUT PRISHA XPRESS PVT. LTD.',
+    breadcrumbLabel: 'About Us',
+    title: 'Helping Your Business with Reliable Transport Services',
+    description:
+      'Prisha Xpress Pvt. Ltd. provides transport, logistics, professional drivers and fleet management services to businesses across India. We help companies manage their transport needs safely and smoothly.',
+    primaryBtn: 'Explore Our Services',
+    secondaryBtn: 'Business Enquiry',
+  },
+  hi: {
+    badge: 'प्रिशा एक्सप्रेस प्राइवेट लिमिटेड के बारे में',
+    breadcrumbLabel: 'हमारे बारे में',
+    title: 'विश्वसनीय परिवहन सेवाओं के साथ आपके व्यवसाय को आगे बढ़ाना',
+    description:
+      'प्रिशा एक्सप्रेस प्राइवेट लिमिटेड पूरे भारत में व्यवसायों को परिवहन, लॉजिस्टिक्स, पेशेवर चालक और बेड़ा प्रबंधन सेवाएं प्रदान करती है। हम कंपनियों को उनकी परिवहन आवश्यकताओं को सुरक्षित और सुचारू रूप से प्रबंधित करने में मदद करते हैं।',
+    primaryBtn: 'हमारी सेवाएं देखें',
+    secondaryBtn: 'व्यावसायिक पूछताछ',
+  },
+  mr: {
+    badge: 'प्रिशा एक्सप्रेस प्रायव्हेट लिमिटेड बद्दल',
+    breadcrumbLabel: 'आमच्याबद्दल',
+    title: 'विश्वासार्ह वाहतूक सेवांसह तुमच्या व्यवसायाला सक्षम बनवणे',
+    description:
+      'प्रिशा एक्सप्रेस प्रायव्हेट लिमिटेड संपूर्ण भारतातील व्यवसायांना वाहतूक, लॉजिस्टिक्स, व्यावसायिक चालक आणि ताफा व्यवस्थापन सेवा पुरवते. आम्ही कंपन्यांना त्यांच्या वाहतुकीच्या गरजा सुरक्षितपणे आणि सुरळीतपणे व्यवस्थापित करण्यास मदत करतो.',
+    primaryBtn: 'आमच्या सेवा पहा',
+    secondaryBtn: 'व्यवसाय चौकशी',
+  },
+};
+
 export const AboutPage: React.FC = () => {
+  const [lang, setLang] = useState<'en' | 'hi' | 'mr'>('en');
+
+  // Detect language changes from document or localStorage
+  useEffect(() => {
+    const detectLang = () => {
+      const docLang = document.documentElement.lang?.slice(0, 2).toLowerCase();
+      const stored = localStorage.getItem('px_selected_language')?.toLowerCase();
+      if (stored === 'hi' || docLang === 'hi') setLang('hi');
+      else if (stored === 'mr' || docLang === 'mr') setLang('mr');
+      else setLang('en');
+    };
+
+    detectLang();
+    window.addEventListener('languagechange', detectLang);
+    return () => window.removeEventListener('languagechange', detectLang);
+  }, []);
+
+  const hero = heroTranslations[lang] || heroTranslations.en;
+
   return (
     <PageTransition>
       {/* SECTION 1: HERO SECTION */}
       <PageHero
-        badge="About Prisha Xpress Pvt. Ltd."
-        title="Empowering Your Fleet, Elevating Your Efficiency"
-        subtitle="Prisha Xpress Pvt. Ltd. delivers transportation, logistics, professional driver solutions and fleet support to help businesses operate with confidence."
+        badge={hero.badge}
+        title={hero.title}
+        subtitle={hero.description}
         image="/assets/images/hero-fleet.jpg"
-        breadcrumbs={[{ label: 'About Us' }]}
+        breadcrumbs={[{ label: hero.breadcrumbLabel }]}
       >
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Button
             to="/services"
             variant="primary"
             size="md"
-            icon={<ArrowRight className="w-4 h-4" />}
+            icon={<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
           >
-            Explore Our Services
+            {hero.primaryBtn}
           </Button>
           <Button
             to="/contact#enquiry"
             variant="glass"
             size="md"
           >
-            Business Enquiry
+            {hero.secondaryBtn}
           </Button>
         </div>
       </PageHero>
