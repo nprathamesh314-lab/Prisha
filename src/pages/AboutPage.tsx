@@ -216,6 +216,100 @@ const missionVisionTranslations = {
   },
 };
 
+// Multilingual translations for Section 5: Our Commitment
+const commitmentTranslations = {
+  en: {
+    badge: 'TWO-WAY COMMITMENT',
+    title: 'Balancing Customer Value with Driver Welfare',
+    subtitle:
+      'We believe good transport services start with happy customers and well-supported drivers. We work to provide reliable service to businesses while treating our drivers and employees with respect.',
+    customer: {
+      label: 'CUSTOMER COMMITMENT',
+      title: 'Reliable Service for Every Customer',
+      description:
+        'We work with businesses and fleet owners to provide dependable transport services, timely deliveries and proper support.',
+      points: [
+        'Clear communication and transparent pricing.',
+        'Proper transport planning and delivery schedules.',
+        'Trained drivers and professional service.',
+        'Support based on business requirements.',
+      ],
+    },
+    driver: {
+      label: 'DRIVER & EMPLOYEE CARE',
+      title: 'Respect and Support for Our Drivers',
+      description:
+        'Our drivers and employees play an important role in our work. We believe in treating everyone with respect and providing a safe and supportive working environment.',
+      points: [
+        'Respectful treatment and fair working practices.',
+        'Support for drivers during their work.',
+        'Focus on road safety and driver well-being.',
+        'Opportunities to learn and improve skills.',
+      ],
+    },
+  },
+  hi: {
+    badge: 'दोतरफा प्रतिबद्धता',
+    title: 'ग्राहक संतुष्टि और चालक कल्याण में संतुलन',
+    subtitle:
+      'हमारा मानना है कि अच्छी परिवहन सेवा खुशहाल ग्राहकों और सशक्त चालकों से शुरू होती है। हम अपने चालकों और कर्मचारियों का सम्मान करते हुए व्यवसायों को विश्वसनीय सेवा प्रदान करते हैं।',
+    customer: {
+      label: 'ग्राहक प्रतिबद्धता',
+      title: 'प्रत्येक ग्राहक के लिए विश्वसनीय सेवा',
+      description:
+        'हम व्यवसायों और बेड़ा मालिकों के साथ मिलकर भरोसेमंद परिवहन सेवाएं, समय पर डिलीवरी और उचित सहायता प्रदान करते हैं।',
+      points: [
+        'स्पष्ट संवाद और पारदर्शी मूल्य निर्धारण।',
+        'उचित परिवहन योजना और डिलीवरी कार्यक्रम।',
+        'प्रशिक्षित चालक और पेशेवर सेवा।',
+        'व्यावसायिक आवश्यकताओं के अनुसार सहायता।',
+      ],
+    },
+    driver: {
+      label: 'चालक एवं कर्मचारी कल्याण',
+      title: 'हमारे चालकों के लिए सम्मान और सहयोग',
+      description:
+        'हमारे चालक और कर्मचारी हमारे कार्य में महत्वपूर्ण भूमिका निभाते हैं। हम सभी के साथ सम्मानपूर्वक व्यवहार करने और एक सुरक्षित वातावरण प्रदान करने में विश्वास रखते हैं।',
+      points: [
+        'सम्मानजनक व्यवहार और निष्पक्ष कार्यप्रणाली।',
+        'काम के दौरान चालकों को निरंतर सहयोग।',
+        'सड़क सुरक्षा और चालक कल्याण पर विशेष ध्यान।',
+        'कौशल सीखने और सुधारने के अवसर।',
+      ],
+    },
+  },
+  mr: {
+    badge: 'दुहेरी बांधिलकी',
+    title: 'ग्राहक मूल्य आणि चालक कल्याण यांचा समतोल',
+    subtitle:
+      'आम्हाला विश्वास आहे की उत्तम वाहतूक सेवा ही समाधानी ग्राहक आणि समर्थ चालकांमुळेच शक्य होते. आम्ही आमच्या चालकांचा आणि कर्मचाऱ्यांचा आदर राखत व्यवसायांना विश्वासार्ह सेवा देतो.',
+    customer: {
+      label: 'ग्राहक बांधिलकी',
+      title: 'प्रत्येक ग्राहकासाठी विश्वासार्ह सेवा',
+      description:
+        'आम्ही व्यवसाय आणि ताफा मालकांना विश्वासार्ह वाहतूक सेवा, वेळेवर डिलिव्हरी आणि योग्य सहाय्य देण्यासाठी एकत्र काम करतो.',
+      points: [
+        'स्पष्ट संवाद आणि पारदर्शक दर.',
+        'योग्य वाहतूक नियोजन आणि डिलिव्हरी वेळापत्रक.',
+        'प्रशिक्षित चालक आणि व्यावसायिक सेवा.',
+        'व्यवसायाच्या गरजांनुसार योग्य सहाय्य.',
+      ],
+    },
+    driver: {
+      label: 'चालक आणि कर्मचारी कल्याण',
+      title: 'आमच्या चालकांसाठी आदर आणि पाठबळ',
+      description:
+        'आमचे चालक आणि कर्मचारी आमच्या कामात महत्त्वाची भूमिका बजावतात. आम्ही प्रत्येकाशी सन्मानाने वागण्यावर आणि सुरक्षित कार्य वातावरण देण्यावर विश्वास ठेवतो.',
+      points: [
+        'सन्मानपूर्वक वागणूक आणि न्याय्य कार्यपद्धती.',
+        'कामादरम्यान चालकांना तत्पर सहाय्य.',
+        'रस्ता सुरक्षा आणि चालकांच्या आरोग्यावर भर.',
+        'कौशल्य शिकण्याची आणि प्रगतीची संधी.',
+      ],
+    },
+  },
+};
+
 export const AboutPage: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'hi' | 'mr'>('en');
 
@@ -237,6 +331,7 @@ export const AboutPage: React.FC = () => {
   const hero = heroTranslations[lang] || heroTranslations.en;
   const overview = overviewTranslations[lang] || overviewTranslations.en;
   const purpose = missionVisionTranslations[lang] || missionVisionTranslations.en;
+  const commitment = commitmentTranslations[lang] || commitmentTranslations.en;
 
   return (
     <PageTransition>
@@ -480,96 +575,116 @@ export const AboutPage: React.FC = () => {
       <AboutStrengthsSlider />
 
       {/* SECTION 5: OUR COMMITMENT (COMBINED COMPACT SECTION) */}
-      <section className="py-14 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#FAF5FF] via-purple-50/40 to-[#FAF5FF] relative overflow-hidden border-t border-purple-100/80">
+        {/* Decorative Ambient Purple Glass Shapes */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 right-0 w-[420px] h-[420px] bg-purple-200/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 left-1/3 w-80 h-80 bg-purple-100/50 rounded-full blur-2xl pointer-events-none" />
+
+        {/* Subtle Mesh Background */}
+        <div className="absolute inset-0 bg-[radial-gradient(#68139A_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.035] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionHeading
-            badge="Two-Way Commitment"
-            title="Balancing Customer Value with Driver Welfare"
-            subtitle="Reliable logistics depends on honoring commitments to both the businesses we serve and the people who keep transportation moving."
+            badge={commitment.badge}
+            title={commitment.title}
+            subtitle={commitment.subtitle}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {/* Column 1: Commitment to Customers */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-px-bg border border-px-border shadow-xs hover:border-px-primary/40 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 text-px-primary flex items-center justify-center shadow-xs">
-                    <Building2 className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-px-violet">
-                      Corporate Service
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mt-10 sm:mt-12">
+            {/* Card 1: Customer Commitment */}
+            <FadeIn delay={0.1} direction="up">
+              <motion.div
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="group relative rounded-[22px] p-6 sm:p-8 flex flex-col justify-between h-full
+                           bg-white/70 backdrop-blur-[16px]
+                           border border-purple-200/60 hover:border-purple-300/90
+                           shadow-[0_8px_32px_0_rgba(104,19,154,0.07)]
+                           hover:shadow-[0_18px_40px_0_rgba(104,19,154,0.15)]
+                           transition-all duration-300 overflow-hidden"
+              >
+                {/* Top Glass Reflection Highlight */}
+                <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 via-white/20 to-transparent rounded-t-[22px] pointer-events-none" />
+
+                <div className="relative z-10 space-y-4 sm:space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-purple-100/75 border border-purple-200/50 text-px-primary shadow-xs group-hover:scale-110 group-hover:rotate-1 transition-all duration-300">
+                      <Building2 className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full bg-purple-100/70 backdrop-blur-sm text-px-primary border border-purple-200/60 shadow-xs">
+                      {commitment.customer.label}
                     </span>
-                    <h3 className="text-xl font-bold text-px-dark">
-                      Commitment to Customers
-                    </h3>
                   </div>
+
+                  <h3 className="text-xl sm:text-2xl font-black text-px-dark tracking-tight leading-snug">
+                    {commitment.customer.title}
+                  </h3>
+
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-normal">
+                    {commitment.customer.description}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed font-normal mb-5">
-                  We partner with enterprise clients and fleet owners to deliver predictable freight movements with strict operational governance.
-                </p>
-              </div>
 
-              <ul className="space-y-3 pt-4 border-t border-purple-100/60 text-xs sm:text-sm text-gray-800 font-medium">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Transparent commercial communication and clear pricing</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Planned transportation operations and strict schedule adherence</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Professional, verified driver support and safety protocol compliance</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Attention to delivery schedules and tailored business requirements</span>
-                </li>
-              </ul>
-            </div>
+                <div className="relative z-10 pt-5 sm:pt-6 mt-6 border-t border-purple-100/80">
+                  <ul className="space-y-3 text-xs sm:text-sm text-gray-800 font-medium">
+                    {commitment.customer.points.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span className="leading-snug">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            </FadeIn>
 
-            {/* Column 2: Commitment to Drivers & Employees */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-px-bg border border-px-border shadow-xs hover:border-px-primary/40 transition-all duration-300 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 text-px-primary flex items-center justify-center shadow-xs">
-                    <Users className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-px-violet">
-                      People & Community
+            {/* Card 2: Driver & Employee Care */}
+            <FadeIn delay={0.2} direction="up">
+              <motion.div
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="group relative rounded-[22px] p-6 sm:p-8 flex flex-col justify-between h-full
+                           bg-white/70 backdrop-blur-[16px]
+                           border border-purple-200/60 hover:border-purple-300/90
+                           shadow-[0_8px_32px_0_rgba(104,19,154,0.07)]
+                           hover:shadow-[0_18px_40px_0_rgba(104,19,154,0.15)]
+                           transition-all duration-300 overflow-hidden"
+              >
+                {/* Top Glass Reflection Highlight */}
+                <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 via-white/20 to-transparent rounded-t-[22px] pointer-events-none" />
+
+                <div className="relative z-10 space-y-4 sm:space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-purple-100/75 border border-purple-200/50 text-px-primary shadow-xs group-hover:scale-110 group-hover:rotate-1 transition-all duration-300">
+                      <Users className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </div>
+                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full bg-purple-100/70 backdrop-blur-sm text-px-primary border border-purple-200/60 shadow-xs">
+                      {commitment.driver.label}
                     </span>
-                    <h3 className="text-xl font-bold text-px-dark">
-                      Commitment to Drivers & Employees
-                    </h3>
                   </div>
-                </div>
-                <p className="text-sm text-gray-700 leading-relaxed font-normal mb-5">
-                  Commercial drivers are the backbone of our economy. We champion dignity, fair treatment, and health security on every highway journey.
-                </p>
-              </div>
 
-              <ul className="space-y-3 pt-4 border-t border-purple-100/60 text-xs sm:text-sm text-gray-800 font-medium">
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Respectful workplace practices and dignified highway conditions</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Fair and transparent treatment without discrimination or delays</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Driver welfare initiatives, including routine vision and health checkup camps</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>Continuous opportunities for skills development and professional advancement</span>
-                </li>
-              </ul>
-            </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-px-dark tracking-tight leading-snug">
+                    {commitment.driver.title}
+                  </h3>
+
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-normal">
+                    {commitment.driver.description}
+                  </p>
+                </div>
+
+                <div className="relative z-10 pt-5 sm:pt-6 mt-6 border-t border-purple-100/80">
+                  <ul className="space-y-3 text-xs sm:text-sm text-gray-800 font-medium">
+                    {commitment.driver.points.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span className="leading-snug">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            </FadeIn>
           </div>
         </div>
       </section>
