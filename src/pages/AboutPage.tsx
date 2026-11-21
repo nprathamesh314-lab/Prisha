@@ -3,7 +3,9 @@
 // REDESIGNED 8-SECTION HIGH-PERFORMANCE CORPORATE PAGE
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { PageTransition } from '../components/animations/PageTransition';
+import { FadeIn } from '../components/animations/FadeIn';
 import { PageHero } from '../components/common/PageHero';
 import { SectionHeading } from '../components/common/SectionHeading';
 import { CTASection } from '../components/common/CTASection';
@@ -135,6 +137,85 @@ const overviewTranslations = {
 
 const overviewIcons = [Calendar, MapPin, Truck];
 
+// Multilingual translations for Section 3: Mission and Vision
+const missionVisionTranslations = {
+  en: {
+    badge: 'CORPORATE PURPOSE',
+    title: 'Our Mission and Vision',
+    subtitle: 'What we do today and what we aim to achieve in the future.',
+    mission: {
+      label: 'OUR MISSION',
+      heading: 'Providing Reliable Transport Services',
+      description:
+        'Our mission is to provide reliable transport services, skilled commercial drivers and proper fleet support to help businesses manage their daily transportation needs.',
+      points: [
+        'Fair and respectful treatment of drivers.',
+        'Focus on timely deliveries and good service.',
+      ],
+    },
+    vision: {
+      label: 'OUR VISION',
+      heading: 'To Become a Trusted Logistics Partner Across India',
+      description:
+        'Our vision is to grow as a trusted transport and logistics company by providing good service, following honest business practices and supporting our drivers and customers.',
+      points: [
+        'Expand our transport services across India.',
+        'Use technology to improve transport operations.',
+      ],
+    },
+  },
+  hi: {
+    badge: 'कॉर्पोरेट उद्देश्य',
+    title: 'हमारा मिशन और विज़न',
+    subtitle: 'हम आज क्या करते हैं और भविष्य में क्या हासिल करना चाहते हैं।',
+    mission: {
+      label: 'हमारा मिशन',
+      heading: 'विश्वसनीय परिवहन सेवाएं प्रदान करना',
+      description:
+        'हमारा मिशन व्यवसायों को उनकी दैनिक परिवहन आवश्यकताओं के प्रबंधन में मदद करने के लिए विश्वसनीय परिवहन सेवाएं, कुशल वाणिज्यिक चालक और उचित बेड़ा सहायता प्रदान करना है।',
+      points: [
+        'चालकों के साथ निष्पक्ष और सम्मानजनक व्यवहार।',
+        'समय पर डिलीवरी और अच्छी सेवा पर ध्यान केंद्रित करना।',
+      ],
+    },
+    vision: {
+      label: 'हमारा विज़न',
+      heading: 'पूरे भारत में एक विश्वसनीय लॉजिस्टिक्स भागीदार बनना',
+      description:
+        'हमारा विज़न अच्छी सेवा प्रदान करके, ईमानदार व्यावसायिक प्रथाओं का पालन करके और अपने चालकों व ग्राहकों का समर्थन करके एक विश्वसनीय परिवहन और लॉजिस्टिक्स कंपनी के रूप में विकसित होना है।',
+      points: [
+        'पूरे भारत में हमारी परिवहन सेवाओं का विस्तार करना।',
+        'परिवहन संचालन को बेहतर बनाने के लिए तकनीक का उपयोग करना।',
+      ],
+    },
+  },
+  mr: {
+    badge: 'कंपनीचा उद्देश',
+    title: 'आमचे ध्येय आणि दृष्टीक्षेप',
+    subtitle: 'आम्ही आज काय करतो आणि भविष्यात काय साध्य करण्याचे आमचे ध्येय आहे.',
+    mission: {
+      label: 'आमचे मिशन',
+      heading: 'विश्वासार्ह वाहतूक सेवा पुरवणे',
+      description:
+        'व्यवसायांना त्यांच्या दैनंदिन वाहतुकीच्या गरजा पूर्ण करण्यात मदत करण्यासाठी विश्वासार्ह वाहतूक सेवा, कुशल व्यावसायिक चालक आणि योग्य ताफा सहाय्य प्रदान करणे हे आमचे ध्येय आहे.',
+      points: [
+        'चालकांशी सन्मानपूर्वक आणि न्याय्य वागणूक.',
+        'वेळेवर डिलिव्हरी आणि चांगल्या सेवेवर भर.',
+      ],
+    },
+    vision: {
+      label: 'आमचे व्हिजन',
+      heading: 'संपूर्ण भारतात एक विश्वासू लॉजिस्टिक्स भागीदार बनणे',
+      description:
+        'उत्तम सेवा देऊन, प्रामाणिक व्यावसायिक पद्धतींचा अवलंब करून आणि आमचे चालक व ग्राहकांना पाठबळ देऊन एक विश्वासार्ह वाहतूक व लॉजिस्टिक्स कंपनी म्हणून विकसित होणे ही आमची दृष्टी आहे.',
+      points: [
+        'संपूर्ण भारतात आमच्या वाहतूक सेवांचा विस्तार करणे.',
+        'वाहतूक ऑपरेशन्स सुधारण्यासाठी तंत्रज्ञानाचा वापर करणे.',
+      ],
+    },
+  },
+};
+
 export const AboutPage: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'hi' | 'mr'>('en');
 
@@ -155,6 +236,7 @@ export const AboutPage: React.FC = () => {
 
   const hero = heroTranslations[lang] || heroTranslations.en;
   const overview = overviewTranslations[lang] || overviewTranslations.en;
+  const purpose = missionVisionTranslations[lang] || missionVisionTranslations.en;
 
   return (
     <PageTransition>
@@ -270,76 +352,126 @@ export const AboutPage: React.FC = () => {
       </section>
 
       {/* SECTION 3: OUR MISSION & VISION */}
-      <section className="py-14 lg:py-20 bg-px-bg border-t border-px-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#FAF5FF] via-purple-50/40 to-[#FAF5FF] relative overflow-hidden border-t border-purple-100/80">
+        {/* Decorative Ambient Purple Glass Shapes */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 right-0 w-[420px] h-[420px] bg-purple-200/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 left-1/3 w-80 h-80 bg-purple-100/50 rounded-full blur-2xl pointer-events-none" />
+
+        {/* Subtle Mesh Background */}
+        <div className="absolute inset-0 bg-[radial-gradient(#68139A_1px,transparent_1px)] [background-size:28px_28px] opacity-[0.035] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionHeading
-            badge="Corporate Purpose"
-            title="Our Purpose and Direction"
-            subtitle="Guiding principles steering our operational execution and long-term industry partnerships."
+            badge={purpose.badge}
+            title={purpose.title}
+            subtitle={purpose.subtitle}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-            {/* Mission Card */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-px-border shadow-soft-purple/30 hover:border-px-primary/40 hover:shadow-soft-purple transition-all duration-300 space-y-4 flex flex-col justify-between">
-              <div className="space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 text-px-primary flex items-center justify-center shadow-xs">
-                    <Target className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mt-10 sm:mt-12">
+            {/* Card 1: Mission */}
+            <FadeIn delay={0.1} direction="up">
+              <motion.div
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="group relative rounded-[22px] p-6 sm:p-8 flex flex-col justify-between h-full
+                           bg-white/70 backdrop-blur-[16px]
+                           border border-purple-200/60 hover:border-purple-300/90
+                           shadow-[0_8px_32px_0_rgba(104,19,154,0.07)]
+                           hover:shadow-[0_18px_40px_0_rgba(104,19,154,0.15)]
+                           transition-all duration-300 overflow-hidden"
+              >
+                {/* Top Glass Reflection Highlight */}
+                <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 via-white/20 to-transparent rounded-t-[22px] pointer-events-none" />
+
+                <div className="relative z-10 space-y-4 sm:space-y-5">
+                  {/* Top Bar: Icon Container & Small Label */}
+                  <div className="flex items-center justify-between">
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-purple-100/75 border border-purple-200/50 text-px-primary shadow-xs group-hover:scale-110 group-hover:rotate-1 transition-all duration-300">
+                      <Target className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </div>
+
+                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full bg-purple-100/70 backdrop-blur-sm text-px-primary border border-purple-200/60 shadow-xs">
+                      {purpose.mission.label}
+                    </span>
                   </div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-px-violet px-3 py-1 rounded-full bg-px-lavender/70 border border-purple-100">
-                    Our Mission
-                  </span>
+
+                  {/* Heading */}
+                  <h3 className="text-xl sm:text-2xl font-black text-px-dark tracking-tight leading-snug">
+                    {purpose.mission.heading}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-normal">
+                    {purpose.mission.description}
+                  </p>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-px-dark">
-                  Deliver Dependable Fleet Operations
-                </h3>
-                <p className="text-sm text-gray-700 leading-relaxed font-normal">
-                  To empower Indian transport enterprises with skilled commercial drivers, proactive vehicle maintenance and transparent fleet management, improving efficiency across their operations.
-                </p>
-              </div>
 
-              <ul className="space-y-2.5 pt-4 border-t border-gray-100 text-xs sm:text-sm text-gray-800 font-medium">
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Dignified, fair working practices for commercial drivers</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Zero-compromise on-time delivery commitments for clients</span>
-                </li>
-              </ul>
-            </div>
+                {/* Supporting Points */}
+                <div className="relative z-10 pt-5 sm:pt-6 mt-6 border-t border-purple-100/80">
+                  <ul className="space-y-3 text-xs sm:text-sm text-gray-800 font-medium">
+                    {purpose.mission.points.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span className="leading-snug">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            </FadeIn>
 
-            {/* Vision Card */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-white border border-px-border shadow-soft-purple/30 hover:border-px-primary/40 hover:shadow-soft-purple transition-all duration-300 space-y-4 flex flex-col justify-between">
-              <div className="space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 text-px-primary flex items-center justify-center shadow-xs">
-                    <Eye className="w-6 h-6" />
+            {/* Card 2: Vision */}
+            <FadeIn delay={0.2} direction="up">
+              <motion.div
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="group relative rounded-[22px] p-6 sm:p-8 flex flex-col justify-between h-full
+                           bg-white/70 backdrop-blur-[16px]
+                           border border-purple-200/60 hover:border-purple-300/90
+                           shadow-[0_8px_32px_0_rgba(104,19,154,0.07)]
+                           hover:shadow-[0_18px_40px_0_rgba(104,19,154,0.15)]
+                           transition-all duration-300 overflow-hidden"
+              >
+                {/* Top Glass Reflection Highlight */}
+                <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/70 via-white/20 to-transparent rounded-t-[22px] pointer-events-none" />
+
+                <div className="relative z-10 space-y-4 sm:space-y-5">
+                  {/* Top Bar: Icon Container & Small Label */}
+                  <div className="flex items-center justify-between">
+                    <div className="p-3.5 sm:p-4 rounded-2xl bg-purple-100/75 border border-purple-200/50 text-px-primary shadow-xs group-hover:scale-110 group-hover:rotate-1 transition-all duration-300">
+                      <Eye className="w-6 h-6 sm:w-7 sm:h-7" />
+                    </div>
+
+                    <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full bg-purple-100/70 backdrop-blur-sm text-px-primary border border-purple-200/60 shadow-xs">
+                      {purpose.vision.label}
+                    </span>
                   </div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-px-violet px-3 py-1 rounded-full bg-px-lavender/70 border border-purple-100">
-                    Our Vision
-                  </span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-black text-px-dark">
-                  India's Most Trusted Logistics Partner
-                </h3>
-                <p className="text-sm text-gray-700 leading-relaxed font-normal">
-                  To become a trusted logistics and fleet management partner recognized for integrity, operational discipline, technological readiness and respect for the driver community.
-                </p>
-              </div>
 
-              <ul className="space-y-2.5 pt-4 border-t border-gray-100 text-xs sm:text-sm text-gray-800 font-medium">
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Integrated multi-service hubs along major national corridors</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Transparent, technology-enabled supply chain operations</span>
-                </li>
-              </ul>
-            </div>
+                  {/* Heading */}
+                  <h3 className="text-xl sm:text-2xl font-black text-px-dark tracking-tight leading-snug">
+                    {purpose.vision.heading}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm sm:text-base text-gray-700 leading-relaxed font-normal">
+                    {purpose.vision.description}
+                  </p>
+                </div>
+
+                {/* Supporting Points */}
+                <div className="relative z-10 pt-5 sm:pt-6 mt-6 border-t border-purple-100/80">
+                  <ul className="space-y-3 text-xs sm:text-sm text-gray-800 font-medium">
+                    {purpose.vision.points.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <span className="leading-snug">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            </FadeIn>
           </div>
         </div>
       </section>
