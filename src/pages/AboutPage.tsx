@@ -10,7 +10,6 @@ import { CTASection } from '../components/common/CTASection';
 import { Button } from '../components/common/Button';
 import { AboutStrengthsSlider } from '../components/about/AboutStrengthsSlider';
 import { AboutStatisticsSection } from '../components/about/AboutStatisticsSection';
-import { companyInfo } from '../data/companyData';
 import {
   Target,
   Eye,
@@ -19,8 +18,9 @@ import {
   CheckCircle2,
   MapPin,
   ShieldCheck,
-  AlertCircle,
   ArrowRight,
+  Calendar,
+  Truck,
 } from 'lucide-react';
 
 // Multilingual translations for the About Us Hero Section
@@ -54,6 +54,87 @@ const heroTranslations = {
   },
 };
 
+// Multilingual translations for the About Us Company Information Section ("WHO WE ARE")
+const overviewTranslations = {
+  en: {
+    badge: 'WHO WE ARE',
+    title: 'Your Trusted Partner for Transport and Fleet Services',
+    desc1:
+      'Prisha Xpress Pvt. Ltd. provides transport, logistics, professional driver services and fleet management solutions for businesses. We also support commercial vehicle servicing and spare parts requirements.',
+    desc2:
+      'We are based in Kharadi, Pune, Maharashtra. We help businesses and fleet operators manage their transportation needs through reliable services and dedicated support.',
+    overlayHeading: 'Our Head Office',
+    overlayLocation: 'Kharadi, Pune – 411014',
+    overlayBadge: 'Pune, Maharashtra',
+    cards: [
+      {
+        label: 'ESTABLISHED',
+        value: '22 November 2023',
+      },
+      {
+        label: 'HEAD OFFICE',
+        value: 'Kharadi, Pune (MH)',
+      },
+      {
+        label: 'SERVICES',
+        value: 'Transport & Fleet Management',
+      },
+    ],
+  },
+  hi: {
+    badge: 'हम कौन हैं',
+    title: 'परिवहन और बेड़ा सेवाओं के लिए आपका विश्वसनीय भागीदार',
+    desc1:
+      'प्रिशा एक्सप्रेस प्राइवेट लिमिटेड व्यवसायों के लिए परिवहन, लॉजिस्टिक्स, पेशेवर चालक सेवाएं और बेड़ा प्रबंधन समाधान प्रदान करती है। हम वाणिज्यिक वाहन सर्विसिंग और स्पेयर पार्ट्स की आवश्यकताओं में भी सहायता करते हैं।',
+    desc2:
+      'हम खराड़ी, पुणे, महाराष्ट्र में स्थित हैं। हम व्यवसायों और बेड़ा ऑपरेटरों को उनकी परिवहन आवश्यकताओं को विश्वसनीय सेवाओं और समर्पित सहायता के माध्यम से प्रबंधित करने में मदद करते हैं।',
+    overlayHeading: 'हमारा प्रधान कार्यालय',
+    overlayLocation: 'खराड़ी, पुणे – 411014',
+    overlayBadge: 'पुणे, महाराष्ट्र',
+    cards: [
+      {
+        label: 'स्थापना',
+        value: '22 नवंबर 2023',
+      },
+      {
+        label: 'प्रधान कार्यालय',
+        value: 'खराड़ी, पुणे (MH)',
+      },
+      {
+        label: 'सेवाएं',
+        value: 'परिवहन और बेड़ा प्रबंधन',
+      },
+    ],
+  },
+  mr: {
+    badge: 'आम्ही कोण आहोत',
+    title: 'वाहतूक आणि ताफा व्यवस्थापनासाठी तुमचा विश्वासू भागीदार',
+    desc1:
+      'प्रिशा एक्सप्रेस प्रायव्हेट लिमिटेड व्यवसायांसाठी वाहतूक, लॉजिस्टिक्स, व्यावसायिक चालक सेवा आणि ताफा व्यवस्थापन सोल्यूशन्स पुरवते. आम्ही व्यावसायिक वाहनांची दुरुस्ती आणि स्पेअर पार्ट्सच्या गरजांसाठीही सहाय्य करतो.',
+    desc2:
+      'आमचे कार्यालय खराडी, पुणे, महाराष्ट्र येथे आहे. आम्ही व्यवसाय आणि फ्लीट ऑपरेटर्सना विश्वासार्ह सेवा आणि समर्पित सहाय्याद्वारे त्यांच्या वाहतुकीच्या गरजा पूर्ण करण्यात मदत करतो.',
+    overlayHeading: 'आमचे मुख्य कार्यालय',
+    overlayLocation: 'खराडी, पुणे – 411014',
+    overlayBadge: 'पुणे, महाराष्ट्र',
+    cards: [
+      {
+        label: 'स्थापना',
+        value: '22 नोव्हेंबर 2023',
+      },
+      {
+        label: 'मुख्य कार्यालय',
+        value: 'खराडी, पुणे (MH)',
+      },
+      {
+        label: 'सेवा',
+        value: 'वाहतूक आणि ताफा व्यवस्थापन',
+      },
+    ],
+  },
+};
+
+const overviewIcons = [Calendar, MapPin, Truck];
+
 export const AboutPage: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'hi' | 'mr'>('en');
 
@@ -73,6 +154,7 @@ export const AboutPage: React.FC = () => {
   }, []);
 
   const hero = heroTranslations[lang] || heroTranslations.en;
+  const overview = overviewTranslations[lang] || overviewTranslations.en;
 
   return (
     <PageTransition>
@@ -117,21 +199,21 @@ export const AboutPage: React.FC = () => {
                   decoding="async"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-px-deep/75 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-px-deep/75 via-transparent to-transparent pointer-events-none" />
 
                 {/* Headquarters Location Indicator */}
                 <div className="absolute bottom-4 left-4 right-4 p-3.5 rounded-2xl bg-white/95 backdrop-blur-md border border-white/60 shadow-md text-xs flex justify-between items-center">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-8 h-8 rounded-xl bg-purple-100 text-px-primary flex items-center justify-center shrink-0">
                       <MapPin className="w-4 h-4" />
                     </div>
-                    <div>
-                      <p className="font-bold text-px-dark">Headquarters</p>
-                      <p className="text-xs text-gray-700 font-medium">Kharadi, Pune – 411014</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-px-dark text-xs sm:text-sm truncate">{overview.overlayHeading}</p>
+                      <p className="text-xs text-gray-700 font-medium truncate">{overview.overlayLocation}</p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-px-lavender text-px-primary font-bold text-[10px] tracking-wide">
-                    Pune, MH
+                  <span className="px-2.5 py-1 rounded-full bg-px-lavender text-px-primary font-bold text-[10px] tracking-wide shrink-0 ml-2 whitespace-nowrap">
+                    {overview.overlayBadge}
                   </span>
                 </div>
               </div>
@@ -142,45 +224,45 @@ export const AboutPage: React.FC = () => {
               <div className="space-y-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-px-primary text-xs font-bold uppercase tracking-wider border border-purple-100">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  WHO WE ARE
+                  {overview.badge}
                 </span>
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-px-dark tracking-tight leading-tight">
-                  Professional Fleet Solutions Built on Trust
+                  {overview.title}
                 </h2>
               </div>
 
               <div className="space-y-4 text-gray-700 text-sm sm:text-base leading-relaxed">
                 <p>
-                  <strong>Prisha Xpress Pvt. Ltd.</strong> (CIN:{' '}
-                  <span className="font-mono text-px-primary font-bold">{companyInfo.cin}</span>) is a transportation, logistics and fleet solutions company established to deliver dependable road freight, professional truck driver staffing, 3PL fleet supervision, commercial vehicle servicing and automotive spare parts support.
+                  {overview.desc1}
                 </p>
                 <p>
-                  Headquartered in <strong>Kharadi, Pune</strong>, the company focuses on helping fleet operators, manufacturers and transport enterprises improve operational reliability through disciplined transportation operations and dedicated support.
+                  {overview.desc2}
                 </p>
               </div>
 
-              {/* Verified Metadata Quick Badges */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-                <div className="p-3 rounded-2xl bg-px-bg border border-px-border">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">Incorporation</p>
-                  <p className="text-xs font-bold text-px-dark mt-0.5">{companyInfo.founded}</p>
-                </div>
-                <div className="p-3 rounded-2xl bg-px-bg border border-px-border">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">Headquarters</p>
-                  <p className="text-xs font-bold text-px-dark mt-0.5">Kharadi, Pune (MH)</p>
-                </div>
-                <div className="p-3 rounded-2xl bg-px-bg border border-px-border col-span-2 sm:col-span-1">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-px-violet">Operations</p>
-                  <p className="text-xs font-bold text-emerald-600 mt-0.5">Active Western Corridors</p>
-                </div>
-              </div>
-
-              {/* Published Experience Audit Flag */}
-              <div className="p-3.5 rounded-2xl bg-px-lavender/50 border border-purple-200/80 flex items-start gap-2.5 text-xs text-px-deep">
-                <AlertCircle className="w-4 h-4 text-px-primary shrink-0 mt-0.5" />
-                <p className="leading-relaxed">
-                  <strong className="font-bold">Published Experience Note:</strong> Claims of 15+ years cumulative fleet leadership across western freight corridors are flagged for formal corporate audit confirmation.
-                </p>
+              {/* Three Company Information Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-2">
+                {overview.cards.map((card, idx) => {
+                  const Icon = overviewIcons[idx];
+                  return (
+                    <div
+                      key={idx}
+                      className="p-3.5 sm:p-4 rounded-2xl bg-purple-50/70 border border-purple-200/70 hover:border-purple-300 transition-colors flex flex-col justify-between h-full shadow-xs"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-7 h-7 rounded-lg bg-purple-100 text-px-primary flex items-center justify-center shrink-0">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-px-violet">
+                          {card.label}
+                        </p>
+                      </div>
+                      <p className="text-xs sm:text-sm font-black text-px-dark leading-snug">
+                        {card.value}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
