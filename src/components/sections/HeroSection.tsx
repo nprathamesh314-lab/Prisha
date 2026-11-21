@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Phone, ShieldCheck, ChevronDown, CheckCircle } from 'lucide-react';
+import { ArrowRight, ShieldCheck, ChevronDown } from 'lucide-react';
 import { Button } from '../common/Button';
 
 export const HeroSection: React.FC = () => {
@@ -29,10 +29,15 @@ export const HeroSection: React.FC = () => {
                 initial={{ opacity: 0, y: -15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-px-lavender shadow-md"
+                className="flex flex-wrap items-center gap-1.5 sm:gap-2"
               >
-                <ShieldCheck className="w-4 h-4 text-purple-300" />
-                <span>Prisha Xpress Pvt. Ltd. • Corporate Logistics</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-px-lavender shadow-md">
+                  <ShieldCheck className="w-4 h-4 text-purple-300" />
+                  PRISHA XPRESS PVT. LTD.
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 text-xs sm:text-sm font-semibold">
+                  Serving Across India
+                </span>
               </motion.div>
 
               {/* Main Headline */}
@@ -42,9 +47,9 @@ export const HeroSection: React.FC = () => {
                 transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.15]"
               >
-                Empowering Your Fleet,{' '}
+                Moving Your Business Forward{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-purple-300 to-pink-200">
-                  Elevating Your Efficiency
+                  Across India.
                 </span>
               </motion.h1>
 
@@ -55,9 +60,7 @@ export const HeroSection: React.FC = () => {
                 transition={{ duration: 0.6, delay: 0.35 }}
                 className="text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed font-normal"
               >
-                A modern corporate transportation, logistics, and fleet solutions company.
-                Delivering verified commercial truck driver hiring, 3PL fleet management,
-                specialized truck servicing, and automotive spare parts from Pune.
+                Reliable transport, logistics, professional driver services and fleet management solutions for businesses across India. We help companies move their goods safely, on time and with confidence.
               </motion.p>
 
               {/* Quick Value Props List */}
@@ -65,20 +68,15 @@ export const HeroSection: React.FC = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.45 }}
-                className="flex flex-wrap items-center gap-y-2 gap-x-6 text-xs sm:text-sm text-gray-200 pt-1"
+                className="flex flex-wrap items-center gap-y-2 gap-x-3 text-xs sm:text-sm font-semibold text-purple-200 pt-1"
               >
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Professional Driver Hiring</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>3PL Fleet Supervision</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Commercial Service & Spares</span>
-                </div>
+                <span>Reliable Transport</span>
+                <span className="text-white/40">•</span>
+                <span>Professional Drivers</span>
+                <span className="text-white/40">•</span>
+                <span>Fleet Management</span>
+                <span className="text-white/40">•</span>
+                <span>Pan-India Operations</span>
               </motion.div>
 
               {/* Action Buttons */}
@@ -89,25 +87,25 @@ export const HeroSection: React.FC = () => {
                 className="flex flex-wrap items-center gap-3 sm:gap-4 pt-3"
               >
                 <Button
+                  to="/services"
+                  variant="white"
+                  size="lg"
+                  icon={<ArrowRight className="w-5 h-5 text-px-primary group-hover:translate-x-1 transition-transform" />}
+                >
+                  Explore Our Services
+                </Button>
+
+                <Button
                   to="#enquiry"
                   onClick={(e) => {
                     e.preventDefault();
                     document.getElementById('enquiry')?.scrollIntoView({ behavior: 'smooth' });
                   }}
-                  variant="white"
-                  size="lg"
-                  icon={<ArrowRight className="w-5 h-5 text-px-primary group-hover:translate-x-1 transition-transform" />}
-                >
-                  Business Enquiry
-                </Button>
-
-                <Button
-                  to="/contact"
                   variant="glass"
                   size="lg"
-                  icon={<Phone className="w-4 h-4 text-purple-300" />}
+                  icon={<ArrowRight className="w-4 h-4 text-purple-300 group-hover:translate-x-1 transition-transform" />}
                 >
-                  Contact Us
+                  Get a Business Quote
                 </Button>
 
                 <Button

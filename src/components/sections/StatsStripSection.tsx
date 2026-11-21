@@ -1,31 +1,33 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Truck, Users, Compass } from 'lucide-react';
+import { Compass, Users, Truck, Clock } from 'lucide-react';
 
-const stats = [
+interface HighlightItem {
+  icon: React.ComponentType<{ className?: string }>;
+  heading: string;
+  subtitle: string;
+}
+
+const highlights: HighlightItem[] = [
   {
     icon: Compass,
-    value: 'Pune Hub',
-    label: 'Operations Base',
-    sub: 'Kharadi & Talegaon Depot',
+    heading: 'Pan-India Operations',
+    subtitle: 'Serving Businesses Across India',
   },
   {
     icon: Users,
-    value: '100% Verified',
-    label: 'Driver Cell',
-    sub: 'RTO & Background Screened',
+    heading: 'Verified Drivers',
+    subtitle: 'RTO and Background Verified',
   },
   {
     icon: Truck,
-    value: 'Rigids & Trailers',
-    label: 'Fleet Scope',
-    sub: 'Heavy Commercial Vehicles',
+    heading: 'Complete Fleet Solutions',
+    subtitle: 'Trucks, Trailers and Heavy Vehicles',
   },
   {
-    icon: ShieldCheck,
-    value: 'SLA-Driven',
-    label: 'Dispatch Control',
-    sub: 'Western Freight Corridors',
+    icon: Clock,
+    heading: 'On-Time Delivery',
+    subtitle: 'Reliable and Timely Transportation',
   },
 ];
 
@@ -39,28 +41,25 @@ export const StatsStripSection: React.FC = () => {
         transition={{ duration: 0.6 }}
         className="rounded-2xl sm:rounded-3xl bg-white border border-px-border shadow-xl p-4 sm:p-6 lg:py-5 lg:px-8"
       >
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
-          {stats.map((item, idx) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 divide-y sm:divide-y-0 lg:divide-x divide-gray-100">
+          {highlights.map((item, idx) => {
             const Icon = item.icon;
             return (
               <div
-                key={item.label}
+                key={item.heading}
                 className={`flex items-center gap-3.5 ${
-                  idx > 0 ? 'pt-3 sm:pt-0 sm:pl-6' : ''
+                  idx > 0 ? 'pt-3.5 sm:pt-0 lg:pl-6' : ''
                 }`}
               >
-                <div className="p-2.5 sm:p-3 rounded-2xl bg-px-lavender text-px-primary shrink-0">
+                <div className="p-2.5 sm:p-3 rounded-2xl bg-px-lavender text-px-primary shrink-0 shadow-xs">
                   <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm sm:text-base lg:text-lg font-black text-px-dark truncate">
-                    {item.value}
-                  </p>
-                  <p className="text-[11px] sm:text-xs font-bold text-px-violet uppercase tracking-wider">
-                    {item.label}
-                  </p>
-                  <p className="text-[10px] sm:text-[11px] text-gray-500 truncate hidden sm:block">
-                    {item.sub}
+                  <h3 className="text-sm sm:text-base font-extrabold text-px-dark leading-snug">
+                    {item.heading}
+                  </h3>
+                  <p className="text-xs text-gray-500 font-medium leading-snug mt-0.5">
+                    {item.subtitle}
                   </p>
                 </div>
               </div>

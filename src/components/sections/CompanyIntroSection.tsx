@@ -24,44 +24,44 @@ export const CompanyIntroSection: React.FC = () => {
                   decoding="async"
                   className="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-700 aspect-[4/3]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-px-deep/60 via-transparent to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 p-3 rounded-2xl bg-white/90 backdrop-blur-md border border-white/40 shadow-lg text-xs flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="absolute inset-0 bg-gradient-to-t from-px-deep/60 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 p-2.5 sm:p-3 rounded-2xl bg-white/95 backdrop-blur-md border border-white/40 shadow-lg text-xs flex items-center justify-between">
+                  <div className="flex items-center gap-2 min-w-0">
                     <MapPin className="w-4 h-4 text-px-primary shrink-0" />
-                    <div>
-                      <p className="font-bold text-px-dark">Headquarters</p>
-                      <p className="text-gray-700 text-xs font-medium">{companyInfo.headquarters}</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-px-dark text-xs sm:text-sm truncate">Prisha Xpress Pvt. Ltd.</p>
+                      <p className="text-gray-600 text-[11px] sm:text-xs font-medium truncate">{companyInfo.headquarters}</p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full font-bold bg-px-lavender text-px-primary text-[10px] sm:text-[11px]">
-                    Pune, MH
+                  <span className="px-2.5 py-1 rounded-full font-bold bg-px-lavender text-px-primary text-[10px] sm:text-[11px] whitespace-nowrap shrink-0 ml-2">
+                    Serving Across India
                   </span>
                 </div>
               </div>
             </FadeIn>
 
-            {/* Floating Operations Hub Badge */}
-            <div className="absolute -bottom-3 left-2 sm:bottom-4 sm:-left-4 bg-px-deep text-white p-3 sm:p-4 rounded-2xl shadow-xl border border-white/20 max-w-[190px] sm:max-w-[210px] z-20">
+            {/* Floating Pan-India Operations Badge */}
+            <div className="absolute -bottom-3 left-2 sm:bottom-4 sm:-left-4 bg-px-deep text-white p-2.5 sm:p-3.5 rounded-2xl shadow-xl border border-white/20 max-w-[195px] sm:max-w-[220px] z-20">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="p-2 rounded-xl bg-px-primary text-white">
-                  <Award className="w-5 h-5" />
+                <div className="p-2 rounded-xl bg-px-primary text-white shrink-0">
+                  <Award className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div>
-                  <p className="text-sm sm:text-base font-black leading-tight">Pune Hub</p>
-                  <p className="text-[10px] sm:text-xs text-purple-200 font-medium mt-0.5">Western Corridors</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-black leading-tight text-white truncate">Pan-India Operations</p>
+                  <p className="text-[10px] sm:text-xs text-purple-200 font-medium mt-0.5 truncate">Serving Across India</p>
                 </div>
               </div>
             </div>
 
-            {/* Floating Driver Verification Badge */}
-            <div className="absolute -top-3 right-2 sm:-top-4 sm:right-2 bg-white text-px-dark p-3 rounded-2xl shadow-card-hover border border-px-border max-w-[170px] sm:max-w-[190px] z-20">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+            {/* Floating Trained Drivers Badge */}
+            <div className="absolute -top-3 right-2 sm:-top-4 sm:right-2 bg-white text-px-dark p-2.5 sm:p-3 rounded-2xl shadow-card-hover border border-px-border max-w-[175px] sm:max-w-[200px] z-20">
+              <div className="flex items-center gap-2 sm:gap-2.5">
+                <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 shrink-0">
                   <Users className="w-4 h-4" />
                 </div>
-                <div>
-                  <p className="text-xs sm:text-sm font-bold text-px-dark">Driver Cell</p>
-                  <p className="text-xs text-gray-700 font-medium">Trained & RTO Verified</p>
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-bold text-px-dark truncate">Trained Drivers</p>
+                  <p className="text-[11px] sm:text-xs text-emerald-700 font-semibold truncate">RTO Verified</p>
                 </div>
               </div>
             </div>
@@ -78,51 +78,51 @@ export const CompanyIntroSection: React.FC = () => {
 
             <FadeIn direction="left" delay={0.1} duration={0.6}>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-px-dark tracking-tight leading-tight">
-                Pioneering Next-Gen Transportation &{' '}
-                <span className="text-gradient-purple">Fleet Infrastructure</span>
+                Your Trusted Partner for{' '}
+                <span className="text-gradient-purple">Transport and Logistics Across India</span>
               </h2>
             </FadeIn>
 
             <FadeIn direction="left" delay={0.2} duration={0.6}>
               <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                <strong>Prisha Xpress Pvt. Ltd. (PXPL)</strong> is an Indian corporate logistics enterprise headquartered in Pune. We bridge critical operational gaps in the supply chain by delivering structured commercial driver staffing, 3PL fleet supervision, dedicated maintenance hubs, and line-haul transit across western routes.
+                Prisha Xpress Pvt. Ltd. provides reliable transport, professional driver services and fleet management solutions to businesses across India. We help companies manage their vehicles, drivers and transportation needs safely and efficiently.
               </p>
             </FadeIn>
 
             <FadeIn direction="left" delay={0.3} duration={0.6}>
-              <div className="space-y-2.5 pt-1">
-                <div className="flex items-start gap-2.5">
-                  <div className="p-1 rounded-full bg-px-lavender text-px-primary mt-0.5 shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="space-y-3.5 pt-1">
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-px-lavender text-px-primary mt-0.5 shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-px-dark">Micro-Entrepreneur Driver Model</h4>
-                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                      RTO-verified commercial pilots with safety training and disciplined electronic trip settlements.
+                    <h4 className="text-sm sm:text-base font-bold text-px-dark">Trained and Verified Drivers</h4>
+                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mt-0.5">
+                      We provide trained and verified commercial drivers to support safe and reliable transportation.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5">
-                  <div className="p-1 rounded-full bg-px-lavender text-px-primary mt-0.5 shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-px-lavender text-px-primary mt-0.5 shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-px-dark">3PL Fleet & Asset Supervision</h4>
-                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                      Eliminating idle times with dedicated dispatch control, telematics coordination, and scheduled maintenance.
+                    <h4 className="text-sm sm:text-base font-bold text-px-dark">Fleet Management Services</h4>
+                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mt-0.5">
+                      We help businesses manage their trucks, drivers and daily transport operations.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2.5">
-                  <div className="p-1 rounded-full bg-px-lavender text-px-primary mt-0.5 shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 rounded-full bg-px-lavender text-px-primary mt-0.5 shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-px-dark">Integrated Service Stations & Spares</h4>
-                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                      Commercial vehicle workshop bays and OEM replacement parts to keep enterprise fleets highway-ready.
+                    <h4 className="text-sm sm:text-base font-bold text-px-dark">Vehicle Maintenance Support</h4>
+                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mt-0.5">
+                      We support vehicle servicing and maintenance to keep commercial vehicles in good working condition.
                     </p>
                   </div>
                 </div>
@@ -130,21 +130,21 @@ export const CompanyIntroSection: React.FC = () => {
             </FadeIn>
 
             <FadeIn direction="left" delay={0.4} duration={0.6}>
-              <div className="pt-2 flex items-center gap-3">
+              <div className="pt-2 flex flex-wrap items-center gap-3">
                 <Button
                   to="/about"
                   variant="primary"
                   size="md"
                   icon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Read Company Profile
+                  View Company Profile
                 </Button>
                 <Button
                   to="/network"
                   variant="outline"
                   size="md"
                 >
-                  Our Network
+                  Explore Our Network
                 </Button>
               </div>
             </FadeIn>

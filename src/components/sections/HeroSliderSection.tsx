@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   ChevronLeft,
   ChevronRight,
-  Send,
   MapPin,
 } from 'lucide-react';
 import { Button } from '../common/Button';
@@ -26,7 +25,7 @@ const slides: Slide[] = [
     mobileImage: '/assets/images/hero-fleet-mobile.jpg',
     alt: 'Prisha Xpress Commercial Transportation Fleet on Highway',
     tag: 'Highway Line-Haul & Freight Logistics',
-    caption: 'Pune & Western Corridor Heavy Commercial Vehicle Fleet',
+    caption: 'All-India Freight Corridors & Heavy Commercial Vehicle Fleet',
   },
   {
     id: 2,
@@ -34,7 +33,7 @@ const slides: Slide[] = [
     mobileImage: '/assets/images/fleet-warehouse-mobile.jpg',
     alt: 'Prisha Xpress 3PL Fleet Management and Logistics Hub',
     tag: '3PL Corporate Fleet Supervision',
-    caption: 'End-to-End Fleet Dispatch, Driver Rosters & Maintenance',
+    caption: 'Pan-India Fleet Dispatch, Driver Rosters & Maintenance',
   },
   {
     id: 3,
@@ -133,29 +132,33 @@ export const HeroSliderSection: React.FC = () => {
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 text-[11px] sm:text-xs font-semibold">
                 <MapPin className="w-3.5 h-3.5" />
-                Kharadi, Pune
+                Serving Across India
               </span>
             </div>
 
             {/* Official Headline */}
             <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15] text-white">
-              Driving Your Business Forward.{' '}
+              Moving Your Business Forward{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-purple-300 to-pink-200">
-                Delivering with Confidence.
+                Across India.
               </span>
             </h1>
 
             {/* Concise Supporting Text */}
             <p className="text-sm sm:text-base lg:text-lg text-gray-100 font-medium leading-relaxed max-w-2xl">
-              Reliable transportation, professional driver solutions and fleet management for your business. Operating across Pune, Maharashtra, and India's vital western freight corridors.
+              Reliable transport, logistics, professional driver services and fleet management solutions for businesses across India. We help companies move their goods safely, on time and with confidence.
             </p>
 
-            {/* Slide Context Indicator */}
-            <div className="py-0.5 sm:py-1 flex items-center gap-2 text-xs text-purple-200">
-              <span className="w-2 h-2 rounded-full bg-px-violet animate-pulse" />
-              <span className="font-bold">{slides[currentSlide].tag}</span>
-              <span className="text-white/40 hidden sm:inline">•</span>
-              <span className="text-purple-100 text-xs font-medium hidden sm:inline">{slides[currentSlide].caption}</span>
+            {/* Supporting Information */}
+            <div className="py-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm font-semibold text-purple-200">
+              <span className="w-2 h-2 rounded-full bg-px-violet animate-pulse shrink-0" />
+              <span>Reliable Transport</span>
+              <span className="text-white/40">•</span>
+              <span>Professional Drivers</span>
+              <span className="text-white/40">•</span>
+              <span>Fleet Management</span>
+              <span className="text-white/40">•</span>
+              <span>Pan-India Operations</span>
             </div>
 
             {/* Action Buttons */}
@@ -177,9 +180,9 @@ export const HeroSliderSection: React.FC = () => {
                 }}
                 variant="glass"
                 size="md"
-                icon={<Send className="w-4 h-4 text-purple-300" />}
+                icon={<ArrowRight className="w-4 h-4 text-purple-300 group-hover:translate-x-1 transition-transform" />}
               >
-                Request a Business Enquiry
+                Get a Business Quote
               </Button>
             </div>
           </div>
