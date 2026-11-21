@@ -11,7 +11,6 @@ import { SectionHeading } from '../components/common/SectionHeading';
 import { CTASection } from '../components/common/CTASection';
 import { Button } from '../components/common/Button';
 import { AboutStrengthsSlider } from '../components/about/AboutStrengthsSlider';
-import { AboutStatisticsSection } from '../components/about/AboutStatisticsSection';
 import {
   Target,
   Eye,
@@ -689,8 +688,6 @@ export const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 6: OUR IMPACT IN NUMBERS (PREMIUM STATISTICS) */}
-      <AboutStatisticsSection />
 
       {/* SECTION 7: BUSINESS ENQUIRY CTA */}
       <CTASection
