@@ -8,7 +8,6 @@ import { PageTransition } from '../components/animations/PageTransition';
 import { FadeIn } from '../components/animations/FadeIn';
 import { PageHero } from '../components/common/PageHero';
 import { SectionHeading } from '../components/common/SectionHeading';
-import { CTASection } from '../components/common/CTASection';
 import { Button } from '../components/common/Button';
 import { AboutStrengthsSlider } from '../components/about/AboutStrengthsSlider';
 import {
@@ -689,17 +688,6 @@ export const AboutPage: React.FC = () => {
       </section>
 
 
-      {/* SECTION 7: BUSINESS ENQUIRY CTA */}
-      <CTASection
-        badge="Connect with Leadership"
-        title="Let's Plan Your Fleet Strategy Together"
-        subtitle="Speak with our team in Kharadi, Pune to explore driver staffing, transportation, fleet management and other business solutions."
-        primaryBtnText="Business Enquiry"
-        primaryBtnLink="/contact#enquiry"
-        secondaryBtnText="Explore Our Services"
-        secondaryBtnLink="/services"
-        image="/assets/images/hero-fleet.jpg"
-      />
 
       {/* SECTION 8: PROFESSIONAL FOOTER (Rendered globally via Footer in App.tsx) */}
     </PageTransition>
