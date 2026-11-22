@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { PageTransition } from '../components/animations/PageTransition';
 import { companyInfo } from '../data/companyData';
-import { supabaseAuthService } from '../services/supabaseClient';
+import { businessEnquiryService } from '../services/enquiryService';
 import {
   Phone,
   Mail,
@@ -97,19 +97,27 @@ export const ContactPage: React.FC = () => {
     setSubmissionResult({ status: null });
 
     try {
-      const isConfigured = supabaseAuthService.getIsConfigured();
+      const result = await businessEnquiryService.submitEnquiry({
+        full_name: formData.name,
+        company_name: formData.company,
+        phone_number: formData.phone,
+        email: formData.email,
+        service_required: (formData.service as any) || 'Truck Drivers on Hire',
+        operational_requirements: formData.message,
+        preferred_contact_method: 'Phone Call',
+      });
 
-      if (isConfigured) {
-        const reference = `PX-CT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      if (result.success && result.referenceId) {
         setSubmissionResult({
           status: 'success',
-          referenceId: reference,
-          message: 'Your message has been securely submitted to the Prisha Xpress operations desk.',
+          referenceId: result.referenceId,
+          message: 'Your enquiry has been securely logged with our Pune Operations Desk and email notifications have been initiated.',
         });
       } else {
         setSubmissionResult({
           status: 'backend_unreachable',
           message:
+            result.error ||
             'The cloud database is currently unreachable. You can immediately forward your request via direct WhatsApp or phone call below.',
         });
       }

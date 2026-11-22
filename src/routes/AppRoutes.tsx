@@ -47,6 +47,7 @@ const TermsAndConditionsPage = lazy(() => import('../pages/TermsAndConditionsPag
 // Private Admin Dashboard Components
 const AdminLayout = lazy(() => import('../pages/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })));
 const AdminDashboardOverviewPage = lazy(() => import('../pages/admin/AdminDashboardOverviewPage').then((m) => ({ default: m.AdminDashboardOverviewPage })));
+const BusinessEnquiriesAdminPage = lazy(() => import('../pages/admin/BusinessEnquiriesAdminPage').then((m) => ({ default: m.BusinessEnquiriesAdminPage })));
 const StaffApplicationsAdminPage = lazy(() => import('../pages/admin/StaffApplicationsAdminPage').then((m) => ({ default: m.StaffApplicationsAdminPage })));
 const DriverApplicationsAdminPage = lazy(() => import('../pages/admin/DriverApplicationsAdminPage').then((m) => ({ default: m.DriverApplicationsAdminPage })));
 const DriverVerificationPage = lazy(() => import('../pages/admin/DriverVerificationPage').then((m) => ({ default: m.DriverVerificationPage })));
@@ -88,6 +89,7 @@ export const AppRoutes: React.FC = () => {
         {/* Corporate Responsibility & Contact */}
         <Route path="/csr" element={<CsrPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/enquiry" element={<ContactPage />} />
 
         {/* Legal & Policy Pages */}
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
@@ -98,6 +100,7 @@ export const AppRoutes: React.FC = () => {
         {/* Private Admin Dashboard Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardOverviewPage />} />
+          <Route path="enquiries" element={<BusinessEnquiriesAdminPage />} />
           <Route path="staff-applications" element={<StaffApplicationsAdminPage />} />
           <Route path="driver-applications" element={<DriverApplicationsAdminPage />} />
           <Route path="driver-verification" element={<DriverVerificationPage />} />

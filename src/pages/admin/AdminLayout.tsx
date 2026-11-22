@@ -27,6 +27,7 @@ import {
   AlertCircle,
   KeyRound,
   ArrowRight,
+  Building2,
 } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
@@ -198,6 +199,13 @@ export const AdminLayout: React.FC = () => {
           path: '/admin',
           icon: LayoutDashboard,
           allowed: true,
+        },
+        {
+          name: 'Business Enquiries',
+          path: '/admin/enquiries',
+          icon: Building2,
+          allowed: true,
+          badge: 'Leads',
         },
       ],
     },
