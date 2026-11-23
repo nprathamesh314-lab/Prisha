@@ -33,6 +33,8 @@ import {
   X,
   Check,
   GraduationCap,
+  Trash2,
+  AlertCircle,
 } from 'lucide-react';
 
 export const StaffApplicationsAdminPage: React.FC = () => {
@@ -44,6 +46,11 @@ export const StaffApplicationsAdminPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<DateRangeFilter>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+
+  // Safe 2-Step Deletion State
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const currentUser = recruitmentService.getCurrentUser();
 
@@ -124,6 +131,38 @@ export const StaffApplicationsAdminPage: React.FC = () => {
       setTimeout(() => setActionSuccessMsg(null), 3000);
     } catch (e: any) {
       alert(`Error updating status: ${e.message}`);
+    }
+  };
+
+  // Safe 2-Step Staff Application Deletion Handler
+  const handleDeleteStaffApplication = async () => {
+    if (!selectedApp) return;
+    setIsDeleting(true);
+    try {
+      const idToDelete = selectedApp.id;
+      const ref = selectedApp.application_reference;
+      const candidateName = selectedApp.full_name;
+
+      await recruitmentService.deleteStaffApplication(idToDelete);
+
+      // Remove from local list
+      const updated = applications.filter((a) => a.id !== idToDelete && a.application_reference !== ref);
+      setApplications(updated);
+
+      // Dispatch count change for sidebar
+      window.dispatchEvent(new CustomEvent('admin_counts_changed'));
+
+      // Close modal & confirmation
+      setDeleteConfirmOpen(false);
+      setSelectedApp(null);
+
+      // Toast notification
+      setToastMessage(`Staff application for ${candidateName} (${ref}) was permanently deleted.`);
+      setTimeout(() => setToastMessage(null), 5000);
+    } catch (err: any) {
+      alert(`Error deleting staff application: ${err.message || 'Unknown error'}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -832,18 +871,98 @@ export const StaffApplicationsAdminPage: React.FC = () => {
               </div>
             )}
 
-            {/* Bottom Close */}
-            <div className="pt-3 border-t border-gray-100 flex items-center justify-end">
+            {/* Bottom Actions with Safe Delete */}
+            <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setSelectedApp(null)}
-                className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 transition-colors"
+                onClick={() => setDeleteConfirmOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 rounded-xl transition-colors cursor-pointer"
+                title="Delete this candidate application permanently"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Application</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedApp(null);
+                  setDeleteConfirmOpen(false);
+                }}
+                className="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 transition-colors cursor-pointer"
               >
                 Close Profile
               </button>
             </div>
 
           </div>
+        </div>
+      )}
+
+      {/* Safe 2-Step Staff Deletion Confirmation Modal */}
+      {deleteConfirmOpen && selectedApp && (
+        <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-gray-200 overflow-hidden animate-scaleUp">
+            <div className="p-5 sm:p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
+                Delete Staff Application Permanently?
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4">
+                Delete application from <span className="font-bold text-gray-900">{selectedApp.full_name}</span> ({selectedApp.application_reference})? This action cannot be undone.
+              </p>
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-left mb-6">
+                <p className="text-[11px] font-medium text-rose-800 leading-normal flex items-start gap-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                  <span>This will permanently delete this candidate record from Supabase and remove uploaded documents from storage.</span>
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setDeleteConfirmOpen(false)}
+                  className="w-1/2 px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={handleDeleteStaffApplication}
+                  className="w-1/2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Yes, Delete Permanently</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[100] max-w-md bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-700 animate-slideUp">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <p className="text-xs font-medium">{toastMessage}</p>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-gray-400 hover:text-white ml-auto"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

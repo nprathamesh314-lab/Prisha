@@ -16,6 +16,7 @@ export type EnquiryStatus =
   | 'In Progress'
   | 'Completed'
   | 'Converted'
+  | 'Booked / Confirmed'
   | 'Closed';
 
 export type EmailNotificationStatus = 'Pending' | 'Sent' | 'Failed';

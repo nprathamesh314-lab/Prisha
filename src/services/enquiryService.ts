@@ -346,7 +346,7 @@ class BusinessEnquiryService {
             const s = (item.status || '').toLowerCase();
             if (s.includes('progress')) normalizedStatus = 'In Progress';
             else if (s.includes('contact')) normalizedStatus = 'Contacted';
-            else if (s.includes('convert')) normalizedStatus = 'Converted';
+            else if (s.includes('book') || s.includes('confirm') || s.includes('convert')) normalizedStatus = 'Booked / Confirmed';
             else if (s.includes('complete')) normalizedStatus = 'Completed';
             else if (s.includes('close') || s.includes('lost')) normalizedStatus = 'Closed';
             else normalizedStatus = 'New';
@@ -464,7 +464,8 @@ class BusinessEnquiryService {
     id: string,
     newStatus: EnquiryStatus,
     reason?: string,
-    actorName: string = 'Administrator'
+    actorName: string = 'Administrator',
+    adminNotes?: string
   ): Promise<BusinessEnquiry> {
     const enquiry = this.enquiries.find((e) => e.id === id);
     if (!enquiry) throw new Error('Enquiry record not found');
@@ -472,6 +473,10 @@ class BusinessEnquiryService {
     const previousStatus = enquiry.status;
     enquiry.status = newStatus;
     enquiry.updated_at = new Date().toISOString();
+
+    if (adminNotes !== undefined) {
+      enquiry.admin_notes = adminNotes;
+    }
 
     if (newStatus === 'Contacted' && !enquiry.contacted_at) {
       enquiry.contacted_at = new Date().toISOString();
@@ -492,6 +497,8 @@ class BusinessEnquiryService {
     this.patchSupabase(id, {
       status: newStatus,
       contacted_at: enquiry.contacted_at || null,
+      admin_notes: enquiry.admin_notes || null,
+      internal_notes: enquiry.admin_notes || null,
       updated_at: enquiry.updated_at,
     });
 
@@ -658,9 +665,11 @@ class BusinessEnquiryService {
     const total = this.enquiries.length;
     const newCount = this.enquiries.filter((e) => e.status === 'New').length;
     const contacted = this.enquiries.filter((e) => e.status === 'Contacted').length;
-    const inProgress = this.enquiries.filter((e) => e.status === 'In Progress').length;
+    const inProgress = this.enquiries.filter((e) => e.status === 'In Progress' || e.status === 'Contacted').length;
     const completed = this.enquiries.filter((e) => e.status === 'Completed').length;
-    const converted = this.enquiries.filter((e) => e.status === 'Converted').length;
+    const converted = this.enquiries.filter(
+      (e) => e.status === 'Booked / Confirmed' || e.status === 'Converted'
+    ).length;
     const closed = this.enquiries.filter((e) => e.status === 'Closed').length;
 
     return {
@@ -727,6 +736,45 @@ class BusinessEnquiryService {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Permanently deletes a business enquiry from Supabase database
+   * and local storage cache.
+   */
+  public async deleteEnquiry(id: string): Promise<boolean> {
+    this.enquiries = this.enquiries.filter(
+      (e) => e.id !== id && e.enquiry_id !== id && e.enquiry_number !== id
+    );
+    this.saveToStorage();
+
+    this.activityLogs = this.activityLogs.filter(
+      (a) => a.enquiry_id !== id && (a as any).enquiryId !== id
+    );
+    this.saveActivityToStorage();
+
+    const session = await supabaseAuthService.getAdminSession();
+    const isConfigured = supabaseAuthService.getIsConfigured();
+    if (isConfigured) {
+      try {
+        const supabaseUrl = supabaseAuthService.getUrl();
+        const anonKey = supabaseAuthService.getAnonKey();
+        const authToken = session?.token || anonKey;
+
+        // Try deleting by id or enquiry_id
+        await fetch(`${supabaseUrl}/rest/v1/business_enquiries?or=(id.eq.${id},enquiry_id.eq.${id})`, {
+          method: 'DELETE',
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+      } catch (e) {
+        console.warn('Error deleting enquiry from Supabase:', e);
+      }
+    }
+
+    return true;
   }
 
   /**

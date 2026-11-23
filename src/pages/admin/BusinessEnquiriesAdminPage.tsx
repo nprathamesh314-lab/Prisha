@@ -28,6 +28,8 @@ import {
   Building2,
   X,
   Check,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const BusinessEnquiriesAdminPage: React.FC = () => {
@@ -37,7 +39,7 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'inProgress' | 'converted'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'new' | 'inProgress' | 'booked'>('all');
   const [selectedService, setSelectedService] = useState<BusinessEnquiryServiceType | 'All'>('All');
   const [dateFilter, setDateFilter] = useState<DateRangeFilter>('all');
 
@@ -45,6 +47,16 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
   const [activeEnquiry, setActiveEnquiry] = useState<BusinessEnquiry | null>(null);
   const [newNoteInput, setNewNoteInput] = useState('');
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+  const [followUpBanner, setFollowUpBanner] = useState<{
+    status: EnquiryStatus;
+    message: string;
+    whatsAppUrl?: string;
+  } | null>(null);
+
+  // Safe 2-Step Deletion State
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const loadData = async () => {
     setIsRefreshing(true);
@@ -68,10 +80,12 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
     setStats({
       total: dateFilteredAll.length,
       new: dateFilteredAll.filter((e) => e.status === 'New').length,
-      inProgress: dateFilteredAll.filter((e) => e.status === 'In Progress').length,
+      inProgress: dateFilteredAll.filter((e) => e.status === 'In Progress' || e.status === 'Contacted').length,
       contacted: dateFilteredAll.filter((e) => e.status === 'Contacted').length,
       completed: dateFilteredAll.filter((e) => e.status === 'Completed').length,
-      converted: dateFilteredAll.filter((e) => e.status === 'Converted').length,
+      converted: dateFilteredAll.filter(
+        (e) => e.status === 'Booked / Confirmed' || e.status === 'Converted'
+      ).length,
       closed: dateFilteredAll.filter((e) => e.status === 'Closed').length,
     });
 
@@ -79,8 +93,8 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
       list = list.filter((e) => e.status === 'New');
     } else if (activeTab === 'inProgress') {
       list = list.filter((e) => e.status === 'In Progress' || e.status === 'Contacted');
-    } else if (activeTab === 'converted') {
-      list = list.filter((e) => e.status === 'Converted');
+    } else if (activeTab === 'booked') {
+      list = list.filter((e) => e.status === 'Booked / Confirmed' || e.status === 'Converted');
     }
 
     setEnquiries(list);
@@ -104,22 +118,59 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
     setActiveEnquiry(enquiry);
     setNewNoteInput(enquiry.admin_notes || '');
     setActionSuccessMsg(null);
+    setFollowUpBanner(null);
   };
 
-  // Status Change Handler
+  // Status Change Handler with Auto-Save Notes & WhatsApp Follow-Up Banner
   const handleStatusChange = async (newStatus: EnquiryStatus) => {
     if (!activeEnquiry) return;
     try {
       const updated = await businessEnquiryService.updateStatus(
         activeEnquiry.id,
         newStatus,
-        `Status changed to ${newStatus} by Administrator`,
-        'Administrator'
+        `Status updated to ${newStatus} by Administrator`,
+        'Administrator',
+        newNoteInput // Auto-saves internal notes to Supabase!
       );
       setActiveEnquiry(updated);
-      setActionSuccessMsg(`Status updated to ${newStatus}.`);
+
+      let msg = '';
+      let waUrl: string | undefined = undefined;
+
+      if (newStatus === 'In Progress') {
+        msg = `Updated to In Progress. Call or WhatsApp ${activeEnquiry.full_name} to share your quote.`;
+        waUrl = formatWhatsAppUrl(
+          activeEnquiry.phone,
+          activeEnquiry.full_name,
+          activeEnquiry.service_required,
+          activeEnquiry.requirements,
+          newStatus
+        );
+      } else if (newStatus === 'Booked / Confirmed') {
+        msg = `Marked as Booked / Confirmed! Send a confirmation message to ${activeEnquiry.full_name} on WhatsApp.`;
+        waUrl = formatWhatsAppUrl(
+          activeEnquiry.phone,
+          activeEnquiry.full_name,
+          activeEnquiry.service_required,
+          activeEnquiry.requirements,
+          newStatus
+        );
+      } else if (newStatus === 'Closed') {
+        msg = 'Lead marked as Closed.';
+      } else if (newStatus === 'New') {
+        msg = 'Status set back to New.';
+      } else {
+        msg = `Status updated to ${newStatus}.`;
+      }
+
+      setFollowUpBanner({
+        status: newStatus,
+        message: msg,
+        whatsAppUrl: waUrl,
+      });
+
       refreshLocalList();
-      setTimeout(() => setActionSuccessMsg(null), 3000);
+      window.dispatchEvent(new CustomEvent('admin_counts_changed'));
     } catch (e: any) {
       alert(`Error updating status: ${e.message}`);
     }
@@ -143,6 +194,39 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
     }
   };
 
+  // Safe 2-Step Delete Enquiry Handler
+  const handleDeleteEnquiry = async () => {
+    if (!activeEnquiry) return;
+    setIsDeleting(true);
+    try {
+      const idToDelete = activeEnquiry.id;
+      const refName = `${activeEnquiry.full_name} (${activeEnquiry.enquiry_id || activeEnquiry.enquiry_number})`;
+      await businessEnquiryService.deleteEnquiry(idToDelete);
+
+      // Update local enquiries list
+      const updated = enquiries.filter((e) => e.id !== idToDelete);
+      setEnquiries(updated);
+
+      // Refresh stats
+      setStats(businessEnquiryService.getStats());
+
+      // Notify sidebar of count change
+      window.dispatchEvent(new CustomEvent('admin_counts_changed'));
+
+      // Close modals
+      setDeleteConfirmOpen(false);
+      setActiveEnquiry(null);
+
+      // Display user feedback toast
+      setToastMessage(`Enquiry from ${refName} was permanently deleted.`);
+      setTimeout(() => setToastMessage(null), 5000);
+    } catch (err: any) {
+      alert(`Error deleting enquiry: ${err.message || 'Unknown error'}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Export CSV
   const handleExportCSV = () => {
     businessEnquiryService.exportToCsv(enquiries, dateFilter);
@@ -150,13 +234,24 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
 
   // Safe Phone & WhatsApp Helpers
   const formatPhoneLink = (phone?: string) => (phone || '').replace(/\s+/g, '');
-  const formatWhatsAppUrl = (phone?: string, name?: string, ref?: string) => {
+  const formatWhatsAppUrl = (
+    phone?: string,
+    name?: string,
+    service?: string,
+    requirements?: string,
+    status?: EnquiryStatus
+  ) => {
     const raw = (phone || '').replace(/\D/g, '');
     const cleanDigits = raw.length === 10 ? `91${raw}` : raw.startsWith('91') ? raw : `91${raw}`;
-    const text = encodeURIComponent(
-      `Hello ${name || 'Customer'}, this is Prisha Xpress regarding your enquiry (${ref || ''}).`
-    );
-    return `https://wa.me/${cleanDigits}?text=${text}`;
+    
+    let text = '';
+    if (status === 'Booked / Confirmed' || status === 'Converted') {
+      text = `Namaste ${name || 'Customer'}, we are pleased to confirm your transport/fleet booking with Prisha Xpress Pvt. Ltd. for ${service || 'Logistics Services'}. Our operations team will coordinate vehicle placement and driver assignment shortly. Contact: +91 7276897727`;
+    } else {
+      text = `Namaste ${name || 'Customer'}, thank you for contacting Prisha Xpress Pvt. Ltd. regarding ${service || 'our services'}${requirements ? ` (${requirements})` : ''}. Please let us know how we can assist you further. Contact: +91 7276897727`;
+    }
+
+    return `https://wa.me/${cleanDigits}?text=${encodeURIComponent(text)}`;
   };
 
   // Status Badge Helper
@@ -177,11 +272,12 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
             {status}
           </span>
         );
+      case 'Booked / Confirmed':
       case 'Converted':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            Converted
+            Booked / Confirmed
           </span>
         );
       default:
@@ -278,15 +374,15 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
 
         <button
           type="button"
-          onClick={() => setActiveTab('converted')}
+          onClick={() => setActiveTab('booked')}
           className={`p-4 rounded-2xl border text-left transition-all ${
-            activeTab === 'converted'
+            activeTab === 'booked'
               ? 'bg-emerald-700 text-white border-emerald-700 shadow-md ring-2 ring-emerald-400/30'
               : 'bg-white text-gray-900 border-gray-200 hover:border-emerald-300'
           }`}
         >
-          <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'converted' ? 'text-emerald-100' : 'text-emerald-600'}`}>
-            Converted
+          <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'booked' ? 'text-emerald-100' : 'text-emerald-600'}`}>
+            Booked / Confirmed
           </p>
           <p className="text-2xl font-black mt-1 text-emerald-600">{stats.converted}</p>
         </button>
@@ -385,7 +481,13 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                                 <Phone className="w-3.5 h-3.5" />
                               </a>
                               <a
-                                href={formatWhatsAppUrl(enq.phone, enq.full_name, enq.enquiry_id)}
+                                href={formatWhatsAppUrl(
+                                  enq.phone,
+                                  enq.full_name,
+                                  enq.service_required,
+                                  enq.requirements,
+                                  enq.status
+                                )}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-1 rounded text-emerald-600 hover:bg-emerald-50 transition-colors"
@@ -475,7 +577,13 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                     </a>
 
                     <a
-                      href={formatWhatsAppUrl(enq.phone, enq.full_name, enq.enquiry_id)}
+                      href={formatWhatsAppUrl(
+                        enq.phone,
+                        enq.full_name,
+                        enq.service_required,
+                        enq.requirements,
+                        enq.status
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs"
@@ -542,7 +650,13 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                 </a>
 
                 <a
-                  href={formatWhatsAppUrl(activeEnquiry.phone, activeEnquiry.full_name, activeEnquiry.enquiry_id)}
+                  href={formatWhatsAppUrl(
+                    activeEnquiry.phone,
+                    activeEnquiry.full_name,
+                    activeEnquiry.service_required,
+                    activeEnquiry.requirements,
+                    activeEnquiry.status
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors"
@@ -552,17 +666,24 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                 </a>
               </div>
 
-              {/* Status Switcher Buttons */}
+              {/* Status Switcher Buttons: New, In Progress, Booked / Confirmed, Closed */}
               <div className="flex items-center gap-1.5 overflow-x-auto">
                 <span className="text-[11px] font-bold text-gray-500 mr-1">Status:</span>
-                {(['New', 'In Progress', 'Converted', 'Closed'] as EnquiryStatus[]).map((st) => (
+                {(['New', 'In Progress', 'Booked / Confirmed', 'Closed'] as EnquiryStatus[]).map((st) => (
                   <button
                     key={st}
                     type="button"
                     onClick={() => handleStatusChange(st)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                      activeEnquiry.status === st
-                        ? 'bg-px-primary text-white shadow-xs'
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      activeEnquiry.status === st ||
+                      (st === 'Booked / Confirmed' && activeEnquiry.status === 'Converted')
+                        ? st === 'Booked / Confirmed'
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : st === 'In Progress'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : st === 'Closed'
+                          ? 'bg-gray-700 text-white shadow-xs'
+                          : 'bg-amber-600 text-white shadow-xs'
                         : 'bg-white text-gray-700 border border-gray-200 hover:bg-purple-50'
                     }`}
                   >
@@ -571,6 +692,50 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                 ))}
               </div>
             </div>
+
+            {/* Post-Click Follow-Up Banner with WhatsApp Action */}
+            {followUpBanner && (
+              <div
+                className={`p-3.5 sm:p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn ${
+                  followUpBanner.status === 'Booked / Confirmed'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
+                    : followUpBanner.status === 'In Progress'
+                    ? 'bg-blue-50 border-blue-200 text-blue-950'
+                    : followUpBanner.status === 'Closed'
+                    ? 'bg-gray-100 border-gray-200 text-gray-800'
+                    : 'bg-amber-50 border-amber-200 text-amber-950'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <CheckCircle2
+                    className={`w-5 h-5 shrink-0 ${
+                      followUpBanner.status === 'Booked / Confirmed'
+                        ? 'text-emerald-600'
+                        : followUpBanner.status === 'In Progress'
+                        ? 'text-blue-600'
+                        : 'text-gray-500'
+                    }`}
+                  />
+                  <p className="text-xs sm:text-sm font-bold">{followUpBanner.message}</p>
+                </div>
+
+                {followUpBanner.whatsAppUrl && (
+                  <a
+                    href={followUpBanner.whatsAppUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all shrink-0"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>
+                      {followUpBanner.status === 'Booked / Confirmed'
+                        ? 'Send Booking Confirmation on WhatsApp'
+                        : 'Send Quote on WhatsApp'}
+                    </span>
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Notification message */}
             {actionSuccessMsg && (
@@ -631,17 +796,97 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-3 bg-gray-50 border-t border-gray-200 text-right">
+            {/* Modal Footer with Safe Delete Button */}
+            <div className="p-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setActiveEnquiry(null)}
-                className="px-4 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
+                onClick={() => setDeleteConfirmOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 rounded-lg transition-colors cursor-pointer"
+                title="Delete this enquiry permanently"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Lead</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveEnquiry(null);
+                  setDeleteConfirmOpen(false);
+                }}
+                className="px-4 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
               >
                 Close
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Safe 2-Step Deletion Confirmation Modal */}
+      {deleteConfirmOpen && activeEnquiry && (
+        <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-gray-200 overflow-hidden animate-scaleUp">
+            <div className="p-5 sm:p-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
+                Delete Business Enquiry Permanently?
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4">
+                Delete enquiry from <span className="font-bold text-gray-900">{activeEnquiry.full_name}</span> ({activeEnquiry.enquiry_id || activeEnquiry.enquiry_number})? This action cannot be undone.
+              </p>
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-left mb-6">
+                <p className="text-[11px] font-medium text-rose-800 leading-normal flex items-start gap-1.5">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                  <span>This will permanently remove this record from Supabase and immediately recalculate your dashboard totals.</span>
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setDeleteConfirmOpen(false)}
+                  className="w-1/2 px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={handleDeleteEnquiry}
+                  className="w-1/2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      <span>Yes, Delete Permanently</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-[100] max-w-md bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-700 animate-slideUp">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <p className="text-xs font-medium">{toastMessage}</p>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-gray-400 hover:text-white ml-auto"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

@@ -798,6 +798,48 @@ export class SupabaseRecruitmentDbService {
       console.warn('Error verifying driver document in Supabase:', e);
     }
   }
+  /**
+   * Permanently deletes a staff application and related records from Supabase
+   */
+  public async deleteStaffApplicationFromDb(id: string, ref?: string): Promise<void> {
+    if (!this.isConfigured) return;
+
+    try {
+      const headers = this.getAuthHeaders();
+      const filter = ref ? `or=(id.eq.${id},application_reference.eq.${ref})` : `id=eq.${id}`;
+
+      // Delete child records first if not cascade
+      await fetch(`${this.supabaseUrl}/rest/v1/staff_application_documents?staff_application_id=eq.${id}`, {
+        method: 'DELETE',
+        headers,
+      }).catch(() => {});
+
+      await fetch(`${this.supabaseUrl}/rest/v1/staff_application_status_history?staff_application_id=eq.${id}`, {
+        method: 'DELETE',
+        headers,
+      }).catch(() => {});
+
+      // Delete main staff application row
+      await fetch(`${this.supabaseUrl}/rest/v1/staff_applications?${filter}`, {
+        method: 'DELETE',
+        headers,
+      });
+
+      // Storage cleanup for staff documents if ref provided
+      if (ref) {
+        await fetch(`${this.supabaseUrl}/storage/v1/object/staff-application-documents`, {
+          method: 'DELETE',
+          headers: {
+            ...headers,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prefixes: [ref] }),
+        }).catch(() => {});
+      }
+    } catch (e) {
+      console.warn('Error deleting staff application in Supabase:', e);
+    }
+  }
 }
 
 export const supabaseRecruitmentDbService = new SupabaseRecruitmentDbService();

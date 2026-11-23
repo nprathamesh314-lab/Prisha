@@ -765,6 +765,28 @@ class RecruitmentService {
     return { total, submitted, underReview, shortlisted, interview, selected, rejected };
   }
 
+  /**
+   * Permanently deletes a staff application from Supabase database
+   * and local storage cache.
+   */
+  public async deleteStaffApplication(id: string): Promise<boolean> {
+    const target = this.staffApps.find((a) => a.id === id || a.application_reference === id);
+    const ref = target?.application_reference || id;
+
+    // 1. Remove from local storage cache
+    this.staffApps = this.staffApps.filter((a) => a.id !== id && a.application_reference !== id);
+    this.saveStaffToStorage();
+
+    // 2. Delete from Supabase
+    try {
+      await supabaseRecruitmentDbService.deleteStaffApplicationFromDb(id, ref);
+    } catch (e) {
+      console.warn('Error deleting staff application from Supabase:', e);
+    }
+
+    return true;
+  }
+
   // ==========================================================================
   // MODULE B: DRIVER REGISTRATION OPERATIONS
   // ==========================================================================

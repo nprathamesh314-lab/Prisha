@@ -493,6 +493,81 @@ class DriverApplicationService {
     }
   }
 
+  /**
+   * Permanently deletes a driver application from Supabase database,
+   * cleans up uploaded files in Supabase Storage ('driver-documents'),
+   * and removes the record from local storage.
+   */
+  public async deleteDriverApplication(id: string, applicationCode?: string): Promise<boolean> {
+    // 1. Remove from local storage
+    const localList = this.getLocalApplications().filter(
+      (a) => a.id !== id && (!applicationCode || a.application_code !== applicationCode)
+    );
+    this.saveAllLocalApplications(localList);
+
+    // 2. Delete from Supabase Database & Storage
+    if (this.isConfigured) {
+      try {
+        const headers = this.getHeaders();
+        const filter = applicationCode
+          ? `or=(id.eq.${id},application_code.eq.${applicationCode},application_reference.eq.${applicationCode})`
+          : `id=eq.${id}`;
+
+        // Attempt deleting any child relations first (if cascade isn't automatic)
+        await fetch(`${this.supabaseUrl}/rest/v1/driver_application_documents?driver_application_id=eq.${id}`, {
+          method: 'DELETE',
+          headers,
+        }).catch(() => {});
+
+        await fetch(`${this.supabaseUrl}/rest/v1/driver_vehicle_categories?driver_application_id=eq.${id}`, {
+          method: 'DELETE',
+          headers,
+        }).catch(() => {});
+
+        await fetch(`${this.supabaseUrl}/rest/v1/driver_vehicle_experience?driver_application_id=eq.${id}`, {
+          method: 'DELETE',
+          headers,
+        }).catch(() => {});
+
+        await fetch(`${this.supabaseUrl}/rest/v1/driver_application_status_history?driver_application_id=eq.${id}`, {
+          method: 'DELETE',
+          headers,
+        }).catch(() => {});
+
+        // Delete main driver application row
+        await fetch(`${this.supabaseUrl}/rest/v1/driver_applications?${filter}`, {
+          method: 'DELETE',
+          headers,
+        });
+
+        // 3. Clean up files from Supabase Storage ('driver-documents' bucket)
+        if (applicationCode) {
+          const docKeys = ['dl-front', 'dl-back', 'aadhaar-front', 'aadhaar-back', 'pan-card'];
+          const exts = ['jpg', 'jpeg', 'png', 'pdf', 'webp'];
+          const possiblePaths: string[] = [];
+          for (const key of docKeys) {
+            for (const ext of exts) {
+              possiblePaths.push(`${applicationCode}/${key}.${ext}`);
+            }
+          }
+
+          await fetch(`${this.supabaseUrl}/storage/v1/object/${STORAGE_BUCKET}`, {
+            method: 'DELETE',
+            headers: {
+              ...headers,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prefixes: [applicationCode], paths: possiblePaths }),
+          }).catch((err) => console.warn('Could not clean up driver storage files:', err));
+        }
+      } catch (err) {
+        console.warn('Error deleting driver application from Supabase:', err);
+      }
+    }
+
+    return true;
+  }
+
   // Draft Autosave Management
   public saveDraft(data: Partial<DriverApplicationFormData>) {
     try {
