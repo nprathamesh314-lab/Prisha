@@ -690,7 +690,8 @@ export class SupabaseRecruitmentDbService {
         'Content-Type': 'application/json',
       };
 
-      await fetch(`${this.supabaseUrl}/rest/v1/staff_applications?id=eq.${id}`, {
+      const filter = id.length === 36 ? `id=eq.${id}` : `application_reference=eq.${id}`;
+      await fetch(`${this.supabaseUrl}/rest/v1/staff_applications?${filter}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({
@@ -731,7 +732,8 @@ export class SupabaseRecruitmentDbService {
         'Content-Type': 'application/json',
       };
 
-      await fetch(`${this.supabaseUrl}/rest/v1/driver_applications?id=eq.${id}`, {
+      const filter = id.length === 36 ? `id=eq.${id}` : `application_reference=eq.${id}`;
+      await fetch(`${this.supabaseUrl}/rest/v1/driver_applications?${filter}`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({

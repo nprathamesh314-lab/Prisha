@@ -217,16 +217,17 @@ class BusinessEnquiryService {
     if (isConfigured) {
       try {
         const payload: any = {
-          enquiry_number: newEnquiry.enquiry_id,
-          full_name: newEnquiry.full_name,
+          contact_person: newEnquiry.full_name,
           company_name: newEnquiry.company_name || null,
-          phone_number: newEnquiry.phone,
+          phone: newEnquiry.phone,
           email: newEnquiry.email,
-          service_required: newEnquiry.service_required,
-          operational_requirements: newEnquiry.requirements || '',
+          service_requested: newEnquiry.service_required,
+          fleet_requirement: newEnquiry.requirements || '',
           status: 'New',
-          email_status: 'Pending',
-          customer_email_status: 'Pending',
+          internal_notes: null,
+          origin_city: 'Pune',
+          destination_city: 'Corridor Operations',
+          additional_details: newEnquiry.requirements || '',
         };
 
         const res = await fetch(`${supabaseUrl}/rest/v1/business_enquiries`, {
@@ -319,18 +320,19 @@ class BusinessEnquiryService {
   public async syncFromSupabase(): Promise<void> {
     const session = await supabaseAuthService.getAdminSession();
     const isConfigured = supabaseAuthService.getIsConfigured();
-    if (!isConfigured || !session?.token) return;
+    if (!isConfigured) return;
 
     try {
       const supabaseUrl = supabaseAuthService.getUrl();
       const anonKey = supabaseAuthService.getAnonKey();
+      const authToken = session?.token || anonKey;
 
       const res = await fetch(
         `${supabaseUrl}/rest/v1/business_enquiries?select=*&order=created_at.desc`,
         {
           headers: {
             apikey: anonKey,
-            Authorization: `Bearer ${session.token}`,
+            Authorization: `Bearer ${authToken}`,
           },
         }
       );
@@ -339,31 +341,42 @@ class BusinessEnquiryService {
         const data: any[] = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           const remoteMap = new Map(data.map((item) => [item.id, item]));
-          const merged: BusinessEnquiry[] = data.map((item) => ({
-            id: item.id,
-            enquiry_id: item.enquiry_number || item.enquiry_id || item.id,
-            enquiry_number: item.enquiry_number || item.enquiry_id || item.id,
-            full_name: item.full_name || item.contact_person || 'Customer',
-            company_name: item.company_name || '',
-            phone: item.phone_number || item.phone || '',
-            phone_number: item.phone_number || item.phone || '',
-            email: item.email || '',
-            service_required: item.service_required || item.service_requested || 'Other',
-            requirements: item.operational_requirements || item.requirements || item.fleet_requirement || '',
-            operational_requirements: item.operational_requirements || item.requirements || item.fleet_requirement || '',
-            status: item.status || 'New',
-            admin_notes: item.admin_notes || item.internal_notes || '',
-            assigned_to: item.assigned_to,
-            assigned_to_name: item.assigned_to_name,
-            follow_up_date: item.follow_up_date,
-            email_status: item.email_status || 'Pending',
-            email_error: item.email_error,
-            customer_email_status: item.customer_email_status || 'Pending',
-            customer_email_error: item.customer_email_error,
-            created_at: item.created_at || new Date().toISOString(),
-            updated_at: item.updated_at || new Date().toISOString(),
-            contacted_at: item.contacted_at,
-          }));
+          const merged: BusinessEnquiry[] = data.map((item) => {
+            let normalizedStatus: EnquiryStatus = 'New';
+            const s = (item.status || '').toLowerCase();
+            if (s.includes('progress')) normalizedStatus = 'In Progress';
+            else if (s.includes('contact')) normalizedStatus = 'Contacted';
+            else if (s.includes('convert')) normalizedStatus = 'Converted';
+            else if (s.includes('complete')) normalizedStatus = 'Completed';
+            else if (s.includes('close') || s.includes('lost')) normalizedStatus = 'Closed';
+            else normalizedStatus = 'New';
+
+            return {
+              id: item.id,
+              enquiry_id: item.enquiry_number || item.enquiry_id || item.id,
+              enquiry_number: item.enquiry_number || item.enquiry_id || item.id,
+              full_name: item.full_name || item.contact_person || 'Customer',
+              company_name: item.company_name || '',
+              phone: item.phone_number || item.phone || '',
+              phone_number: item.phone_number || item.phone || '',
+              email: item.email || '',
+              service_required: (item.service_required || item.service_requested || 'Other') as BusinessEnquiryServiceType,
+              requirements: item.operational_requirements || item.requirements || item.fleet_requirement || '',
+              operational_requirements: item.operational_requirements || item.requirements || item.fleet_requirement || '',
+              status: normalizedStatus,
+              admin_notes: item.admin_notes || item.internal_notes || '',
+              assigned_to: item.assigned_to,
+              assigned_to_name: item.assigned_to_name,
+              follow_up_date: item.follow_up_date,
+              email_status: item.email_status || 'Pending',
+              email_error: item.email_error,
+              customer_email_status: item.customer_email_status || 'Pending',
+              customer_email_error: item.customer_email_error,
+              created_at: item.created_at || new Date().toISOString(),
+              updated_at: item.updated_at || new Date().toISOString(),
+              contacted_at: item.contacted_at,
+            };
+          });
 
           for (const local of this.enquiries) {
             if (!remoteMap.has(local.id)) {
@@ -722,20 +735,26 @@ class BusinessEnquiryService {
   private async patchSupabase(id: string, payload: any) {
     const session = await supabaseAuthService.getAdminSession();
     const isConfigured = supabaseAuthService.getIsConfigured();
-    if (!isConfigured || !session?.token) return;
+    if (!isConfigured) return;
 
     try {
       const supabaseUrl = supabaseAuthService.getUrl();
       const anonKey = supabaseAuthService.getAnonKey();
+      const authToken = session?.token || anonKey;
+
+      const dbPayload: any = { ...payload };
+      if (payload.admin_notes !== undefined) {
+        dbPayload.internal_notes = payload.admin_notes;
+      }
 
       await fetch(`${supabaseUrl}/rest/v1/business_enquiries?id=eq.${id}`, {
         method: 'PATCH',
         headers: {
           apikey: anonKey,
-          Authorization: `Bearer ${session.token}`,
+          Authorization: `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(dbPayload),
       });
     } catch (e) {
       console.warn('Error patching enquiry in Supabase:', e);

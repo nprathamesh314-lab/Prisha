@@ -9,6 +9,9 @@ import {
   supabaseAuthService,
   SupabaseAuthSession,
 } from '../../services/supabaseClient';
+import { businessEnquiryService } from '../../services/enquiryService';
+import { recruitmentService } from '../../services/recruitmentService';
+import { driverApplicationService } from '../../services/driverApplicationService';
 import {
   LayoutDashboard,
   Users,
@@ -36,11 +39,47 @@ export const AdminLayout: React.FC = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Live pending counts for Staff, Drivers, and Business Enquiries
+  const [pendingCounts, setPendingCounts] = useState({
+    enquiries: 0,
+    staff: 0,
+    drivers: 0,
+  });
+
   // Sign-in gate form state
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  // Fetch live counts across modules
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        await businessEnquiryService.syncFromSupabase();
+        const enqStats = businessEnquiryService.getStats();
+
+        await recruitmentService.syncStaffApplicationsFromDb();
+        const staffList = recruitmentService.getStaffApplications();
+        const staffPending = staffList.filter(
+          (s) => s.application_status === 'Submitted' || s.application_status === 'Under Review'
+        ).length;
+
+        const driverList = await driverApplicationService.getDriverApplications();
+        const driverPending = driverList.filter((d) => d.status === 'pending').length;
+
+        setPendingCounts({
+          enquiries: enqStats.new || 0,
+          staff: staffPending || 0,
+          drivers: driverPending || 0,
+        });
+      } catch (e) {
+        console.warn('Error updating admin counts:', e);
+      }
+    };
+
+    fetchCounts();
+  }, [location.pathname]);
 
   // Check existing session on mount
   useEffect(() => {
@@ -205,7 +244,7 @@ export const AdminLayout: React.FC = () => {
           path: '/admin/enquiries',
           icon: Building2,
           allowed: true,
-          badge: 'Leads',
+          badge: pendingCounts.enquiries > 0 ? `${pendingCounts.enquiries} Pending` : undefined,
         },
       ],
     },
@@ -217,14 +256,14 @@ export const AdminLayout: React.FC = () => {
           path: '/admin/staff-applications',
           icon: Users,
           allowed: true,
-          badge: 'Module A',
+          badge: pendingCounts.staff > 0 ? `${pendingCounts.staff} Pending` : undefined,
         },
         {
           name: 'Driver Applications',
-          path: '/admin/driver-applications',
+          path: '/admin/drivers',
           icon: Truck,
           allowed: true,
-          badge: 'Module B',
+          badge: pendingCounts.drivers > 0 ? `${pendingCounts.drivers} Pending` : undefined,
         },
         {
           name: 'Document Verification',
@@ -358,6 +397,12 @@ export const AdminLayout: React.FC = () => {
                     const isActive =
                       item.path === '/admin'
                         ? location.pathname === '/admin'
+                        : item.path === '/admin/drivers'
+                        ? location.pathname === '/admin/drivers' || location.pathname.startsWith('/admin/driver-applications')
+                        : item.path === '/admin/staff-applications'
+                        ? location.pathname === '/admin/staff' || location.pathname.startsWith('/admin/staff-applications')
+                        : item.path === '/admin/enquiries'
+                        ? location.pathname === '/admin/enquiries' || location.pathname.startsWith('/admin/business-enquiries')
                         : location.pathname.startsWith(item.path);
 
                     return (
@@ -377,10 +422,10 @@ export const AdminLayout: React.FC = () => {
                         </div>
                         {item.badge && (
                           <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded-md uppercase tracking-wider font-extrabold ${
+                            className={`text-[9px] px-2 py-0.5 rounded-full font-bold shadow-2xs transition-all ${
                               isActive
-                                ? 'bg-white/20 text-white'
-                                : 'bg-purple-100 text-px-primary'
+                                ? 'bg-white text-px-primary font-black'
+                                : 'bg-purple-100 text-purple-900 border border-purple-200'
                             }`}
                           >
                             {item.badge}

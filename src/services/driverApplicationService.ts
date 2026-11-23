@@ -317,7 +317,7 @@ class DriverApplicationService {
     if (this.isConfigured) {
       try {
         const res = await fetch(
-          `${this.supabaseUrl}/rest/v1/driver_applications?select=*&order=created_at.desc`,
+          `${this.supabaseUrl}/rest/v1/driver_applications?select=*,driver_vehicle_categories(*),driver_application_documents(*)&order=created_at.desc`,
           {
             headers: this.getHeaders(),
           }
@@ -325,31 +325,46 @@ class DriverApplicationService {
 
         if (res.ok) {
           const dbRows: any[] = await res.json();
-          const mappedDbRows: DriverApplicationRecord[] = dbRows.map((row) => ({
-            id: row.id,
-            application_code: row.application_code || row.application_reference || `PX-DRV-2026-${row.id.slice(0, 4)}`,
-            full_name: row.full_name || '',
-            mobile_number: row.mobile_number || '',
-            whatsapp_number: row.whatsapp_number || row.alternate_mobile_number || row.mobile_number,
-            date_of_birth: row.date_of_birth || '',
-            city: row.city || 'Pune',
-            pincode: row.pincode || row.pin_code || '',
-            emergency_contact: row.emergency_contact || row.emergency_contact_number || '',
-            dl_number: row.dl_number || row.licence_number || '',
-            vehicle_categories: Array.isArray(row.vehicle_categories) && row.vehicle_categories.length > 0
-              ? row.vehicle_categories
-              : ([row.licence_type || 'Transport Vehicle'] as DriverVehicleCategory[]),
-            dl_front_url: row.dl_front_url || '',
-            dl_back_url: row.dl_back_url || '',
-            aadhaar_front_url: row.aadhaar_front_url || '',
-            aadhaar_back_url: row.aadhaar_back_url || '',
-            pan_card_url: row.pan_card_url || null,
-            status: this.normalizeStatus(row.status || row.application_status),
-            admin_remarks: row.admin_remarks || null,
-            reviewed_at: row.reviewed_at || null,
-            created_at: row.created_at || new Date().toISOString(),
-            updated_at: row.updated_at || row.created_at,
-          }));
+          const mappedDbRows: DriverApplicationRecord[] = dbRows.map((row) => {
+            const docs = row.driver_application_documents || [];
+            const findDoc = (type: string) => {
+              const d = docs.find((item: any) =>
+                item.document_type && item.document_type.toLowerCase().includes(type.toLowerCase())
+              );
+              return d ? d.storage_path : '';
+            };
+
+            const cats: DriverVehicleCategory[] =
+              Array.isArray(row.vehicle_categories) && row.vehicle_categories.length > 0
+                ? row.vehicle_categories
+                : Array.isArray(row.driver_vehicle_categories) && row.driver_vehicle_categories.length > 0
+                ? row.driver_vehicle_categories.map((c: any) => c.vehicle_category)
+                : ([row.licence_type || 'Transport Vehicle'] as DriverVehicleCategory[]);
+
+            return {
+              id: row.id,
+              application_code: row.application_code || row.application_reference || `PX-DRV-2026-${row.id.slice(0, 4)}`,
+              full_name: row.full_name || '',
+              mobile_number: row.mobile_number || '',
+              whatsapp_number: row.whatsapp_number || row.alternate_mobile_number || row.mobile_number,
+              date_of_birth: row.date_of_birth || '',
+              city: row.city || 'Pune',
+              pincode: row.pincode || row.pin_code || '',
+              emergency_contact: row.emergency_contact || row.emergency_contact_number || '',
+              dl_number: row.dl_number || row.licence_number || '',
+              vehicle_categories: cats,
+              dl_front_url: row.dl_front_url || findDoc('Front') || '/assets/images/drivers-hero.jpg',
+              dl_back_url: row.dl_back_url || findDoc('Back') || '/assets/images/drivers-hero.jpg',
+              aadhaar_front_url: row.aadhaar_front_url || findDoc('Aadhaar') || '/assets/images/drivers-hero.jpg',
+              aadhaar_back_url: row.aadhaar_back_url || findDoc('Aadhaar') || '/assets/images/drivers-hero.jpg',
+              pan_card_url: row.pan_card_url || findDoc('PAN') || null,
+              status: this.normalizeStatus(row.status || row.application_status),
+              admin_remarks: row.admin_remarks || null,
+              reviewed_at: row.reviewed_at || null,
+              created_at: row.created_at || new Date().toISOString(),
+              updated_at: row.updated_at || row.created_at,
+            };
+          });
 
           // Merge DB rows with local rows, deduplicating by application_code or id
           const idMap = new Map<string, DriverApplicationRecord>();
