@@ -4,7 +4,7 @@ import { PageHero } from '../components/common/PageHero';
 import { SectionHeading } from '../components/common/SectionHeading';
 import { FadeIn } from '../components/animations/FadeIn';
 import { CTASection } from '../components/common/CTASection';
-import { NetworkEarthGlobe } from '../components/sections/NetworkEarthGlobe';
+import { NetworkLogisticsVideo } from '../components/sections/NetworkLogisticsVideo';
 import {
   Radio,
   Truck,
@@ -106,18 +106,15 @@ With our growing network and transport support, we work to make goods delivery e
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge="OUR TRANSPORT NETWORK"
-            title="Strong Network. Reliable Transport. Across India."
-            subtitle="Prisha Xpress connects businesses, cities and transport routes across India. We work with drivers and transport partners to help deliver goods safely and on time."
-            className="mb-3"
+            title="Connecting Businesses Across India"
+            subtitle="Prisha Xpress helps businesses transport goods between different cities across India. Our road and air transport network helps move goods from one place to another."
+            className="mb-4"
           />
-          <p className="text-center text-sm sm:text-base text-gray-600 max-w-2xl mx-auto -mt-6 mb-8 leading-relaxed">
-            Our team supports daily transport work and helps customers move their goods with confidence.
-          </p>
 
-          {/* PART 3: 3D Earth and Moving Trucks Animation */}
-          <NetworkEarthGlobe />
+          {/* Logistics Animation Video Player */}
+          <NetworkLogisticsVideo />
 
-          {/* PART 2: THE FOUR CORE NETWORK CARDS */}
+          {/* The Four Core Network Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Card 1: Transport Network */}
             <FadeIn direction="up" delay={0.1}>
