@@ -12,6 +12,8 @@ import {
   UserCheck,
   FileCheck,
   Truck,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 
 const introTranslations = {
@@ -45,16 +47,22 @@ const introTranslations = {
         icon: FileCheck,
       },
     ],
-    stats: [
+    whyChooseTitle: 'Why Businesses Choose Prisha Xpress',
+    benefits: [
       {
-        value: 'SLA',
-        label: 'Planned Delivery Schedules',
-        sub: 'Disciplined trip coordination',
+        title: 'On-Time Delivery',
+        desc: 'We plan deliveries carefully to avoid unnecessary delays.',
+        icon: Clock,
       },
       {
-        value: '100% Insured Cargo',
-        label: 'Cargo Insurance Coverage',
-        sub: 'Transit safety protection',
+        title: 'Transport Support',
+        desc: 'Our team coordinates vehicles and transportation needs.',
+        icon: Truck,
+      },
+      {
+        title: 'Safety First',
+        desc: 'We focus on vehicle checks and safe goods transportation.',
+        icon: ShieldCheck,
       },
     ],
     imageBadge: 'Prisha Xpress Logistics Terminal',
@@ -89,16 +97,22 @@ const introTranslations = {
         icon: FileCheck,
       },
     ],
-    stats: [
+    whyChooseTitle: 'व्यवसाय प्रिशा एक्सप्रेस को क्यों चुनते हैं',
+    benefits: [
       {
-        value: 'SLA',
-        label: 'नियोजित डिलीवरी कार्यक्रम',
-        sub: 'अनुशासित समय-सारणी समन्वय',
+        title: 'समय पर डिलीवरी',
+        desc: 'अनावश्यक देरी से बचने के लिए हम डिलीवरी की सावधानीपूर्वक योजना बनाते हैं।',
+        icon: Clock,
       },
       {
-        value: '100% बीमित कार्गो',
-        label: 'कार्गो बीमा कवरेज',
-        sub: 'पारगमन सुरक्षा संरक्षण',
+        title: 'परिवहन सहायता',
+        desc: 'हमारी टीम वाहनों और परिवहन की जरूरतों का समन्वय करती है।',
+        icon: Truck,
+      },
+      {
+        title: 'सुरक्षा सर्वोपरि',
+        desc: 'हम वाहन जांच और सुरक्षित माल परिवहन पर ध्यान केंद्रित करते हैं।',
+        icon: ShieldCheck,
       },
     ],
     imageBadge: 'प्रिशा एक्सप्रेस लॉजिस्टिक्स टर्मिनल',
@@ -133,16 +147,22 @@ const introTranslations = {
         icon: FileCheck,
       },
     ],
-    stats: [
+    whyChooseTitle: 'व्यवसाय प्रिशा एक्सप्रेस का निवडतात',
+    benefits: [
       {
-        value: 'SLA',
-        label: 'नियोजित डिलिव्हरी वेळापत्रक',
-        sub: 'अनुशासित वाहतूक नियोजन',
+        title: 'वेळेवर डिलिव्हरी',
+        desc: 'अनावश्यक विलंब टाळण्यासाठी आम्ही डिलिव्हरीचे काळजीपूर्वक नियोजन करतो.',
+        icon: Clock,
       },
       {
-        value: '100% विमित कार्गो',
-        label: 'कार्गो विमा संरक्षण',
-        sub: 'सुरक्षित वाहतूक हमी',
+        title: 'वाहतूक सहाय्य',
+        desc: 'आमची टीम वाहने आणि वाहतूक गरजांचे समन्वय साधते.',
+        icon: Truck,
+      },
+      {
+        title: 'सुरक्षा प्रथम',
+        desc: 'आम्ही वाहन तपासणी आणि सुरक्षित माल वाहतुकीवर भर देतो.',
+        icon: ShieldCheck,
       },
     ],
     imageBadge: 'प्रिशा एक्सप्रेस लॉजिस्टिक्स टर्मिनल',
@@ -278,27 +298,36 @@ export const TransportIntro: React.FC = () => {
               })}
             </motion.div>
 
-            {/* 2 Statistics / Information Cards */}
-            <motion.div
-              variants={itemVariants}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2"
-            >
-              {t.stats.map((st, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-2xl bg-gradient-to-br from-purple-50/60 to-white border border-purple-100/90 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 transition-all duration-200 space-y-1"
-                >
-                  <p className="text-xl sm:text-2xl font-black text-px-primary font-mono tracking-tight">
-                    {st.value}
-                  </p>
-                  <p className="text-xs font-bold text-px-dark">
-                    {st.label}
-                  </p>
-                  <p className="text-[11px] text-gray-500 font-medium">
-                    {st.sub}
-                  </p>
-                </div>
-              ))}
+            {/* Why Businesses Choose Prisha Xpress */}
+            <motion.div variants={itemVariants} className="pt-2 space-y-2.5">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-px-primary">
+                <Sparkles className="w-3.5 h-3.5 text-px-primary shrink-0" />
+                <span>{t.whyChooseTitle}</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                {t.benefits.map((b, idx) => {
+                  const Icon = b.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="p-3 rounded-2xl bg-purple-50/70 border border-purple-100 hover:border-purple-200 hover:bg-purple-100/60 hover:-translate-y-0.5 hover:shadow-2xs transition-all duration-200 flex flex-col justify-between space-y-1.5 group"
+                    >
+                      <div className="w-7 h-7 rounded-xl bg-white border border-purple-200/80 flex items-center justify-center text-px-primary shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                        <Icon className="w-3.5 h-3.5 text-px-primary" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <h5 className="text-xs font-bold text-px-dark">
+                          {b.title}
+                        </h5>
+                        <p className="text-[11px] text-gray-600 leading-snug">
+                          {b.desc}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </motion.div>
           </motion.div>
 
