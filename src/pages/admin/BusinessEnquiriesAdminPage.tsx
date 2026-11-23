@@ -205,6 +205,7 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
       case 'Contacted':
         return 'bg-purple-100 text-px-primary border-purple-300';
       case 'Converted':
+      case 'Completed':
         return 'bg-emerald-100 text-emerald-800 border-emerald-300';
       case 'Closed':
         return 'bg-gray-100 text-gray-700 border-gray-300';
@@ -451,9 +452,6 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                     {/* Service */}
                     <td className="py-3.5 px-4 whitespace-nowrap">
                       <span className="font-medium text-gray-900 block">{enq.service_required}</span>
-                      <span className="text-[10px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full inline-block mt-0.5">
-                        Via {enq.preferred_contact_method}
-                      </span>
                     </td>
 
                     {/* Date */}
@@ -629,10 +627,6 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                     </a>
                   </div>
                   <div>
-                    <span className="text-gray-500 font-medium block">Preferred Contact:</span>
-                    <span className="font-bold text-purple-800">{activeEnquiry.preferred_contact_method}</span>
-                  </div>
-                  <div>
                     <span className="text-gray-500 font-medium block">Submitted Date & Time:</span>
                     <span className="font-bold text-gray-800">
                       {new Date(activeEnquiry.created_at).toLocaleString('en-IN', {
@@ -671,7 +665,7 @@ export const BusinessEnquiriesAdminPage: React.FC = () => {
                   Enquiry Status Workflow
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {(['New', 'In Progress', 'Contacted', 'Converted', 'Closed'] as EnquiryStatus[]).map((st) => (
+                  {(['New', 'In Progress', 'Contacted', 'Converted', 'Completed', 'Closed'] as EnquiryStatus[]).map((st) => (
                     <button
                       key={st}
                       type="button"

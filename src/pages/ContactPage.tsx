@@ -1,12 +1,14 @@
-// PRISHA XPRESS PVT. LTD. - CONTACT US PAGE
+// PRISHA XPRESS PVT. LTD. - CONTACT & BUSINESS ENQUIRY PAGE
 // ROUTE: /contact
-// VERIFIED COMPANY CONTACT DETAILS & BUSINESS ENQUIRY WORKFLOW
+// CLEAN COMPACT TWO-COLUMN LAYOUT WITHOUT PREFERRED CONTACT METHOD
+// AUTOMATIC SUPABASE DATABASE INSERTION & RESEND EMAIL NOTIFICATIONS
 
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PageTransition } from '../components/animations/PageTransition';
 import { companyInfo } from '../data/companyData';
 import { businessEnquiryService } from '../services/enquiryService';
+import { BusinessEnquiryServiceType } from '../types/enquiry';
 import {
   Phone,
   Mail,
@@ -15,61 +17,51 @@ import {
   Send,
   CheckCircle2,
   AlertCircle,
-  Clock,
-  Building2,
-  HelpCircle,
-  PhoneCall,
   Loader2,
+  ArrowRight,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react';
-import { Button } from '../components/common/Button';
 
-interface ContactFormData {
-  name: string;
-  company: string;
-  email: string;
+interface ContactFormState {
+  fullName: string;
+  companyName: string;
   phone: string;
-  service: string;
-  message: string;
+  email: string;
+  service: BusinessEnquiryServiceType;
+  requirements: string;
 }
 
+const SERVICE_OPTIONS: BusinessEnquiryServiceType[] = [
+  'Truck Drivers on Hire',
+  'Transportation Services',
+  '3PL Fleet Management',
+  'Fleet Supervision',
+  'Vehicle Servicing',
+  'Automotive Spare Parts',
+  'Other',
+];
+
 export const ContactPage: React.FC = () => {
-  const location = useLocation();
-  const [formType, setFormType] = useState<'business' | 'customer'>('business');
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: '',
-    company: '',
-    email: '',
+  const [formData, setFormData] = useState<ContactFormState>({
+    fullName: '',
+    companyName: '',
     phone: '',
-    service: 'Truck Drivers On Hire',
-    message: '',
+    email: '',
+    service: 'Truck Drivers on Hire',
+    requirements: '',
   });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof ContactFormData, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof ContactFormState, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<{
-    status: 'success' | 'backend_unreachable' | null;
-    referenceId?: string;
-    message?: string;
-  }>({ status: null });
-
-  useEffect(() => {
-    if (location.hash === '#enquiry') {
-      const el = document.getElementById('enquiry-form');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  }, [location]);
+  const [submittedEnquiryId, setSubmittedEnquiryId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof ContactFormData, string>> = {};
+    const newErrors: Partial<Record<keyof ContactFormState, string>> = {};
 
-    if (!formData.name.trim() || formData.name.trim().length < 2) {
-      newErrors.name = 'Please enter your full name (minimum 2 characters).';
-    }
-
-    if (formType === 'business' && (!formData.company.trim() || formData.company.trim().length < 2)) {
-      newErrors.company = 'Please enter your company or fleet name.';
+    if (!formData.fullName.trim() || formData.fullName.trim().length < 2) {
+      newErrors.fullName = 'Please enter your full name.';
     }
 
     const cleanPhone = formData.phone.replace(/[\s-]/g, '');
@@ -81,8 +73,8 @@ export const ContactPage: React.FC = () => {
       newErrors.email = 'Please enter a valid email address.';
     }
 
-    if (!formData.message.trim() || formData.message.trim().length < 10) {
-      newErrors.message = 'Please provide requirement details (at least 10 characters).';
+    if (!formData.service) {
+      newErrors.service = 'Please select a required service.';
     }
 
     setErrors(newErrors);
@@ -91,488 +83,354 @@ export const ContactPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return; // Prevent duplicate submissions caused by repeated clicks
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setSubmissionResult({ status: null });
+    setErrorMessage(null);
 
     try {
       const result = await businessEnquiryService.submitEnquiry({
-        full_name: formData.name,
-        company_name: formData.company,
-        phone_number: formData.phone,
+        full_name: formData.fullName,
+        company_name: formData.companyName,
+        phone: formData.phone,
         email: formData.email,
-        service_required: (formData.service as any) || 'Truck Drivers on Hire',
-        operational_requirements: formData.message,
-        preferred_contact_method: 'Phone Call',
+        service_required: formData.service,
+        requirements: formData.requirements,
       });
 
-      if (result.success && result.referenceId) {
-        setSubmissionResult({
-          status: 'success',
-          referenceId: result.referenceId,
-          message: 'Your enquiry has been securely logged with our Pune Operations Desk and email notifications have been initiated.',
-        });
+      if (result.success && (result.enquiryId || result.referenceId)) {
+        setSubmittedEnquiryId(result.enquiryId || result.referenceId || 'PXPL-ENQ-2026');
       } else {
-        setSubmissionResult({
-          status: 'backend_unreachable',
-          message:
-            result.error ||
-            'The cloud database is currently unreachable. You can immediately forward your request via direct WhatsApp or phone call below.',
-        });
+        setErrorMessage('Unable to submit your enquiry. Please try again.');
       }
     } catch {
-      setSubmissionResult({
-        status: 'backend_unreachable',
-        message: 'Could not connect to the database. Please connect with our team via WhatsApp or phone.',
-      });
+      setErrorMessage('Unable to submit your enquiry. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const whatsappMessage = encodeURIComponent(
-    `Hello Prisha Xpress (${formType === 'business' ? 'Business Enquiry' : 'Customer Contact'}):\nName: ${formData.name}\nCompany: ${formData.company || 'N/A'}\nPhone: ${formData.phone}\nEmail: ${formData.email}\nService: ${formData.service}\nDetails: ${formData.message}`
-  );
+  const handleReset = () => {
+    setSubmittedEnquiryId(null);
+    setFormData({
+      fullName: '',
+      companyName: '',
+      phone: '',
+      email: '',
+      service: 'Truck Drivers on Hire',
+      requirements: '',
+    });
+    setErrors({});
+    setErrorMessage(null);
+  };
+
+  // Official contact values
+  const directPhone = '+91 7276879727';
+  const whatsappUrl = 'https://wa.me/917276879727?text=Hello%20Prisha%20Xpress%2C%20I%20would%20like%20to%20discuss%20a%20business%20enquiry.';
+  const officialEmail = companyInfo.email || 'contact@prishaxpress.com';
+  const locationText = 'Kharadi, Pune, Maharashtra.';
 
   return (
     <PageTransition>
-      {/* Banner */}
-      <section className="relative pt-32 pb-16 lg:pt-36 lg:pb-20 text-white overflow-hidden bg-px-deep flex items-center justify-center min-h-[440px]">
-        {/* Background Corporate HQ Image - Natural Daylight */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/assets/images/contact-hq.jpg"
-            alt="Prisha Xpress Corporate Headquarters & Facility"
-            className="w-full h-full object-cover object-[75%_center] md:object-center filter brightness-100 contrast-100"
-          />
-          {/* Soft Ambient Directional Support Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-px-deep/65 via-transparent to-px-deep/40 hidden md:block" />
-          <div className="absolute inset-0 bg-gradient-to-t from-px-deep/75 via-transparent to-px-deep/35 md:hidden" />
-        </div>
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center w-full py-6">
-          <div className="p-6 sm:p-10 rounded-3xl bg-px-deep/80 backdrop-blur-md border border-white/20 shadow-2xl space-y-4">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-purple-200 border border-white/20">
-              Official Corporate Connect
-            </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
-              Contact Prisha Xpress Pvt. Ltd.
-            </h1>
-            <p className="text-sm sm:text-base text-gray-100 max-w-2xl mx-auto font-medium leading-relaxed">
-              Headquartered in Kharadi, Pune. Speak with our team for commercial driver staffing, 3PL fleet operations, transportation planning, or workshop servicing.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Section */}
-      <section className="py-20 bg-px-bg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            {/* Contact Details Card (5 cols) */}
+      <div className="min-h-screen bg-white text-px-dark pt-28 pb-16 lg:pt-32 lg:pb-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            
+            {/* ======================================================== */}
+            {/* LEFT SIDE – Contact Information                          */}
+            {/* ======================================================== */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="p-8 rounded-3xl bg-white border border-px-border shadow-soft-purple space-y-6">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-px-violet">
-                    Corporate Office
-                  </span>
-                  <h2 className="text-2xl font-black text-px-dark mt-0.5">
-                    {companyInfo.name}
-                  </h2>
-                  <p className="text-xs text-gray-500 font-mono mt-1">CIN: {companyInfo.cin}</p>
+              <div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-purple-100 text-px-primary border border-purple-200">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  LET'S WORK TOGETHER
+                </span>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-px-dark tracking-tight leading-tight mt-3">
+                  Let's Discuss Your Transport Needs
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-normal mt-2">
+                  Looking for reliable transport, truck drivers or fleet management services? Share your requirements with us. Our team will contact you.
+                </p>
+              </div>
+
+              {/* Three Simple Contact Options */}
+              <div className="space-y-3.5 pt-2">
+                {/* 1. Call Us */}
+                <a
+                  href={`tel:${directPhone.replace(/\s+/g, '')}`}
+                  className="p-4 rounded-2xl bg-[#FAF8FC] border border-purple-100 hover:border-purple-300 hover:bg-purple-50/50 transition-all flex items-start gap-3.5 group shadow-2xs block"
+                >
+                  <div className="p-2.5 rounded-xl bg-purple-100 text-px-primary group-hover:bg-px-primary group-hover:text-white transition-colors shrink-0 mt-0.5">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-px-dark">1. Call Us</h2>
+                    <p className="text-sm font-extrabold text-px-primary mt-0.5">{directPhone}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Click to call.</p>
+                  </div>
+                </a>
+
+                {/* 2. WhatsApp */}
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-2xl bg-[#FAF8FC] border border-emerald-100 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all flex items-start gap-3.5 group shadow-2xs block"
+                >
+                  <div className="p-2.5 rounded-xl bg-emerald-100 text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                    <MessageCircle className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-px-dark">2. WhatsApp</h2>
+                    <p className="text-sm font-bold text-emerald-700 mt-0.5">Chat with our team.</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Open the company's existing official WhatsApp number.</p>
+                  </div>
+                </a>
+
+                {/* 3. Email */}
+                <a
+                  href={`mailto:${officialEmail}`}
+                  className="p-4 rounded-2xl bg-[#FAF8FC] border border-purple-100 hover:border-purple-300 hover:bg-purple-50/50 transition-all flex items-start gap-3.5 group shadow-2xs block"
+                >
+                  <div className="p-2.5 rounded-xl bg-purple-100 text-px-primary group-hover:bg-px-primary group-hover:text-white transition-colors shrink-0 mt-0.5">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-px-dark">3. Email</h2>
+                    <p className="text-sm font-bold text-px-dark mt-0.5">{officialEmail}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Contact us using the company's verified official email address.</p>
+                  </div>
+                </a>
+              </div>
+
+              {/* Company Location */}
+              <div className="pt-2 flex items-center gap-2.5 text-xs text-gray-600">
+                <div className="p-2 rounded-lg bg-gray-100 text-gray-700 shrink-0">
+                  <MapPin className="w-4 h-4 text-px-primary" />
                 </div>
-
-                <div className="space-y-4 pt-2">
-                  {/* Address */}
-                  <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 rounded-xl bg-px-lavender text-px-primary shrink-0 mt-0.5">
-                      <MapPin className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 uppercase">Registered Location</p>
-                      <p className="text-sm font-semibold text-px-dark mt-0.5">
-                        {companyInfo.address}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 rounded-xl bg-px-lavender text-px-primary shrink-0 mt-0.5">
-                      <Phone className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 uppercase">Direct Official Helpline</p>
-                      <a
-                        href={`tel:${companyInfo.phone}`}
-                        className="text-sm font-bold text-px-primary hover:underline block mt-0.5"
-                      >
-                        {companyInfo.phone}
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 rounded-xl bg-px-lavender text-px-primary shrink-0 mt-0.5">
-                      <Mail className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 uppercase">Official Email</p>
-                      <a
-                        href={`mailto:${companyInfo.email}`}
-                        className="text-sm font-bold text-px-primary hover:underline block mt-0.5"
-                      >
-                        {companyInfo.email}
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Business Hours */}
-                  <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 rounded-xl bg-px-lavender text-px-primary shrink-0 mt-0.5">
-                      <Clock className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 uppercase">Published Business Hours</p>
-                      <p className="text-sm font-semibold text-px-dark mt-0.5">
-                        {companyInfo.businessHours}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Customer support and driver desk active during standard operating hours.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* WhatsApp Direct Integration */}
-                <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-emerald-600 text-white shrink-0">
-                      <MessageCircle className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-emerald-900">Direct WhatsApp Enquiry</p>
-                      <p className="text-[11px] text-emerald-700">Connect instantly on +91 7276897727</p>
-                    </div>
-                  </div>
-                  <a
-                    href="https://wa.me/917276897727?text=Hello%20Prisha%20Xpress%2C%20I%20would%20like%20to%20enquire%20about%20your%20services."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs inline-flex items-center justify-center gap-1.5 transition-all"
-                  >
-                    <span>Message WhatsApp</span>
-                    <Send className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-
-                {/* Google Maps Location Preview Card */}
-                <div className="p-4 rounded-2xl bg-px-bg border border-px-border space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-px-dark">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-px-primary" />
-                      Kharadi, Pune – 411014 Location
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-normal">Maharashtra</span>
-                  </div>
-                  <div className="h-44 rounded-xl overflow-hidden border border-gray-200 relative bg-gray-100 flex items-center justify-center text-center p-4">
-                    <iframe
-                      title="Prisha Xpress Office Location Map"
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d60505.74836647184!2d73.91689438038755!3d18.552945203716654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c3c1db92c3a5%3A0x6e9f187a552e6754!2sKharadi%2C%20Pune%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-                      className="w-full h-full border-0 absolute inset-0"
-                      allowFullScreen={false}
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                    />
-                  </div>
-                  <p className="text-[11px] text-gray-500 italic text-center">
-                    Exact premises pin provided upon confirmed meeting appointment.
-                  </p>
-                </div>
+                <span>
+                  <strong>Location: </strong> {locationText}
+                </span>
               </div>
             </div>
 
-            {/* Form Section (7 cols) */}
-            <div id="enquiry" className="scroll-mt-28 lg:col-span-7">
-              <div id="enquiry-form" className="p-8 sm:p-12 rounded-3xl bg-white border border-px-border shadow-soft-purple space-y-6">
-                {/* Form Tabs: Business Enquiry vs Customer Support */}
-                <div className="flex p-1.5 rounded-2xl bg-px-bg border border-px-border max-w-sm">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormType('business');
-                      setErrors({});
-                      setSubmissionResult({ status: null });
-                    }}
-                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-                      formType === 'business'
-                        ? 'bg-px-primary text-white shadow-xs'
-                        : 'text-gray-600 hover:text-px-primary'
-                    }`}
-                  >
-                    <Building2 className="w-3.5 h-3.5" />
-                    <span>Business Enquiry</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormType('customer');
-                      setErrors({});
-                      setSubmissionResult({ status: null });
-                    }}
-                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
-                      formType === 'customer'
-                        ? 'bg-px-primary text-white shadow-xs'
-                        : 'text-gray-600 hover:text-px-primary'
-                    }`}
-                  >
-                    <HelpCircle className="w-3.5 h-3.5" />
-                    <span>Customer Contact</span>
-                  </button>
-                </div>
-
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-px-dark">
-                    {formType === 'business'
-                      ? 'Discuss Transportation & Fleet Requirements'
-                      : 'Customer & Partner Assistance Desk'}
-                  </h2>
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                    {formType === 'business'
-                      ? 'Submit your commercial transport, driver hiring, or 3PL fleet parameters for a formal proposal.'
-                      : 'Reach our team for active consignment inquiries, driver verification support, or billing questions.'}
-                  </p>
-                </div>
-
-                {submissionResult.status === 'success' ? (
-                  <div className="p-8 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-4 animate-fadeIn">
-                    <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
-                    <h3 className="text-lg font-bold text-emerald-900">Enquiry Received Successfully!</h3>
-                    {submissionResult.referenceId && (
-                      <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-mono font-bold">
-                        Reference: {submissionResult.referenceId}
-                      </span>
-                    )}
-                    <p className="text-xs sm:text-sm text-emerald-800 max-w-md mx-auto">
-                      Thank you for contacting Prisha Xpress Pvt. Ltd. Our Pune operations team will review your {formData.service} inquiry and reach out within 2 hours during standard business hours (9:30 AM – 6:00 PM).
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSubmissionResult({ status: null });
-                        setFormData({
-                          name: '',
-                          company: '',
-                          email: '',
-                          phone: '',
-                          service: 'Truck Drivers On Hire',
-                          message: '',
-                        });
-                        setErrors({});
-                      }}
-                      className="text-xs font-bold text-px-primary underline mt-2 inline-block hover:text-px-violet"
-                    >
-                      Submit another enquiry
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                    {/* Database Offline Fallback Notice */}
-                    {submissionResult.status === 'backend_unreachable' && (
-                      <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-2.5 text-xs text-amber-900">
-                        <div className="flex items-start gap-2.5">
-                          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                          <p className="leading-relaxed">
-                            {submissionResult.message}
-                          </p>
-                        </div>
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          <a
-                            href={`https://wa.me/917276897727?text=${whatsappMessage}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                            <span>Forward via WhatsApp (+91 7276897727)</span>
-                          </a>
-                          <a
-                            href={`tel:${companyInfo.phone}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-800 font-bold text-xs hover:bg-gray-50 transition-colors"
-                          >
-                            <PhoneCall className="w-3.5 h-3.5 text-px-primary" />
-                            <span>Call {companyInfo.phone}</span>
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
-                          Full Name <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.name}
-                          onChange={(e) => {
-                            setFormData({ ...formData, name: e.target.value });
-                            if (errors.name) setErrors({ ...errors, name: undefined });
-                          }}
-                          placeholder="e.g. Anand Kulkarni"
-                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
-                            errors.name
-                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
-                              : 'border-gray-200 focus:border-px-primary'
-                          }`}
-                        />
-                        {errors.name && (
-                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.name}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
-                          Company / Fleet Name {formType === 'business' && <span className="text-rose-500">*</span>}
-                        </label>
-                        <input
-                          type="text"
-                          required={formType === 'business'}
-                          value={formData.company}
-                          onChange={(e) => {
-                            setFormData({ ...formData, company: e.target.value });
-                            if (errors.company) setErrors({ ...errors, company: undefined });
-                          }}
-                          placeholder="e.g. ABC Manufacturing / Transport"
-                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
-                            errors.company
-                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
-                              : 'border-gray-200 focus:border-px-primary'
-                          }`}
-                        />
-                        {errors.company && (
-                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.company}</p>
-                        )}
-                      </div>
+            {/* ======================================================== */}
+            {/* RIGHT SIDE – Business Enquiry Form                      */}
+            {/* ======================================================== */}
+            <div className="lg:col-span-7">
+              <div className="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white border border-purple-100 shadow-[0_4px_24px_rgba(112,47,138,0.06)]">
+                
+                {submittedEnquiryId ? (
+                  /* Success Feedback View */
+                  <div className="text-center py-8 space-y-5 animate-fadeIn">
+                    <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
+                      <CheckCircle2 className="w-8 h-8" />
                     </div>
 
+                    <div className="space-y-2">
+                      <h3 className="text-xl sm:text-2xl font-black text-px-dark">
+                        Thank you!
+                      </h3>
+                      <p className="text-sm sm:text-base text-gray-700 font-medium max-w-md mx-auto">
+                        Your enquiry has been submitted successfully. Our team will contact you soon.
+                      </p>
+                    </div>
+
+                    {/* Enquiry ID Display */}
+                    <div className="p-4 rounded-xl bg-purple-50 border border-purple-200 max-w-sm mx-auto text-center space-y-1">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-purple-700 block">
+                        Your Enquiry ID
+                      </span>
+                      <span className="text-xl font-black font-mono text-px-primary block select-all">
+                        {submittedEnquiryId}
+                      </span>
+                    </div>
+
+                    <div className="pt-4 flex flex-wrap justify-center items-center gap-3">
+                      <Link
+                        to="/"
+                        className="px-5 py-2.5 rounded-xl bg-px-primary hover:bg-px-violet text-white text-xs sm:text-sm font-bold shadow-soft-purple transition-all inline-flex items-center gap-2"
+                      >
+                        <span>Back to Home</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={handleReset}
+                        className="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-px-dark text-xs sm:text-sm font-bold transition-all inline-flex items-center gap-1.5"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5 text-gray-600" />
+                        <span>Submit Another Enquiry</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Form Input View */
+                  <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-black text-px-dark">
+                        Send a Business Enquiry
+                      </h2>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                        Tell us what service you need. Our team will get in touch.
+                      </p>
+                    </div>
+
+                    {/* Error Banner */}
+                    {errorMessage && (
+                      <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm flex items-center gap-2.5">
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                        <span>{errorMessage}</span>
+                      </div>
+                    )}
+
+                    {/* 1. Full Name * */}
+                    <div>
+                      <label className="block text-xs font-bold text-px-dark mb-1">
+                        Full Name <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.fullName}
+                        onChange={(e) => {
+                          setFormData({ ...formData, fullName: e.target.value });
+                          if (errors.fullName) setErrors({ ...errors, fullName: undefined });
+                        }}
+                        placeholder="Enter your full name"
+                        className={`w-full px-4 py-2.5 rounded-xl bg-white border ${
+                          errors.fullName ? 'border-rose-400 focus:ring-rose-200' : 'border-gray-200 focus:border-px-primary'
+                        } text-sm focus:outline-none focus:ring-2 focus:ring-px-primary/20 transition-all`}
+                        disabled={isSubmitting}
+                      />
+                      {errors.fullName && (
+                        <p className="text-[11px] text-rose-600 mt-1 font-medium">{errors.fullName}</p>
+                      )}
+                    </div>
+
+                    {/* 2. Company / Business Name (Optional) */}
+                    <div>
+                      <label className="block text-xs font-bold text-px-dark mb-1">
+                        Company / Business Name <span className="text-gray-400 font-normal">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.companyName}
+                        onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                        placeholder="Enter company or fleet name"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 focus:border-px-primary text-sm focus:outline-none focus:ring-2 focus:ring-px-primary/20 transition-all"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    {/* 3 & 4. Mobile Number * & Email Address * */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
-                          Mobile / Phone Number <span className="text-rose-500">*</span>
+                        <label className="block text-xs font-bold text-px-dark mb-1">
+                          Mobile Number <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="tel"
-                          required
                           value={formData.phone}
                           onChange={(e) => {
                             setFormData({ ...formData, phone: e.target.value });
                             if (errors.phone) setErrors({ ...errors, phone: undefined });
                           }}
-                          placeholder="+91 98765 00000"
-                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
-                            errors.phone
-                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
-                              : 'border-gray-200 focus:border-px-primary'
-                          }`}
+                          placeholder="10-digit mobile number"
+                          className={`w-full px-4 py-2.5 rounded-xl bg-white border ${
+                            errors.phone ? 'border-rose-400 focus:ring-rose-200' : 'border-gray-200 focus:border-px-primary'
+                          } text-sm focus:outline-none focus:ring-2 focus:ring-px-primary/20 transition-all`}
+                          disabled={isSubmitting}
                         />
                         {errors.phone && (
-                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.phone}</p>
+                          <p className="text-[11px] text-rose-600 mt-1 font-medium">{errors.phone}</p>
                         )}
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-700 mb-1">
-                          Official Email Address <span className="text-rose-500">*</span>
+                        <label className="block text-xs font-bold text-px-dark mb-1">
+                          Email Address <span className="text-rose-500">*</span>
                         </label>
                         <input
                           type="email"
-                          required
                           value={formData.email}
                           onChange={(e) => {
                             setFormData({ ...formData, email: e.target.value });
                             if (errors.email) setErrors({ ...errors, email: undefined });
                           }}
-                          placeholder="contact@company.com"
-                          className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors ${
-                            errors.email
-                              ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
-                              : 'border-gray-200 focus:border-px-primary'
-                          }`}
+                          placeholder="Your email address"
+                          className={`w-full px-4 py-2.5 rounded-xl bg-white border ${
+                            errors.email ? 'border-rose-400 focus:ring-rose-200' : 'border-gray-200 focus:border-px-primary'
+                          } text-sm focus:outline-none focus:ring-2 focus:ring-px-primary/20 transition-all`}
+                          disabled={isSubmitting}
                         />
                         {errors.email && (
-                          <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.email}</p>
+                          <p className="text-[11px] text-rose-600 mt-1 font-medium">{errors.email}</p>
                         )}
                       </div>
                     </div>
 
-                    {/* Service Selection */}
+                    {/* 5. Service Required * (Dropdown) */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Service of Interest <span className="text-rose-500">*</span>
+                      <label className="block text-xs font-bold text-px-dark mb-1">
+                        Service Required <span className="text-rose-500">*</span>
                       </label>
                       <select
                         value={formData.service}
-                        onChange={(e) => setFormData({ ...formData, service: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm focus:outline-none focus:border-px-primary bg-white"
+                        onChange={(e) =>
+                          setFormData({ ...formData, service: e.target.value as BusinessEnquiryServiceType })
+                        }
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 focus:border-px-primary text-sm font-medium focus:outline-none focus:ring-2 focus:ring-px-primary/20 transition-all cursor-pointer"
+                        disabled={isSubmitting}
                       >
-                        <option value="Truck Drivers On Hire">Truck Drivers On Hire</option>
-                        <option value="3PL Fleet Management">3PL Fleet Management</option>
-                        <option value="Transportation">Transportation & Road Freight</option>
-                        <option value="Service Station">Commercial Service Station</option>
-                        <option value="Auto Spares">Auto Spares Enquiry</option>
-                        <option value="General Corporate Query">General Corporate Query</option>
+                        {SERVICE_OPTIONS.map((srv) => (
+                          <option key={srv} value={srv}>
+                            {srv}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
+                    {/* 6. Requirements (Optional textarea) */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Requirement Details <span className="text-rose-500">*</span>
+                      <label className="block text-xs font-bold text-px-dark mb-1">
+                        Requirements <span className="text-gray-400 font-normal">(Optional)</span>
                       </label>
                       <textarea
-                        rows={4}
-                        required
-                        value={formData.message}
-                        onChange={(e) => {
-                          setFormData({ ...formData, message: e.target.value });
-                          if (errors.message) setErrors({ ...errors, message: undefined });
-                        }}
-                        placeholder="Please describe your route requirements, fleet specifications, vehicle models, or required driver headcount..."
-                        className={`w-full px-4 py-2.5 rounded-xl border text-xs sm:text-sm focus:outline-none transition-colors resize-none ${
-                          errors.message
-                            ? 'border-rose-400 bg-rose-50/30 focus:border-rose-500'
-                            : 'border-gray-200 focus:border-px-primary'
-                        }`}
+                        rows={3}
+                        value={formData.requirements}
+                        onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+                        placeholder="Briefly describe your transport or fleet requirements."
+                        className="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-200 focus:border-px-primary text-sm focus:outline-none focus:ring-2 focus:ring-px-primary/20 transition-all resize-y"
+                        disabled={isSubmitting}
                       />
-                      {errors.message && (
-                        <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.message}</p>
-                      )}
                     </div>
 
-                    <div className="pt-2">
-                      <Button
+                    {/* 7. Submit Enquiry Button */}
+                    <div className="pt-2 space-y-2">
+                      <button
                         type="submit"
-                        variant="primary"
-                        size="lg"
                         disabled={isSubmitting}
-                        className="w-full justify-center py-3.5 text-xs sm:text-sm"
-                        icon={
-                          isSubmitting ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Send className="w-4 h-4" />
-                          )
-                        }
+                        className="w-full py-3.5 px-6 rounded-xl bg-px-primary hover:bg-px-violet text-white font-bold text-sm sm:text-base shadow-soft-purple hover:shadow-glow-purple disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
                       >
-                        {isSubmitting
-                          ? 'Submitting...'
-                          : formType === 'business'
-                          ? 'Submit Business Enquiry'
-                          : 'Send Message'}
-                      </Button>
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin text-white" />
+                            <span>Submitting Enquiry...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Submit Enquiry</span>
+                            <Send className="w-4 h-4 text-white" />
+                          </>
+                        )}
+                      </button>
+
+                      {/* Reassurance text below button */}
+                      <p className="text-center text-xs text-gray-500 font-medium">
+                        Your information is safe with us. Our team will contact you.
+                      </p>
                     </div>
                   </form>
                 )}
@@ -580,7 +438,7 @@ export const ContactPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </PageTransition>
   );
 };

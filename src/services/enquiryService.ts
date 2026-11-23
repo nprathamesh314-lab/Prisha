@@ -9,7 +9,6 @@ import {
   EnquiryStats,
   EnquiryFilterOptions,
   EnquiryActivityHistory,
-  PreferredContactMethod,
 } from '../types/enquiry';
 import { emailService } from './emailService';
 import { supabaseAuthService } from './supabaseClient';
@@ -21,14 +20,16 @@ const STORAGE_KEY_ACTIVITY = 'prisha_business_enquiry_activity_v1';
 const SEED_ENQUIRIES: BusinessEnquiry[] = [
   {
     id: 'enq-seed-001',
+    enquiry_id: 'PXPL-ENQ-2026-0001',
     enquiry_number: 'PXPL-ENQ-2026-0001',
     full_name: 'Rajesh Sharma',
     company_name: 'Western Logistics Hub Ltd.',
+    phone: '+91 98220 12345',
     phone_number: '+91 98220 12345',
     email: 'rajesh.sharma@westernlogistics.in',
     service_required: 'Truck Drivers on Hire',
+    requirements: 'Require 8 verified HMV container drivers for Pune – Mumbai – Ahmedabad freight corridor on monthly corporate contract.',
     operational_requirements: 'Require 8 verified HMV container drivers for Pune – Mumbai – Ahmedabad freight corridor on monthly corporate contract.',
-    preferred_contact_method: 'Phone Call',
     status: 'In Progress',
     admin_notes: 'Spoke with Mr. Rajesh. Shared commercial proposal for 8 multi-axle drivers. Awaiting route clearance.',
     assigned_to: 'usr-admin-pxpl',
@@ -42,14 +43,16 @@ const SEED_ENQUIRIES: BusinessEnquiry[] = [
   },
   {
     id: 'enq-seed-002',
+    enquiry_id: 'PXPL-ENQ-2026-0002',
     enquiry_number: 'PXPL-ENQ-2026-0002',
     full_name: 'Vikram Patil',
     company_name: 'Kirloskar Spares & Engineering',
+    phone: '+91 98901 67890',
     phone_number: '+91 98901 67890',
     email: 'v.patil@kirloskarspares.com',
     service_required: '3PL Fleet Management',
+    requirements: 'Need dedicated 3PL fleet management for 14 commercial tempos operating across Bhosari and Chakan industrial belts.',
     operational_requirements: 'Need dedicated 3PL fleet management for 14 commercial tempos operating across Bhosari and Chakan industrial belts.',
-    preferred_contact_method: 'WhatsApp',
     status: 'New',
     admin_notes: 'New enquiry received. Fleet size: 14 vehicles.',
     assigned_to: undefined,
@@ -61,14 +64,16 @@ const SEED_ENQUIRIES: BusinessEnquiry[] = [
   },
   {
     id: 'enq-seed-003',
+    enquiry_id: 'PXPL-ENQ-2026-0003',
     enquiry_number: 'PXPL-ENQ-2026-0003',
     full_name: 'Amitabh Sen',
     company_name: 'Apex FMCG Distribution',
+    phone: '+91 97654 32109',
     phone_number: '+91 97654 32109',
     email: 'asen@apexfmcg.co.in',
-    service_required: 'Transportation',
+    service_required: 'Transportation Services',
+    requirements: 'Looking for scheduled daily 32ft multi-axle closed container movement from Pune warehouse to Nagpur distribution centre.',
     operational_requirements: 'Looking for scheduled daily 32ft multi-axle closed container movement from Pune warehouse to Nagpur distribution centre.',
-    preferred_contact_method: 'Email',
     status: 'Contacted',
     admin_notes: 'Sent rate card for 32ft multi-axle line-haul via official email. Follow up scheduled for tomorrow.',
     assigned_to: 'usr-admin-pxpl',
@@ -160,19 +165,22 @@ class BusinessEnquiryService {
   /**
    * Submits a new business enquiry.
    * Follows strict rule: Database first, email second.
+   * Completely removes preferred_contact_method.
    */
   public async submitEnquiry(input: {
     full_name: string;
     company_name?: string;
-    phone_number: string;
+    phone?: string;
+    phone_number?: string;
     email: string;
     service_required: BusinessEnquiryServiceType;
-    operational_requirements: string;
-    preferred_contact_method: PreferredContactMethod;
+    requirements?: string;
+    operational_requirements?: string;
   }): Promise<{
     success: boolean;
     data?: BusinessEnquiry;
     referenceId?: string;
+    enquiryId?: string;
     error?: string;
   }> {
     const isConfigured = supabaseAuthService.getIsConfigured();
@@ -183,16 +191,21 @@ class BusinessEnquiryService {
     const newId = `enq-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const nowIso = new Date().toISOString();
 
+    const cleanPhone = (input.phone || input.phone_number || '').trim();
+    const reqText = (input.requirements || input.operational_requirements || '').trim();
+
     const newEnquiry: BusinessEnquiry = {
       id: newId,
+      enquiry_id: referenceId,
       enquiry_number: referenceId,
       full_name: input.full_name.trim(),
       company_name: input.company_name?.trim() || '',
-      phone_number: input.phone_number.trim(),
+      phone: cleanPhone,
+      phone_number: cleanPhone,
       email: input.email.trim().toLowerCase(),
       service_required: input.service_required,
-      operational_requirements: input.operational_requirements.trim(),
-      preferred_contact_method: input.preferred_contact_method,
+      requirements: reqText,
+      operational_requirements: reqText,
       status: 'New',
       email_status: 'Pending',
       customer_email_status: 'Pending',
@@ -203,16 +216,15 @@ class BusinessEnquiryService {
     // 1. DATABASE FIRST: Persist to Supabase if configured
     if (isConfigured) {
       try {
-        const payload = {
-          enquiry_number: newEnquiry.enquiry_number,
+        const payload: any = {
+          enquiry_number: newEnquiry.enquiry_id,
           full_name: newEnquiry.full_name,
-          company_name: newEnquiry.company_name,
-          phone_number: newEnquiry.phone_number,
+          company_name: newEnquiry.company_name || null,
+          phone_number: newEnquiry.phone,
           email: newEnquiry.email,
           service_required: newEnquiry.service_required,
-          operational_requirements: newEnquiry.operational_requirements,
-          preferred_contact_method: newEnquiry.preferred_contact_method,
-          status: newEnquiry.status,
+          operational_requirements: newEnquiry.requirements || '',
+          status: 'New',
           email_status: 'Pending',
           customer_email_status: 'Pending',
         };
@@ -233,6 +245,7 @@ class BusinessEnquiryService {
           if (inserted?.id) {
             newEnquiry.id = inserted.id;
             if (inserted.enquiry_number) {
+              newEnquiry.enquiry_id = inserted.enquiry_number;
               newEnquiry.enquiry_number = inserted.enquiry_number;
             }
           }
@@ -253,7 +266,7 @@ class BusinessEnquiryService {
       enquiry_id: newEnquiry.id,
       action_type: 'CREATED',
       actor_name: `${newEnquiry.full_name} (Customer)`,
-      notes: `Enquiry submitted for ${newEnquiry.service_required}. Preferred contact: ${newEnquiry.preferred_contact_method}.`,
+      notes: `Enquiry submitted for ${newEnquiry.service_required}.`,
     });
 
     // 2. EMAIL SECOND: Dispatch transactional notifications safely
@@ -295,7 +308,8 @@ class BusinessEnquiryService {
     return {
       success: true,
       data: newEnquiry,
-      referenceId: newEnquiry.enquiry_number,
+      referenceId: newEnquiry.enquiry_id,
+      enquiryId: newEnquiry.enquiry_id,
     };
   }
 
@@ -322,12 +336,35 @@ class BusinessEnquiryService {
       );
 
       if (res.ok) {
-        const data: BusinessEnquiry[] = await res.json();
+        const data: any[] = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          // Merge remote records with local state
           const remoteMap = new Map(data.map((item) => [item.id, item]));
-          // Retain any locally created unsynced items
-          const merged = [...data];
+          const merged: BusinessEnquiry[] = data.map((item) => ({
+            id: item.id,
+            enquiry_id: item.enquiry_number || item.enquiry_id || item.id,
+            enquiry_number: item.enquiry_number || item.enquiry_id || item.id,
+            full_name: item.full_name || item.contact_person || 'Customer',
+            company_name: item.company_name || '',
+            phone: item.phone_number || item.phone || '',
+            phone_number: item.phone_number || item.phone || '',
+            email: item.email || '',
+            service_required: item.service_required || item.service_requested || 'Other',
+            requirements: item.operational_requirements || item.requirements || item.fleet_requirement || '',
+            operational_requirements: item.operational_requirements || item.requirements || item.fleet_requirement || '',
+            status: item.status || 'New',
+            admin_notes: item.admin_notes || item.internal_notes || '',
+            assigned_to: item.assigned_to,
+            assigned_to_name: item.assigned_to_name,
+            follow_up_date: item.follow_up_date,
+            email_status: item.email_status || 'Pending',
+            email_error: item.email_error,
+            customer_email_status: item.customer_email_status || 'Pending',
+            customer_email_error: item.customer_email_error,
+            created_at: item.created_at || new Date().toISOString(),
+            updated_at: item.updated_at || new Date().toISOString(),
+            contacted_at: item.contacted_at,
+          }));
+
           for (const local of this.enquiries) {
             if (!remoteMap.has(local.id)) {
               merged.push(local);
@@ -355,12 +392,14 @@ class BusinessEnquiryService {
       const q = filters.searchQuery.trim().toLowerCase();
       list = list.filter(
         (e) =>
-          e.enquiry_number.toLowerCase().includes(q) ||
+          (e.enquiry_id && e.enquiry_id.toLowerCase().includes(q)) ||
+          (e.enquiry_number && e.enquiry_number.toLowerCase().includes(q)) ||
           e.full_name.toLowerCase().includes(q) ||
           (e.company_name && e.company_name.toLowerCase().includes(q)) ||
-          e.phone_number.includes(q) ||
+          e.phone.includes(q) ||
           e.email.toLowerCase().includes(q) ||
-          e.operational_requirements.toLowerCase().includes(q)
+          (e.requirements && e.requirements.toLowerCase().includes(q)) ||
+          (e.operational_requirements && e.operational_requirements.toLowerCase().includes(q))
       );
     }
 
@@ -541,7 +580,7 @@ class BusinessEnquiryService {
   }
 
   /**
-   * Retries email notifications for a failed enquiry
+   * Retries email notifications for an enquiry
    */
   public async retryEmails(id: string, actorName: string = 'Administrator'): Promise<{
     adminSuccess: boolean;
@@ -605,16 +644,18 @@ class BusinessEnquiryService {
   public getStats(): EnquiryStats {
     const total = this.enquiries.length;
     const newCount = this.enquiries.filter((e) => e.status === 'New').length;
-    const inProgress = this.enquiries.filter((e) => e.status === 'In Progress').length;
     const contacted = this.enquiries.filter((e) => e.status === 'Contacted').length;
+    const inProgress = this.enquiries.filter((e) => e.status === 'In Progress').length;
+    const completed = this.enquiries.filter((e) => e.status === 'Completed').length;
     const converted = this.enquiries.filter((e) => e.status === 'Converted').length;
     const closed = this.enquiries.filter((e) => e.status === 'Closed').length;
 
     return {
       total,
       new: newCount,
-      inProgress,
       contacted,
+      inProgress,
+      completed,
       converted,
       closed,
     };
@@ -622,43 +663,42 @@ class BusinessEnquiryService {
 
   /**
    * Exports enquiries to Excel-compatible CSV format
+   * (No Preferred Contact Method column)
    */
   public exportToCsv(filteredEnquiries?: BusinessEnquiry[]): void {
     const list = filteredEnquiries || this.enquiries;
 
     const headers = [
-      'Enquiry Number',
-      'Submission Date',
-      'Full Name',
+      'Enquiry ID',
+      'Submission Date & Time',
+      'Customer Name',
       'Company Name',
-      'Phone Number',
+      'Mobile Number',
       'Email Address',
       'Service Required',
-      'Preferred Contact Method',
       'Status',
       'Assigned To',
       'Follow-up Date',
       'Company Email Status',
       'Customer Email Status',
-      'Operational Requirements',
+      'Requirements',
       'Internal Admin Notes',
     ];
 
     const rows = list.map((e) => [
-      e.enquiry_number,
+      e.enquiry_id || e.enquiry_number,
       new Date(e.created_at).toLocaleString('en-IN'),
       `"${e.full_name.replace(/"/g, '""')}"`,
       `"${(e.company_name || '').replace(/"/g, '""')}"`,
-      `"${e.phone_number}"`,
+      `"${e.phone || e.phone_number}"`,
       `"${e.email}"`,
       `"${e.service_required}"`,
-      `"${e.preferred_contact_method}"`,
       `"${e.status}"`,
       `"${e.assigned_to_name || 'Unassigned'}"`,
       e.follow_up_date ? new Date(e.follow_up_date).toLocaleDateString('en-IN') : '',
       e.email_status,
       e.customer_email_status,
-      `"${e.operational_requirements.replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+      `"${(e.requirements || e.operational_requirements || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
       `"${(e.admin_notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
     ]);
 

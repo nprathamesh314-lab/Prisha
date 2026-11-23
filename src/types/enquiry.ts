@@ -3,18 +3,18 @@
 
 export type BusinessEnquiryServiceType =
   | 'Truck Drivers on Hire'
+  | 'Transportation Services'
   | '3PL Fleet Management'
-  | 'Transportation'
-  | 'Service Station'
-  | 'Auto-Spares'
+  | 'Fleet Supervision'
+  | 'Vehicle Servicing'
+  | 'Automotive Spare Parts'
   | 'Other';
-
-export type PreferredContactMethod = 'Phone Call' | 'WhatsApp' | 'Email';
 
 export type EnquiryStatus =
   | 'New'
-  | 'In Progress'
   | 'Contacted'
+  | 'In Progress'
+  | 'Completed'
   | 'Converted'
   | 'Closed';
 
@@ -22,14 +22,16 @@ export type EmailNotificationStatus = 'Pending' | 'Sent' | 'Failed';
 
 export interface BusinessEnquiry {
   id: string;
-  enquiry_number: string;
+  enquiry_id: string; // Unique readable enquiry reference (e.g. PXPL-ENQ-2026-0001)
+  enquiry_number: string; // Compatibility alias
   full_name: string;
   company_name?: string;
-  phone_number: string;
+  phone: string; // Mobile number
+  phone_number: string; // Compatibility alias
   email: string;
   service_required: BusinessEnquiryServiceType;
-  operational_requirements: string;
-  preferred_contact_method: PreferredContactMethod;
+  requirements?: string; // Optional requirements description
+  operational_requirements?: string; // Compatibility alias
   status: EnquiryStatus;
   admin_notes?: string;
   assigned_to?: string;
@@ -69,8 +71,9 @@ export interface EnquiryActivityHistory {
 export interface EnquiryStats {
   total: number;
   new: number;
-  inProgress: number;
   contacted: number;
+  inProgress: number;
+  completed: number;
   converted: number;
   closed: number;
 }

@@ -23,7 +23,6 @@ import { companyInfo } from '../../data/companyData';
 import { businessEnquiryService } from '../../services/enquiryService';
 import {
   BusinessEnquiryServiceType,
-  PreferredContactMethod,
 } from '../../types/enquiry';
 
 interface FormState {
@@ -33,7 +32,6 @@ interface FormState {
   email: string;
   service: BusinessEnquiryServiceType;
   requirements: string;
-  contactMethod: PreferredContactMethod;
 }
 
 const enquiryTranslations = {
@@ -182,14 +180,13 @@ const enquiryTranslations = {
 
 const SERVICES_OPTIONS: BusinessEnquiryServiceType[] = [
   'Truck Drivers on Hire',
+  'Transportation Services',
   '3PL Fleet Management',
-  'Transportation',
-  'Service Station',
-  'Auto-Spares',
+  'Fleet Supervision',
+  'Vehicle Servicing',
+  'Automotive Spare Parts',
   'Other',
 ];
-
-const CONTACT_METHODS: PreferredContactMethod[] = ['Phone Call', 'WhatsApp', 'Email'];
 
 export const BusinessEnquirySection: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'hi' | 'mr'>('en');
@@ -218,7 +215,6 @@ export const BusinessEnquirySection: React.FC = () => {
     email: '',
     service: 'Truck Drivers on Hire',
     requirements: '',
-    contactMethod: 'Phone Call',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
@@ -242,10 +238,6 @@ export const BusinessEnquirySection: React.FC = () => {
       newErrors.email = t.errEmail;
     }
 
-    if (!formData.requirements.trim() || formData.requirements.trim().length < 10) {
-      newErrors.requirements = t.errRequirements;
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -266,7 +258,6 @@ export const BusinessEnquirySection: React.FC = () => {
         email: formData.email,
         service_required: formData.service,
         operational_requirements: formData.requirements,
-        preferred_contact_method: formData.contactMethod,
       });
 
       if (result.success && result.referenceId) {
@@ -294,7 +285,6 @@ export const BusinessEnquirySection: React.FC = () => {
       email: '',
       service: 'Truck Drivers on Hire',
       requirements: '',
-      contactMethod: 'Phone Call',
     });
     setErrors({});
     setErrorMessage(null);
@@ -594,33 +584,6 @@ export const BusinessEnquirySection: React.FC = () => {
                     {errors.requirements && (
                       <p className="text-[11px] text-rose-600 mt-1 font-medium">{errors.requirements}</p>
                     )}
-                  </div>
-
-                  {/* Row 5: Preferred Contact Method */}
-                  <div>
-                    <label className="block text-xs font-bold text-px-dark uppercase tracking-wider mb-2">
-                      {t.labelContactMethod}
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {CONTACT_METHODS.map((method) => {
-                        const isSelected = formData.contactMethod === method;
-                        return (
-                          <button
-                            key={method}
-                            type="button"
-                            onClick={() => setFormData({ ...formData, contactMethod: method })}
-                            className={`py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold border transition-all text-center ${
-                              isSelected
-                                ? 'bg-purple-100 text-px-primary border-purple-300 shadow-xs'
-                                : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
-                            }`}
-                            disabled={isSubmitting}
-                          >
-                            {method}
-                          </button>
-                        );
-                      })}
-                    </div>
                   </div>
 
                   {/* Privacy Notice */}

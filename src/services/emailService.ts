@@ -1,5 +1,5 @@
 // PRISHA XPRESS PVT. LTD. - TRANSACTIONAL EMAIL SERVICE
-// RESEND INTEGRATION WITH TEMPLATING FOR ADMIN NOTIFICATION & CUSTOMER CONFIRMATION
+// RESEND INTEGRATION WITH AUTOMATIC NOTIFICATIONS
 // RULE: DATABASE FIRST, EMAIL SECOND. EMAIL FAILURE NEVER DESTROYS SAVED DATA.
 
 import { BusinessEnquiry } from '../types/enquiry';
@@ -41,6 +41,8 @@ class EmailService {
       ? `${window.location.origin}/admin/enquiries`
       : 'https://www.prishaxpress.com/admin/enquiries';
 
+    const reqText = enquiry.requirements || enquiry.operational_requirements || 'No specific requirements specified.';
+
     return `
       <!DOCTYPE html>
       <html>
@@ -69,22 +71,21 @@ class EmailService {
           <div class="header">
             <span class="badge">New Business Enquiry</span>
             <h1 class="title">Corporate Lead Notification</h1>
-            <div class="ref">${enquiry.enquiry_number}</div>
+            <div class="ref">${enquiry.enquiry_id || enquiry.enquiry_number}</div>
           </div>
           <div class="body">
             <div class="section-title">Customer Details</div>
-            <div class="row"><div class="label">Full Name:</div><div class="value">${enquiry.full_name}</div></div>
+            <div class="row"><div class="label">Customer Name:</div><div class="value">${enquiry.full_name}</div></div>
             <div class="row"><div class="label">Company Name:</div><div class="value">${enquiry.company_name || 'Not specified'}</div></div>
-            <div class="row"><div class="label">Phone Number:</div><div class="value"><a href="tel:${enquiry.phone_number}">${enquiry.phone_number}</a></div></div>
-            <div class="row"><div class="label">Business Email:</div><div class="value"><a href="mailto:${enquiry.email}">${enquiry.email}</a></div></div>
-            <div class="row"><div class="label">Preferred Contact:</div><div class="value">${enquiry.preferred_contact_method}</div></div>
-            <div class="row"><div class="label">Submission Date:</div><div class="value">${formattedDate}</div></div>
+            <div class="row"><div class="label">Phone Number:</div><div class="value"><a href="tel:${enquiry.phone || enquiry.phone_number}">${enquiry.phone || enquiry.phone_number}</a></div></div>
+            <div class="row"><div class="label">Email Address:</div><div class="value"><a href="mailto:${enquiry.email}">${enquiry.email}</a></div></div>
+            <div class="row"><div class="label">Submission Date & Time:</div><div class="value">${formattedDate}</div></div>
 
             <div class="section-title">Service Requested</div>
             <div class="row"><div class="label">Service Required:</div><div class="value" style="color: #702F8A;">${enquiry.service_required}</div></div>
 
-            <div class="section-title">Operational Requirements</div>
-            <div class="requirements-box">${enquiry.operational_requirements.replace(/\n/g, '<br/>')}</div>
+            <div class="section-title">Requirements</div>
+            <div class="requirements-box">${reqText.replace(/\n/g, '<br/>')}</div>
 
             <div class="cta-wrap">
               <a href="${adminPortalUrl}" class="btn">Open Enquiry in Admin Dashboard &rarr;</a>
@@ -103,6 +104,8 @@ class EmailService {
    * Generates Customer Acknowledgement Email HTML
    */
   private buildCustomerConfirmationHtml(enquiry: BusinessEnquiry): string {
+    const enqId = enquiry.enquiry_id || enquiry.enquiry_number;
+
     return `
       <!DOCTYPE html>
       <html>
@@ -129,22 +132,22 @@ class EmailService {
             <div class="logo-sub">Commercial Transport &amp; Fleet Management</div>
           </div>
           <div class="body">
-            <p>Dear <strong>${enquiry.full_name}</strong>,</p>
+            <p>Hello <strong>${enquiry.full_name}</strong>,</p>
             <p>Thank you for contacting <strong>Prisha Xpress Pvt. Ltd.</strong></p>
-            <p>We have successfully received your business enquiry for <span class="highlight">${enquiry.service_required}</span>.</p>
+            <p>We have successfully received your business enquiry.</p>
+            <p>Our team will review your requirements and contact you using the phone number or email address you provided.</p>
 
             <div class="ref-card">
-              <div class="ref-label">Your Enquiry Reference Number</div>
-              <div class="ref-num">${enquiry.enquiry_number}</div>
+              <div class="ref-label">Your Enquiry ID</div>
+              <div class="ref-num">${enqId}</div>
             </div>
 
-            <p>Our Pune operations team will review the parameters you provided and contact you shortly via <strong>${enquiry.preferred_contact_method}</strong>.</p>
             <p>If you have an urgent transport requirement, you can also connect directly with our desk:</p>
             <p style="margin-top: 4px;">
-              &bull; Official Helpline: <a href="tel:+917276897727" style="color: #702F8A; font-weight: bold;">+91 7276897727</a><br/>
-              &bull; WhatsApp Desk: <a href="https://wa.me/917276897727" style="color: #059669; font-weight: bold;">Chat on WhatsApp</a>
+              &bull; Official Helpline: <a href="tel:+917276879727" style="color: #702F8A; font-weight: bold;">+91 7276879727</a><br/>
+              &bull; WhatsApp Desk: <a href="https://wa.me/917276879727" style="color: #059669; font-weight: bold;">Chat on WhatsApp</a>
             </p>
-            <p style="margin-top: 24px;">Thank you for considering Prisha Xpress for your transport and fleet requirements.</p>
+            <p style="margin-top: 24px;">Thank you for considering Prisha Xpress.</p>
             <p style="margin-bottom: 0;">Regards,<br/><strong>Prisha Xpress Pvt. Ltd.</strong><br/><span style="font-size: 13px; color: #6B7280;">Kharadi, Pune &bull; Maharashtra</span></p>
           </div>
           <div class="footer">
@@ -184,7 +187,7 @@ class EmailService {
         body: JSON.stringify({
           from: this.emailFrom,
           to: [this.adminEmail],
-          subject: `New Business Enquiry – Prisha Xpress – ${enquiry.enquiry_number}`,
+          subject: `New Business Enquiry – Prisha Xpress`,
           html: this.buildAdminNotificationHtml(enquiry),
         }),
       });
@@ -210,7 +213,7 @@ class EmailService {
         body: JSON.stringify({
           from: this.emailFrom,
           to: [enquiry.email],
-          subject: `Your Business Enquiry Has Been Received – Prisha Xpress (${enquiry.enquiry_number})`,
+          subject: `We Have Received Your Enquiry – Prisha Xpress`,
           html: this.buildCustomerConfirmationHtml(enquiry),
         }),
       });
