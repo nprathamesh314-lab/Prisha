@@ -91,9 +91,11 @@ export const NetworkPage: React.FC = () => {
     <PageTransition>
       {/* SECTION 1: HERO */}
       <PageHero
-        badge="Pan-India Logistics Infrastructure"
-        title="Connecting Transportation Operations Through Our Network"
-        subtitle="A synchronized nationwide network connecting Pune headquarters to key industrial clusters, driver touchpoints, and major interstate freight corridors."
+        badge="OUR TRANSPORT NETWORK"
+        title="Connecting Businesses Across India"
+        subtitle={`Our strong transport network connects Pune with important business areas and cities across India. We work with trusted transport partners and drivers to help move your goods from one place to another.
+
+With our growing network and transport support, we work to make goods delivery easier, smoother and more reliable for every customer.`}
         image="/assets/images/network-map.jpg"
         breadcrumbs={[{ label: 'Our Network' }]}
       />
