@@ -4,6 +4,7 @@ import { PageHero } from '../components/common/PageHero';
 import { SectionHeading } from '../components/common/SectionHeading';
 import { FadeIn } from '../components/animations/FadeIn';
 import { CTASection } from '../components/common/CTASection';
+import { NetworkEarthGlobe } from '../components/sections/NetworkEarthGlobe';
 import {
   Radio,
   Truck,
@@ -100,84 +101,96 @@ With our growing network and transport support, we work to make goods delivery e
         breadcrumbs={[{ label: 'Our Network' }]}
       />
 
-      {/* SECTION 2: OUR NETWORK OVERVIEW */}
-      <section className="py-20 bg-white">
+      {/* SECTION 2: OUR TRANSPORT NETWORK & ARCHITECTURE */}
+      <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Network Architecture"
-            title="Comprehensive Highway & Operational Connectivity"
-            subtitle="Built on four foundational operational pillars ensuring consistent, punctual transit across India."
+            badge="OUR TRANSPORT NETWORK"
+            title="Strong Network. Reliable Transport. Across India."
+            subtitle="Prisha Xpress connects businesses, cities and transport routes across India. We work with drivers and transport partners to help deliver goods safely and on time."
+            className="mb-3"
           />
+          <p className="text-center text-sm sm:text-base text-gray-600 max-w-2xl mx-auto -mt-6 mb-8 leading-relaxed">
+            Our team supports daily transport work and helps customers move their goods with confidence.
+          </p>
 
+          {/* PART 3: 3D Earth and Moving Trucks Animation */}
+          <NetworkEarthGlobe />
+
+          {/* PART 2: THE FOUR CORE NETWORK CARDS */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Card 1: Transport Network */}
             <FadeIn direction="up" delay={0.1}>
-              <div className="p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple h-full flex flex-col justify-between">
+              <div className="p-6 sm:p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple hover:shadow-card-hover transition-all duration-300 h-full flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="p-3 rounded-2xl bg-px-lavender text-px-primary w-fit">
                     <Navigation className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-extrabold text-px-dark">Transportation Network</h3>
+                  <h3 className="text-xl font-extrabold text-px-dark">Transport Network</h3>
                   <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                    Connecting key industrial corridors with dedicated long-haul schedules and committed delivery turnarounds.
+                    We connect important cities and business areas across India to make goods transport easier.
                   </p>
                 </div>
                 <div className="pt-4 border-t border-px-border/80 text-xs font-bold text-px-violet flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Pan-India Corridors</span>
+                  <span>Connecting Cities Across India</span>
                 </div>
               </div>
             </FadeIn>
 
+            {/* Card 2: Driver Network */}
             <FadeIn direction="up" delay={0.2}>
-              <div className="p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple h-full flex flex-col justify-between">
+              <div className="p-6 sm:p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple hover:shadow-card-hover transition-all duration-300 h-full flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="p-3 rounded-2xl bg-px-lavender text-px-primary w-fit">
                     <Users className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-extrabold text-px-dark">Driver Network</h3>
-                  <p className="text-sm text-gray-700 leading-relaxed font-normal">
-                    Over 1,000 thoroughly verified, safety-trained commercial drivers positioned near critical highway hubs.
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    We work with a large network of drivers who help move goods safely from one place to another.
                   </p>
                 </div>
                 <div className="pt-4 border-t border-px-border/80 text-xs font-bold text-px-violet flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>1,000+ Verified Crew</span>
+                  <span>1,000+ Drivers</span>
                 </div>
               </div>
             </FadeIn>
 
+            {/* Card 3: Fleet Operations */}
             <FadeIn direction="up" delay={0.3}>
-              <div className="p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple h-full flex flex-col justify-between">
+              <div className="p-6 sm:p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple hover:shadow-card-hover transition-all duration-300 h-full flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="p-3 rounded-2xl bg-px-lavender text-px-primary w-fit">
                     <Truck className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-extrabold text-px-dark">Fleet Operations</h3>
-                  <p className="text-sm text-gray-700 leading-relaxed font-normal">
-                    Telematics-ready heavy commercial vehicles maintained through preventive checks and dedicated service bays.
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    We support truck operations and regular vehicle checks to help keep trucks in good working condition.
                   </p>
                 </div>
                 <div className="pt-4 border-t border-px-border/80 text-xs font-bold text-px-violet flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Zero Idle Downtime</span>
+                  <span>Better Vehicle Care</span>
                 </div>
               </div>
             </FadeIn>
 
+            {/* Card 4: Customer Support */}
             <FadeIn direction="up" delay={0.4}>
-              <div className="p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple h-full flex flex-col justify-between">
+              <div className="p-6 sm:p-7 rounded-3xl bg-px-bg border border-px-border shadow-soft-purple hover:shadow-card-hover transition-all duration-300 h-full flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="p-3 rounded-2xl bg-px-lavender text-px-primary w-fit">
                     <Activity className="w-6 h-6" />
                   </div>
-                  <h3 className="text-xl font-extrabold text-px-dark">Operational Support</h3>
-                  <p className="text-sm text-gray-700 leading-relaxed font-normal">
-                    Centralized Pune control room providing 24/7 journey monitoring, driver coordination, and incident support.
+                  <h3 className="text-xl font-extrabold text-px-dark">Customer Support</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                    Our team helps with journey updates, driver coordination and transport-related support.
                   </p>
                 </div>
                 <div className="pt-4 border-t border-px-border/80 text-xs font-bold text-px-violet flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>24/7 Active Control</span>
+                  <span>Reliable Support</span>
                 </div>
               </div>
             </FadeIn>
