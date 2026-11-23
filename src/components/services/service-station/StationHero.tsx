@@ -1,8 +1,8 @@
 // PRISHA XPRESS PVT. LTD. - SERVICE STATION HERO SECTION
 // ROUTE: /services/service-station
-// "KEEPING YOUR VEHICLES READY FOR EVERY JOURNEY" - SIMPLE INDIAN ENGLISH, HIGH-CONTRAST WHITE/LAVENDER TEXT
-// 3 ATTRACTIVE SERVICE HIGHLIGHTS (MAINTENANCE, INSPECTION, SPARE PARTS) ON RIGHT
-// BALANCED 20-30% PURPLE OVERLAY WITH CLEARLY VISIBLE WORKSHOP TRUCK PHOTOGRAPHY
+// "KEEP YOUR TRUCKS & FLEET READY ON THE HIGHWAY" - SIMPLE INDIAN ENGLISH COPY
+// INTERACTIVE PURPLE CENTER CARD: SUBTLE 3D TILT, DYNAMIC GLOW SHIFT, MOBILE TOUCH FEEDBACK
+// DUAL ACTION BUTTONS: BOOK SERVICE ENQUIRY WITH ARROW SLIDE & DIRECT PHONE CALL
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -13,14 +13,23 @@ import {
   Cog,
   ArrowRight,
   Sparkles,
+  Phone,
+  Zap,
 } from 'lucide-react';
 import { Breadcrumbs } from '../../common/Breadcrumbs';
 
 const heroTranslations = {
   en: {
-    badge: 'COMMERCIAL VEHICLE SERVICE STATION',
-    title: 'Keeping Your Vehicles Ready for Every Journey',
-    desc: 'Prisha Xpress provides vehicle servicing and maintenance support to help businesses keep their trucks in good working condition. Our team helps with vehicle checks, regular servicing and maintenance coordination.',
+    badge: 'Pune Fleet Service & Maintenance',
+    title: 'Keep Your Trucks & Fleet Ready on the Highway',
+    desc: 'Book regular truck checkups, priority service lanes, or company AMC plans at our Pune service station. Fast turnaround so your vehicles spend less time waiting and more time on the road.',
+    btnPrimary: 'Book Service Enquiry',
+    btnCall: 'Call +91 7276897727',
+    quickPills: [
+      { text: 'Priority Highway Service Lanes', icon: Zap },
+      { text: 'Multi-Axle Inspection Pits', icon: Wrench },
+      { text: 'Company Fleet AMC Plans', icon: ShieldCheck },
+    ],
     highlights: [
       {
         title: 'Vehicle Maintenance',
@@ -38,13 +47,19 @@ const heroTranslations = {
         icon: Cog,
       },
     ],
-    btnBook: 'Book Vehicle Servicing',
-    btnSpares: 'Explore Spare Parts',
+    activeBays: 'Dedicated commercial workshop pits for heavy multi-axle trucks in Pune',
   },
   hi: {
-    badge: 'कमर्शियल वाहन सर्विस स्टेशन',
-    title: 'आपके वाहनों को हर यात्रा के लिए तैयार रखना',
-    desc: 'प्रिशा एक्सप्रेस व्यवसायों को उनके ट्रकों को अच्छी कार्यशील स्थिति में रखने में मदद करने के लिए वाहन सर्विसिंग और रखरखाव सहायता प्रदान करती है। हमारी टीम वाहन जांच, नियमित सर्विसिंग और रखरखाव समन्वय में मदद करती है।',
+    badge: 'पुणे फ्लीट सर्विस और मेंटेनेंस',
+    title: 'अपने ट्रकों और बेड़े को हाईवे पर तैयार रखें',
+    desc: 'हमारे पुणे सर्विस स्टेशन पर नियमित ट्रक चेकअप, प्राथमिकता सर्विस लेन, या कंपनी AMC प्लान बुक करें। तेज़ टर्नअराउंड ताकि आपके वाहन कम समय प्रतीक्षा करें और अधिक समय सड़क पर रहें।',
+    btnPrimary: 'सर्विस पूछताछ बुक करें',
+    btnCall: 'कॉल करें +91 7276897727',
+    quickPills: [
+      { text: 'प्राथमिकता हाईवे सर्विस लेन', icon: Zap },
+      { text: 'मल्टी-एक्सल इंस्पेक्शन पिट', icon: Wrench },
+      { text: 'कंपनी फ्लीट AMC प्लान', icon: ShieldCheck },
+    ],
     highlights: [
       {
         title: 'वाहन रखरखाव',
@@ -62,13 +77,19 @@ const heroTranslations = {
         icon: Cog,
       },
     ],
-    btnBook: 'वाहन सर्विसिंग बुक करें',
-    btnSpares: 'स्पेयर पार्ट्स देखें',
+    activeBays: 'पुणे में कमर्शियल वर्कशॉप पिट्स और प्रशिक्षित हैवी-व्हीकल मैकेनिक',
   },
   mr: {
-    badge: 'व्यावसायिक वाहन सर्व्हिस स्टेशन',
-    title: 'तुमची वाहने प्रत्येक प्रवासासाठी सज्ज ठेवणे',
-    desc: 'प्रिशा एक्सप्रेस व्यवसायांचे ट्रक्स चांगल्या स्थितीत ठेवण्यासाठी वाहन सर्व्हिसिंग आणि देखभाल सहाय्य प्रदान करते. आमची टीम वाहन तपासणी, नियमित सर्व्हिसिंग आणि देखभाल समन्वयात मदत करते.',
+    badge: 'पुणे ताफा सर्व्हिस आणि देखभाल',
+    title: 'तुमचे ट्रक्स आणि ताफा महामार्गावर सदैव सज्ज ठेवा',
+    desc: 'आमच्या पुणे सर्व्हिस स्टेशनवर नियमित ट्रक तपासणी, प्राधान्य सर्व्हिस लेन किंवा कंपनी AMC प्लॅन बुक करा. जलद टर्नअराउंडमुळे तुमची वाहने कमी वेळ थांबतील आणि अधिक वेळ रस्त्यावर धावतील.',
+    btnPrimary: 'सर्व्हिस चौकशी नोंदवा',
+    btnCall: 'कॉल करा +91 7276897727',
+    quickPills: [
+      { text: 'प्राधान्य महामार्ग सर्व्हिस लेन', icon: Zap },
+      { text: 'मल्टी-एक्सल तपासणी खड्डे', icon: Wrench },
+      { text: 'कंपनी ताफा AMC योजना', icon: ShieldCheck },
+    ],
     highlights: [
       {
         title: 'वाहन देखभाल',
@@ -86,14 +107,32 @@ const heroTranslations = {
         icon: Cog,
       },
     ],
-    btnBook: 'वाहन सर्व्हिसिंग बुक करा',
-    btnSpares: 'सुटे भाग पाहा',
+    activeBays: 'पुण्यामध्ये कमर्शियल वर्कशॉप खड्डे आणि प्रशिक्षित अवजड वाहन मेकॅनिक',
   },
 };
 
 export const StationHero: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'hi' | 'mr'>('en');
   const shouldReduceMotion = useReducedMotion();
+
+  // Desktop interactive 3D tilt & dynamic glow tracking
+  const [mouseOffset, setMouseOffset] = useState<{ x: number; y: number; isHovered: boolean }>({
+    x: 0,
+    y: 0,
+    isHovered: false,
+  });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (shouldReduceMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // range: -0.5 to 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5; // range: -0.5 to 0.5
+    setMouseOffset({ x, y, isHovered: true });
+  };
+
+  const handleMouseLeave = () => {
+    setMouseOffset({ x: 0, y: 0, isHovered: false });
+  };
 
   // Detect language changes from document or localStorage
   useEffect(() => {
@@ -112,7 +151,7 @@ export const StationHero: React.FC = () => {
 
   const t = heroTranslations[lang] || heroTranslations.en;
 
-  // Staggered entrance animation variants
+  // Staggered entrance animation variants (respecting prefers-reduced-motion)
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -125,7 +164,7 @@ export const StationHero: React.FC = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 16 },
     visible: {
       opacity: 1,
       y: 0,
@@ -138,7 +177,7 @@ export const StationHero: React.FC = () => {
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.7, ease: 'easeOut' },
+      transition: { duration: 0.6, ease: 'easeOut' },
     },
   };
 
@@ -146,7 +185,6 @@ export const StationHero: React.FC = () => {
     <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center pt-28 pb-16 lg:py-24 overflow-hidden text-white">
       {/* =========================================================================
           1. LAYER 1: Full-Width Real Commercial Service Station Workshop Photography
-          Workshop, mechanics, and heavy trucks remain clearly visible & colorful
           ========================================================================= */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.img
@@ -157,7 +195,7 @@ export const StationHero: React.FC = () => {
           animate={
             shouldReduceMotion
               ? { scale: 1 }
-              : { scale: [1, 1.05, 1] }
+              : { scale: [1, 1.04, 1] }
           }
           transition={{
             duration: 24,
@@ -168,14 +206,12 @@ export const StationHero: React.FC = () => {
         />
 
         {/* =========================================================================
-            2. LAYER 2: Balanced 20-30% Purple Gradient Overlay
-            Leaves trucks, tools and workshop interior sharp and clearly visible
+            2. LAYER 2: Balanced 20-30% Purple Brand Overlays & Ambient Shimmer
             ========================================================================= */}
-        {/* Subtle horizontal gradient overlay: slightly deeper behind left text, clear on right */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1A052E]/75 via-[#2A0845]/45 to-[#1A052E]/30 hidden md:block" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1A052E]/85 via-[#2A0845]/55 to-[#1A052E]/30 md:hidden" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1A052E]/80 via-[#2A0845]/55 to-[#1A052E]/35 hidden md:block pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1A052E]/90 via-[#2A0845]/65 to-[#1A052E]/35 md:hidden pointer-events-none" />
 
-        {/* Subtle moving ambient light shimmer across background */}
+        {/* Ambient moving light shimmer */}
         {!shouldReduceMotion && (
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none"
@@ -189,8 +225,12 @@ export const StationHero: React.FC = () => {
         )}
       </div>
 
+      {/* Ambient background glow orbs */}
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
+
       {/* =========================================================================
-          3. LAYER 3: Main Content Grid (Left: Typography & Buttons; Right: 3 Highlights)
+          3. LAYER 3: Main Content Grid (Left: Interactive Purple Card; Right: Capabilities)
           ========================================================================= */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         {/* Breadcrumbs Navigation */}
@@ -206,65 +246,128 @@ export const StationHero: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* =========================================================================
-              LEFT COLUMN: High-Contrast White Heading, Light Lavender Description & Buttons
+              LEFT COLUMN: Interactive Purple Glassmorphic Card (7 cols)
+              Responsive 3D Tilt on Desktop, Dynamic Glow Shift, Mobile Touch Feedback
               ========================================================================= */}
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="lg:col-span-7 space-y-5 sm:space-y-6"
-          >
-            {/* Small Label Badge */}
-            <motion.div variants={itemVariants} className="flex justify-start">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-xs sm:text-sm font-bold uppercase tracking-wider text-purple-200 shadow-sm">
-                <Wrench className="w-4 h-4 text-purple-300" />
-                <span>{t.badge}</span>
-              </span>
-            </motion.div>
-
-            {/* Main Heading (Pure Crisp White, Clearly Visible on Desktop & Mobile) */}
-            <motion.h1
-              variants={itemVariants}
-              className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15] drop-shadow-md"
-            >
-              Keeping Your Vehicles{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-purple-300 to-amber-200">
-                Ready for Every Journey
-              </span>
-            </motion.h1>
-
-            {/* Description (Light Lavender with Strong Contrast Against Background) */}
-            <motion.p
-              variants={itemVariants}
-              className="text-sm sm:text-base md:text-lg text-purple-100 font-normal leading-relaxed max-w-2xl drop-shadow-xs"
-            >
-              {t.desc}
-            </motion.p>
-
-            {/* Action Buttons (Side by Side on Desktop, Stacked on Mobile) */}
+          <div className="lg:col-span-7">
             <motion.div
-              variants={itemVariants}
-              className="pt-2 sm:pt-4 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full sm:w-auto"
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              whileTap={{ scale: shouldReduceMotion ? 1 : 0.995 }}
+              style={{
+                perspective: 1000,
+                transformStyle: 'preserve-3d',
+              }}
+              animate={
+                shouldReduceMotion || !mouseOffset.isHovered
+                  ? { rotateX: 0, rotateY: 0 }
+                  : {
+                      rotateX: -mouseOffset.y * 5, // subtle max ~2.5 degrees
+                      rotateY: mouseOffset.x * 5,  // subtle max ~2.5 degrees
+                    }
+              }
+              transition={{
+                type: 'spring',
+                stiffness: 240,
+                damping: 22,
+              }}
+              className="relative p-6 sm:p-9 lg:p-11 rounded-[28px] bg-[#1A052E]/80 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.45)] hover:border-white/30 transition-colors duration-300 space-y-5 sm:space-y-6 text-white overflow-hidden group select-none"
             >
-              {/* Primary Button */}
-              <Link
-                to="/contact?service=vehicle-servicing#enquiry"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-xl bg-white hover:bg-purple-50 text-px-primary font-bold text-sm sm:text-base shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300 group"
-              >
-                <span>{t.btnBook}</span>
-                <ArrowRight className="w-4 h-4 text-px-primary group-hover:translate-x-1.5 transition-transform" />
-              </Link>
+              {/* Dynamic Ambient Purple Glow Layer shifting with mouse */}
+              {!shouldReduceMotion && mouseOffset.isHovered && (
+                <div
+                  className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(550px circle at ${(mouseOffset.x + 0.5) * 100}% ${(mouseOffset.y + 0.5) * 100}%, rgba(168, 85, 247, 0.22), transparent 70%)`,
+                  }}
+                />
+              )}
 
-              {/* Secondary Button */}
-              <Link
-                to="/services/auto-spares"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm sm:text-base border border-white/30 backdrop-blur-sm shadow-md hover:-translate-y-0.5 transition-all duration-300"
+              {/* Shifting Top Glass Reflection Highlight */}
+              <div
+                className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/20 via-white/5 to-transparent rounded-t-[28px] pointer-events-none transition-transform duration-300"
+                style={
+                  !shouldReduceMotion && mouseOffset.isHovered
+                    ? { transform: `translate3d(${mouseOffset.x * 12}px, ${mouseOffset.y * 8}px, 0)` }
+                    : undefined
+                }
+              />
+
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+                className="relative z-10 space-y-5 sm:space-y-6"
               >
-                <Cog className="w-4 h-4 text-purple-200" />
-                <span>{t.btnSpares}</span>
-              </Link>
+                {/* 1. Pill Badge */}
+                <motion.div variants={itemVariants} className="flex justify-start">
+                  <span className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-xs sm:text-sm font-bold uppercase tracking-wider text-purple-200 shadow-sm hover:bg-white/20 hover:border-purple-300/40 transition-all cursor-default">
+                    <Wrench className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-300 animate-pulse" />
+                    <span>{t.badge}</span>
+                  </span>
+                </motion.div>
+
+                {/* 2. Main Heading (Pure Crisp White, High Contrast) */}
+                <motion.h1
+                  variants={itemVariants}
+                  className="text-2xl sm:text-4xl lg:text-[42px] font-black text-white tracking-tight leading-[1.18] drop-shadow-md"
+                >
+                  Keep Your Trucks & Fleet{' '}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-purple-300 to-amber-200">
+                    Ready on the Highway
+                  </span>
+                </motion.h1>
+
+                {/* 3. Subtitle (Light Lavender with Strong Contrast Against Background) */}
+                <motion.p
+                  variants={itemVariants}
+                  className="text-sm sm:text-base md:text-lg text-purple-100/95 font-normal leading-relaxed max-w-2xl drop-shadow-xs"
+                >
+                  {t.desc}
+                </motion.p>
+
+                {/* 4. Interactive Quick-Focus Pills */}
+                <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2 pt-1">
+                  {t.quickPills.map((pill, idx) => {
+                    const PillIcon = pill.icon;
+                    return (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/18 border border-white/15 hover:border-purple-300/50 text-xs font-semibold text-purple-100 hover:text-white backdrop-blur-sm transition-all duration-200 cursor-default hover:scale-[1.02] shadow-2xs"
+                      >
+                        <PillIcon className="w-3.5 h-3.5 text-purple-300 shrink-0" />
+                        <span>{pill.text}</span>
+                      </span>
+                    );
+                  })}
+                </motion.div>
+
+                {/* 5. Action Buttons (Primary & Secondary) */}
+                <motion.div
+                  variants={itemVariants}
+                  className="pt-2 sm:pt-3 flex flex-col sm:flex-row items-center gap-3.5 sm:gap-4 w-full sm:w-auto"
+                >
+                  {/* Primary Button: Book Service Enquiry → with smooth arrow slide on hover */}
+                  <Link
+                    to="/contact?service=vehicle-servicing#enquiry"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 sm:py-4 rounded-xl bg-white hover:bg-purple-50 text-px-primary font-bold text-sm sm:text-base shadow-xl hover:shadow-2xl hover:-translate-y-0.5 active:scale-95 transition-all duration-300 group"
+                  >
+                    <span>{t.btnPrimary}</span>
+                    <ArrowRight className="w-4 h-4 text-px-primary group-hover:translate-x-1.5 transition-transform duration-200" />
+                  </Link>
+
+                  {/* Secondary Button: Call +91 7276897727 with gentle press/scale effect */}
+                  <a
+                    href="tel:+917276897727"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 sm:py-4 rounded-xl bg-white/12 hover:bg-white/20 text-white font-semibold text-sm sm:text-base border border-white/30 backdrop-blur-sm shadow-md hover:-translate-y-0.5 active:scale-95 transition-all duration-300 group"
+                  >
+                    <Phone className="w-4 h-4 text-purple-300 group-hover:rotate-12 transition-transform duration-200" />
+                    <span>{t.btnCall}</span>
+                  </a>
+                </motion.div>
+              </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* =========================================================================
               RIGHT COLUMN: Three Attractive Service Highlights Panel (5 cols)
@@ -275,7 +378,7 @@ export const StationHero: React.FC = () => {
             variants={rightPanelVariants}
             className="lg:col-span-5"
           >
-            <div className="p-6 sm:p-7 rounded-3xl bg-[#1A052E]/65 backdrop-blur-md border border-white/20 shadow-2xl space-y-4">
+            <div className="p-6 sm:p-7 rounded-3xl bg-[#1A052E]/70 backdrop-blur-md border border-white/20 shadow-2xl space-y-4">
               {/* Panel Top Header */}
               <div className="flex items-center justify-between pb-3 border-b border-white/15">
                 <span className="text-xs font-bold uppercase tracking-wider text-purple-200 flex items-center gap-2">
@@ -287,7 +390,7 @@ export const StationHero: React.FC = () => {
                 </span>
               </div>
 
-              {/* 3 Service Highlights Cards */}
+              {/* 3 Service Highlights Cards with subtle interactive hover states */}
               <div className="space-y-3">
                 {t.highlights.map((item, idx) => {
                   const Icon = item.icon;
@@ -297,7 +400,7 @@ export const StationHero: React.FC = () => {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + idx * 0.1, duration: 0.4 }}
-                      className="p-3.5 sm:p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 hover:border-purple-300/60 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex items-start gap-3.5 group"
+                      className="p-3.5 sm:p-4 rounded-2xl bg-white/10 hover:bg-white/18 border border-white/15 hover:border-purple-300/60 shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200 flex items-start gap-3.5 group cursor-default"
                     >
                       <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-purple-200 shrink-0 group-hover:scale-105 group-hover:bg-purple-500/30 transition-all duration-200 mt-0.5">
                         <Icon className="w-5 h-5 text-purple-200" />
@@ -306,7 +409,7 @@ export const StationHero: React.FC = () => {
                         <h3 className="text-sm font-bold text-white group-hover:text-purple-200 transition-colors">
                           {item.title}
                         </h3>
-                        <p className="text-xs text-purple-100/85 leading-relaxed font-normal">
+                        <p className="text-xs text-purple-100/90 leading-relaxed font-normal">
                           {item.desc}
                         </p>
                       </div>
@@ -318,7 +421,7 @@ export const StationHero: React.FC = () => {
               {/* Subtle Trust Note */}
               <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-[11px] text-purple-200 flex items-center gap-2 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span>Dedicated commercial workshop pits for heavy multi-axle trucks</span>
+                <span>{t.activeBays}</span>
               </div>
             </div>
           </motion.div>
