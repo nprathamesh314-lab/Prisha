@@ -35,7 +35,7 @@ export const CareersPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 3. Two Completely Separate Recruitment Application Cards */}
+      {/* 3. Two Dedicated Recruitment Application Cards */}
       <section className="py-20 lg:py-28 bg-px-bg relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -46,7 +46,7 @@ export const CareersPage: React.FC = () => {
               Select Your Application Stream
             </h2>
             <p className="mt-3 text-gray-700 text-sm sm:text-base font-normal">
-              Our recruitment workflows and verification pathways are strictly dedicated. Please choose the module matching your professional background.
+              Please choose the application form that matches your professional experience.
             </p>
           </div>
 
@@ -63,12 +63,12 @@ export const CareersPage: React.FC = () => {
                 <div className="absolute top-4 left-4">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-xs font-black text-px-primary shadow-sm">
                     <Building2 className="w-3.5 h-3.5 text-px-violet" />
-                    Corporate & Office Roles
+                    Office & Admin
                   </span>
                 </div>
                 <div className="absolute bottom-4 left-6 right-6">
                   <span className="text-xs font-bold uppercase tracking-widest text-purple-200">
-                    Corporate Department
+                    CORPORATE DEPARTMENT
                   </span>
                   <h3 className="text-2xl font-black text-white">Staff Application</h3>
                 </div>
@@ -77,7 +77,7 @@ export const CareersPage: React.FC = () => {
               <div className="p-8 sm:p-10 flex flex-col flex-grow justify-between space-y-6">
                 <div className="space-y-4">
                   <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                    For office and non-driver employees interested in Administration, HR, Operations, Accounts, IT and other departments.
+                    For office roles in Admin, HR, Operations, Accounts, IT, and other teams.
                   </p>
 
                   <div className="border-t border-gray-100 pt-4 space-y-2.5">
@@ -87,15 +87,15 @@ export const CareersPage: React.FC = () => {
                     <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-px-violet shrink-0" />
-                        <span>Corporate HQ in Pune with competitive CTC and health coverage</span>
+                        <span>Pune head office with good salary (CTC)</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-px-violet shrink-0" />
-                        <span>Openings for both Freshers and Experienced logistics professionals</span>
+                        <span>Roles available for both freshers and experienced logistics staff.</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-px-violet shrink-0" />
-                        <span>6-step streamlined online application wizard with resume upload</span>
+                        <span>Simple online form with resume upload.</span>
                       </li>
                     </ul>
                   </div>
@@ -107,13 +107,10 @@ export const CareersPage: React.FC = () => {
                       variant="primary"
                       className="w-full py-4 text-sm sm:text-base justify-center shadow-md group-hover:shadow-lg group-hover:bg-px-violet"
                     >
-                      <span>Apply for Staff Position</span>
+                      <span>Apply for Staff</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
-                  <p className="text-[11px] text-gray-400 text-center mt-2.5">
-                    Reference format: PX-STF-2026-XXXX
-                  </p>
                 </div>
               </div>
             </div>
@@ -130,12 +127,12 @@ export const CareersPage: React.FC = () => {
                 <div className="absolute top-4 left-4">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-px-primary text-white text-xs font-black shadow-sm">
                     <Truck className="w-3.5 h-3.5 text-px-accent" />
-                    Fleet & Transport Operations
+                    Fleet & Transport
                   </span>
                 </div>
                 <div className="absolute bottom-4 left-6 right-6">
                   <span className="text-xs font-bold uppercase tracking-widest text-purple-200">
-                    Fleet & Highway Operations
+                    FLEET & HIGHWAY OPERATIONS
                   </span>
                   <h3 className="text-2xl font-black text-white">Driver Registration</h3>
                 </div>
@@ -144,7 +141,7 @@ export const CareersPage: React.FC = () => {
               <div className="p-8 sm:p-10 flex flex-col flex-grow justify-between space-y-6">
                 <div className="space-y-4">
                   <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                    For truck and commercial vehicle drivers interested in joining the Prisha Xpress driver network.
+                    For truck and commercial vehicle drivers looking to join Prisha Xpress.
                   </p>
 
                   <div className="border-t border-gray-100 pt-4 space-y-2.5">
@@ -154,15 +151,15 @@ export const CareersPage: React.FC = () => {
                     <ul className="space-y-2 text-xs sm:text-sm text-gray-700">
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-px-violet shrink-0" />
-                        <span>Guaranteed on-time monthly settlements & trip mileage incentives</span>
+                        <span>Timely monthly pay plus trip and mileage allowances.</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-px-violet shrink-0" />
-                        <span>Driver rest lounges at key service station hubs across Maharashtra</span>
+                        <span>Driver rest rooms at major hubs across India.</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-px-violet shrink-0" />
-                        <span>Dedicated document verification cell (Private & secure storage)</span>
+                        <span>Safe and verified document handling.</span>
                       </li>
                     </ul>
                   </div>
@@ -178,9 +175,6 @@ export const CareersPage: React.FC = () => {
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
-                  <p className="text-[11px] text-gray-400 text-center mt-2.5">
-                    Reference format: PX-DRV-2026-XXXX
-                  </p>
                 </div>
               </div>
             </div>
@@ -197,9 +191,9 @@ export const CareersPage: React.FC = () => {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-px-dark text-base">Verified & Compliant</h4>
+                <h4 className="font-bold text-px-dark text-base">Registered & Compliant</h4>
                 <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                  Incorporated corporate enterprise (CIN: U49231PN2023PTC225810) operating under strict Indian labor and transport compliances.
+                  Registered company (CIN: U49231PN2023PTC225810) following Indian labour and transport rules.
                 </p>
               </div>
             </div>
@@ -209,9 +203,9 @@ export const CareersPage: React.FC = () => {
                 <FileCheck2 className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-px-dark text-base">Separate Data Architecture</h4>
+                <h4 className="font-bold text-px-dark text-base">Safe & Private Documents</h4>
                 <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                  Candidate documents and information are stored in independent private storage buckets with strict Row Level Security.
+                  Your IDs, licences, and resumes are kept secure and private.
                 </p>
               </div>
             </div>
@@ -221,9 +215,9 @@ export const CareersPage: React.FC = () => {
                 <Award className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="font-bold text-px-dark text-base">Transparent Career Growth</h4>
+                <h4 className="font-bold text-px-dark text-base">Clear Growth</h4>
                 <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                  Structured career paths from junior logistics coordinators to regional station heads, and from truck captains to fleet trainers.
+                  Clear promotion paths—from junior staff to branch leads, and from drivers to senior captains or trainers.
                 </p>
               </div>
             </div>
