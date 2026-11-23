@@ -407,10 +407,10 @@ class BusinessEnquiryService {
         (e) =>
           (e.enquiry_id && e.enquiry_id.toLowerCase().includes(q)) ||
           (e.enquiry_number && e.enquiry_number.toLowerCase().includes(q)) ||
-          e.full_name.toLowerCase().includes(q) ||
+          (e.full_name && e.full_name.toLowerCase().includes(q)) ||
           (e.company_name && e.company_name.toLowerCase().includes(q)) ||
-          e.phone.includes(q) ||
-          e.email.toLowerCase().includes(q) ||
+          (e.phone && e.phone.includes(q)) ||
+          (e.email && e.email.toLowerCase().includes(q)) ||
           (e.requirements && e.requirements.toLowerCase().includes(q)) ||
           (e.operational_requirements && e.operational_requirements.toLowerCase().includes(q))
       );
@@ -678,7 +678,7 @@ class BusinessEnquiryService {
    * Exports enquiries to Excel-compatible CSV format
    * (No Preferred Contact Method column)
    */
-  public exportToCsv(filteredEnquiries?: BusinessEnquiry[]): void {
+  public exportToCsv(filteredEnquiries?: BusinessEnquiry[], dateFilterName?: string): void {
     const list = filteredEnquiries || this.enquiries;
 
     const headers = [
@@ -722,7 +722,7 @@ class BusinessEnquiryService {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `prisha_xpress_business_enquiries_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `prisha_xpress_business_enquiries_${dateFilterName ? dateFilterName + '_' : ''}${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

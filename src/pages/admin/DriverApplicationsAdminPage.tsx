@@ -1,8 +1,9 @@
-// PRISHA XPRESS PVT. LTD. - DRIVER APPLICATIONS & VERIFICATION DASHBOARD
+// PRISHA XPRESS PVT. LTD. - CLEAN DRIVER APPLICATIONS DASHBOARD
 // ROUTE: /admin/drivers & /admin/driver-applications
-// CONNECTED TO SUPABASE (PostgreSQL Database + Storage bucket 'driver-documents')
+// SUPABASE CONNECTED (driver_applications table & driver-documents bucket)
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   driverApplicationService,
 } from '../../services/driverApplicationService';
@@ -10,6 +11,11 @@ import {
   DriverApplicationRecord,
   DriverAppStatus,
 } from '../../types/driverApplication';
+import {
+  DATE_FILTER_OPTIONS,
+  DateRangeFilter,
+  isWithinDateRange,
+} from '../../utils/dateFilters';
 import {
   Search,
   Download,
@@ -20,39 +26,78 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  ShieldCheck,
   X,
   Maximize2,
   FileText,
   AlertCircle,
   Truck,
+  Check,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  ExternalLink,
 } from 'lucide-react';
+
+const REJECTION_REASON_CHIPS = [
+  'Blurry Driving Licence photo',
+  'Blurred ID proof',
+  'Driving Licence expired',
+  'Incomplete details',
+];
 
 export const DriverApplicationsAdminPage: React.FC = () => {
   const [drivers, setDrivers] = useState<DriverApplicationRecord[]>([]);
   const [selectedDriver, setSelectedDriver] = useState<DriverApplicationRecord | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState<string>('All');
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [dateFilter, setDateFilter] = useState<DateRangeFilter>('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Verification modal state
   const [adminRemarks, setAdminRemarks] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
   const [isProcessingAction, setIsProcessingAction] = useState(false);
+  const [rejectionPanelOpen, setRejectionPanelOpen] = useState(false);
+  const [recentActionResult, setRecentActionResult] = useState<{
+    type: 'approved' | 'rejected';
+    driver: DriverApplicationRecord;
+  } | null>(null);
 
-  // Full-screen image preview modal
+  // Full-screen image preview lightbox state
   const [zoomedImage, setZoomedImage] = useState<{ url: string; title: string } | null>(null);
+  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [rotation, setRotation] = useState<number>(0);
+
+  // Reset zoom & rotation whenever image changes
+  useEffect(() => {
+    setZoomScale(1);
+    setRotation(0);
+  }, [zoomedImage]);
+
+  // Keyboard Escape handler to close ONLY the zoomed image
+  useEffect(() => {
+    if (!zoomedImage) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setZoomedImage(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [zoomedImage]);
 
   // Fetch applications
   const loadDrivers = async () => {
-    setIsSyncing(true);
+    setIsRefreshing(true);
     try {
       const list = await driverApplicationService.getDriverApplications();
       setDrivers(list);
     } catch (err) {
       console.error('Error fetching driver applications:', err);
     } finally {
-      setIsSyncing(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -60,16 +105,41 @@ export const DriverApplicationsAdminPage: React.FC = () => {
     loadDrivers();
   }, []);
 
-  // Update adminRemarks when opening modal
+  // Update adminRemarks and reset action states when opening modal
   useEffect(() => {
     if (selectedDriver) {
       setAdminRemarks(selectedDriver.admin_remarks || '');
       setActionError(null);
+      setRejectionPanelOpen(false);
+      setRecentActionResult((prev) => (prev?.driver.id === selectedDriver.id ? prev : null));
     }
   }, [selectedDriver]);
 
-  // Filtered drivers based on tab and search
-  const filteredDrivers = drivers.filter((driver) => {
+  // Unique cities list for simple filter dropdown
+  const cities = ['All', ...Array.from(new Set(drivers.map((d) => d.city).filter(Boolean)))];
+
+  // Safe WhatsApp number helper
+  const getCleanWhatsAppNumber = (phone?: string): string => {
+    const raw = (phone || '').replace(/\D/g, '');
+    if (raw.length === 10) return `91${raw}`;
+    if (raw.length === 12 && raw.startsWith('91')) return raw;
+    if (raw.length > 10) return `91${raw.slice(-10)}`;
+    return raw || '910000000000';
+  };
+
+  // 1. Filter by Date Range First
+  const dateFilteredDrivers = drivers.filter((driver) =>
+    isWithinDateRange(driver.created_at, dateFilter)
+  );
+
+  // 2. Summary Counts Dynamically Reflect the Active Date Filter
+  const totalCount = dateFilteredDrivers.length;
+  const pendingCount = dateFilteredDrivers.filter((d) => d.status === 'pending').length;
+  const approvedCount = dateFilteredDrivers.filter((d) => d.status === 'approved').length;
+  const rejectedCount = dateFilteredDrivers.filter((d) => d.status === 'rejected').length;
+
+  // 3. Final Filtered Drivers (Card tab, City, Search Query)
+  const filteredDrivers = dateFilteredDrivers.filter((driver) => {
     const matchesTab =
       activeTab === 'all'
         ? true
@@ -80,6 +150,10 @@ export const DriverApplicationsAdminPage: React.FC = () => {
         : driver.status === 'rejected';
 
     if (!matchesTab) return false;
+
+    if (selectedCity !== 'All' && driver.city !== selectedCity) {
+      return false;
+    }
 
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase().trim();
@@ -93,26 +167,24 @@ export const DriverApplicationsAdminPage: React.FC = () => {
     );
   });
 
-  // Summary counts
-  const totalCount = drivers.length;
-  const pendingCount = drivers.filter((d) => d.status === 'pending').length;
-  const approvedCount = drivers.filter((d) => d.status === 'approved').length;
-  const rejectedCount = drivers.filter((d) => d.status === 'rejected').length;
-
   // Status Action Handlers
   const handleApprove = async () => {
     if (!selectedDriver) return;
     setIsProcessingAction(true);
     setActionError(null);
     try {
-      const remarks = adminRemarks.trim() || 'Driving Licence & Aadhaar verified. Approved for hub onboarding.';
+      const remarks = adminRemarks.trim() || 'Driving Licence & Aadhaar verified. Approved for hub operations.';
       const updated = await driverApplicationService.updateApplicationStatus(
         selectedDriver.id,
         'approved',
         remarks
       );
       setSelectedDriver(updated);
+      setAdminRemarks(remarks);
       setDrivers((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+      setRecentActionResult({ type: 'approved', driver: updated });
+      setRejectionPanelOpen(false);
+      window.dispatchEvent(new CustomEvent('admin_counts_changed'));
     } catch (err: any) {
       setActionError(err.message || 'Failed to approve driver application.');
     } finally {
@@ -120,22 +192,32 @@ export const DriverApplicationsAdminPage: React.FC = () => {
     }
   };
 
-  const handleReject = async () => {
+  const handleRejectClick = () => {
+    setActionError(null);
+    setRejectionPanelOpen(true);
+  };
+
+  const handleConfirmReject = async () => {
     if (!selectedDriver) return;
     if (!adminRemarks.trim()) {
-      setActionError('Please provide a reason in Admin Remarks before rejecting this application.');
+      setActionError('Please select or type a short reason before rejecting.');
       return;
     }
     setIsProcessingAction(true);
     setActionError(null);
     try {
+      const reason = adminRemarks.trim();
       const updated = await driverApplicationService.updateApplicationStatus(
         selectedDriver.id,
         'rejected',
-        adminRemarks.trim()
+        reason
       );
       setSelectedDriver(updated);
+      setAdminRemarks(reason);
       setDrivers((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+      setRecentActionResult({ type: 'rejected', driver: updated });
+      setRejectionPanelOpen(false);
+      window.dispatchEvent(new CustomEvent('admin_counts_changed'));
     } catch (err: any) {
       setActionError(err.message || 'Failed to reject driver application.');
     } finally {
@@ -143,33 +225,29 @@ export const DriverApplicationsAdminPage: React.FC = () => {
     }
   };
 
-  // CSV Export
-  const exportCSV = () => {
+  // Export CSV
+  const handleExportCSV = () => {
     const headers = [
       'Application ID',
       'Driver Name',
       'Mobile Number',
-      'WhatsApp Number',
       'City',
-      'PIN Code',
-      'Driving Licence',
+      'Pincode',
+      'DL Number',
       'Vehicle Categories',
-      'Date of Birth',
       'Status',
       'Admin Remarks',
       'Submission Date',
     ];
 
     const rows = filteredDrivers.map((d) => [
-      d.application_code,
+      `"${d.application_code}"`,
       `"${d.full_name}"`,
       `"${d.mobile_number}"`,
-      `"${d.whatsapp_number || d.mobile_number}"`,
       `"${d.city}"`,
       `"${d.pincode}"`,
       `"${d.dl_number}"`,
       `"${d.vehicle_categories.join(', ')}"`,
-      `"${d.date_of_birth}"`,
       `"${d.status}"`,
       `"${d.admin_remarks || ''}"`,
       `"${new Date(d.created_at).toLocaleDateString('en-IN')}"`,
@@ -179,13 +257,13 @@ export const DriverApplicationsAdminPage: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `PrishaXpress_Driver_Applications_${Date.now()}.csv`);
+    link.setAttribute('download', `PrishaXpress_Drivers_${dateFilter}_${Date.now()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Render Status Badge
+  // Status Badge Helper
   const renderStatusBadge = (status: DriverAppStatus) => {
     switch (status) {
       case 'approved':
@@ -206,48 +284,41 @@ export const DriverApplicationsAdminPage: React.FC = () => {
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
             <Clock className="w-3.5 h-3.5 text-amber-600" />
-            Pending Review
+            Pending
           </span>
         );
     }
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-2 sm:px-4">
-      {/* 1. Header with Title & Action Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5 max-w-7xl mx-auto">
+      {/* 1. Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-px-deep text-white font-extrabold text-[10px] uppercase tracking-wider">
-              Fleet Recruitment Cell
-            </span>
-            <span className="text-xs text-gray-500 font-semibold">• Supabase Connected</span>
-          </div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight mt-1 flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
             <Truck className="w-6 h-6 text-px-primary" />
-            Driver Applications & Verification
+            Driver Applications
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Manage commercial heavy vehicle driver registrations, verify documents, and approve applications.
+            Heavy commercial drivers registered for Prisha Xpress logistics network.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={loadDrivers}
-            disabled={isSyncing}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-xs font-bold text-px-primary transition-all disabled:opacity-50"
-            title="Refresh list from Supabase Database"
+            disabled={isRefreshing}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-xs transition-all disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>{isSyncing ? 'Syncing...' : 'Sync Database'}</span>
+            <RefreshCw className={`w-3.5 h-3.5 text-px-primary ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
           </button>
 
           <button
             type="button"
-            onClick={exportCSV}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-sm transition-all"
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-xs font-bold text-gray-700 shadow-xs transition-all"
           >
             <Download className="w-3.5 h-3.5 text-px-primary" />
             <span>Export CSV</span>
@@ -255,177 +326,201 @@ export const DriverApplicationsAdminPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Top Summary Stat Cards */}
+      {/* 2. Four Clickable Summary Cards (Dynamic with Date Filter) */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div
+        <button
+          type="button"
           onClick={() => setActiveTab('all')}
-          className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+          className={`p-4 rounded-2xl border text-left transition-all ${
             activeTab === 'all'
-              ? 'bg-purple-900 text-white border-purple-900 shadow-md'
-              : 'bg-white text-gray-900 border-gray-200 hover:border-purple-200'
+              ? 'bg-purple-900 text-white border-purple-900 shadow-md ring-2 ring-purple-600/30'
+              : 'bg-white text-gray-900 border-gray-200 hover:border-purple-300'
           }`}
         >
-          <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-purple-200' : 'text-gray-500'}`}>
-            All Drivers
+          <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'all' ? 'text-purple-200' : 'text-gray-400'}`}>
+            Total Drivers
           </p>
           <p className="text-2xl font-black mt-1">{totalCount}</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setActiveTab('pending')}
-          className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+          className={`p-4 rounded-2xl border text-left transition-all ${
             activeTab === 'pending'
-              ? 'bg-amber-600 text-white border-amber-600 shadow-md'
-              : 'bg-white text-gray-900 border-gray-200 hover:border-amber-200'
+              ? 'bg-amber-600 text-white border-amber-600 shadow-md ring-2 ring-amber-400/30'
+              : 'bg-white text-gray-900 border-gray-200 hover:border-amber-300'
           }`}
         >
           <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'pending' ? 'text-amber-100' : 'text-amber-600'}`}>
             Pending Review
           </p>
           <p className="text-2xl font-black mt-1 text-amber-600">{pendingCount}</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setActiveTab('approved')}
-          className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+          className={`p-4 rounded-2xl border text-left transition-all ${
             activeTab === 'approved'
-              ? 'bg-emerald-700 text-white border-emerald-700 shadow-md'
-              : 'bg-white text-gray-900 border-gray-200 hover:border-emerald-200'
+              ? 'bg-emerald-700 text-white border-emerald-700 shadow-md ring-2 ring-emerald-400/30'
+              : 'bg-white text-gray-900 border-gray-200 hover:border-emerald-300'
           }`}
         >
           <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'approved' ? 'text-emerald-100' : 'text-emerald-600'}`}>
             Approved
           </p>
           <p className="text-2xl font-black mt-1 text-emerald-600">{approvedCount}</p>
-        </div>
+        </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => setActiveTab('rejected')}
-          className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+          className={`p-4 rounded-2xl border text-left transition-all ${
             activeTab === 'rejected'
-              ? 'bg-rose-700 text-white border-rose-700 shadow-md'
-              : 'bg-white text-gray-900 border-gray-200 hover:border-rose-200'
+              ? 'bg-rose-700 text-white border-rose-700 shadow-md ring-2 ring-rose-400/30'
+              : 'bg-white text-gray-900 border-gray-200 hover:border-rose-300'
           }`}
         >
           <p className={`text-xs font-bold uppercase tracking-wider ${activeTab === 'rejected' ? 'text-rose-100' : 'text-rose-600'}`}>
             Rejected
           </p>
           <p className="text-2xl font-black mt-1 text-rose-600">{rejectedCount}</p>
-        </div>
+        </button>
       </div>
 
-      {/* 3. Search Bar & Filter Tabs */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Search Input */}
-        <div className="relative w-full md:w-96">
+      {/* 3. Search Bar, Quick Date Filter Buttons & City Filter */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        {/* Search */}
+        <div className="relative w-full lg:w-72">
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search driver name, mobile, DL number, or city..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:border-px-primary"
+            placeholder="Search by name, phone, city, or ID..."
+            className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-xs font-medium focus:outline-none focus:border-px-primary"
           />
         </div>
 
-        {/* Tab Buttons */}
-        <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          {[
-            { id: 'all', label: 'All Drivers' },
-            { id: 'pending', label: 'Pending Review' },
-            { id: 'approved', label: 'Approved' },
-            { id: 'rejected', label: 'Rejected' },
-          ].map((tab) => (
+        {/* Date Filter Pills */}
+        <div className="flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl overflow-x-auto self-start lg:self-auto">
+          {DATE_FILTER_OPTIONS.map((opt) => (
             <button
-              key={tab.id}
+              key={opt.id}
               type="button"
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? 'bg-purple-900 text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              onClick={() => setDateFilter(opt.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                dateFilter === opt.id
+                  ? 'bg-px-primary text-white shadow-xs'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
               }`}
             >
-              {tab.label}
+              {opt.label}
             </button>
           ))}
         </div>
+
+        {/* City Filter */}
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedCity}
+            onChange={(e) => setSelectedCity(e.target.value)}
+            className="px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium bg-white text-gray-700 focus:outline-none focus:border-px-primary"
+          >
+            {cities.map((city) => (
+              <option key={city} value={city}>
+                {city === 'All' ? 'All Cities' : city}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {/* 4. Desktop Applications Table / Mobile Cards */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* 4. Clean 5-Column Table (Desktop) + Mobile Cards */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
         {filteredDrivers.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
-            <Truck className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-base font-bold text-gray-700">No driver applications found</p>
-            <p className="text-xs text-gray-400 mt-1">Try adjusting your search query or filter tab.</p>
+            <Truck className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm font-bold text-gray-700">No driver records found matching your filters.</p>
+            <p className="text-xs text-gray-400 mt-1">Try changing the date filter or clear the search box.</p>
           </div>
         ) : (
           <>
-            {/* Desktop Table View (Hidden on mobile) */}
+            {/* Desktop Table (Hidden on Mobile) */}
             <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-gray-50/80 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                    <th className="py-3 px-4">Application ID</th>
-                    <th className="py-3 px-4">Driver Name</th>
-                    <th className="py-3 px-4">Mobile / WhatsApp</th>
-                    <th className="py-3 px-4">City</th>
-                    <th className="py-3 px-4">DL Number & Categories</th>
-                    <th className="py-3 px-4">Submitted Date</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                  <tr className="bg-gray-50/70 border-b border-gray-200 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                    <th className="py-3 px-4">1. Name & Contact</th>
+                    <th className="py-3 px-4">2. Licence & Vehicles</th>
+                    <th className="py-3 px-4">3. Location</th>
+                    <th className="py-3 px-4">4. Status</th>
+                    <th className="py-3 px-4 text-right">5. Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-xs">
                   {filteredDrivers.map((driver) => (
-                    <tr key={driver.id} className="hover:bg-purple-50/30 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-purple-950">
-                        {driver.application_code}
-                      </td>
-                      <td className="py-3.5 px-4 font-bold text-gray-900">
-                        {driver.full_name}
-                      </td>
+                    <tr key={driver.id} className="hover:bg-purple-50/20 transition-colors">
+                      {/* 1. Name & Phone with quick call / WhatsApp */}
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-gray-800">+91 {driver.mobile_number}</div>
-                        {driver.whatsapp_number && driver.whatsapp_number !== driver.mobile_number && (
-                          <div className="text-[11px] text-gray-400">WA: +91 {driver.whatsapp_number}</div>
-                        )}
+                        <div className="font-bold text-gray-900 text-sm">{driver.full_name}</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-gray-600 font-medium">{driver.mobile_number}</span>
+                          <a
+                            href={`tel:${driver.mobile_number}`}
+                            className="p-1 rounded text-purple-700 hover:bg-purple-100 transition-colors"
+                            title="Call Driver"
+                          >
+                            <Phone className="w-3.5 h-3.5" />
+                          </a>
+                          <a
+                            href={`https://wa.me/${getCleanWhatsAppNumber(driver.whatsapp_number || driver.mobile_number)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1 rounded text-emerald-600 hover:bg-emerald-50 transition-colors"
+                            title="WhatsApp Driver"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                        <span className="text-[10px] font-mono text-gray-400 block mt-0.5">{driver.application_code}</span>
                       </td>
-                      <td className="py-3.5 px-4 font-medium text-gray-700">
-                        {driver.city}
-                      </td>
+
+                      {/* 2. Licence & Vehicles */}
                       <td className="py-3.5 px-4">
-                        <div className="font-mono font-semibold text-gray-900">{driver.dl_number}</div>
-                        <div className="flex flex-wrap gap-1 mt-0.5">
-                          {driver.vehicle_categories.slice(0, 2).map((c) => (
+                        <span className="font-mono font-bold text-gray-800 text-xs bg-gray-100 px-2 py-0.5 rounded">
+                          {driver.dl_number}
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1.5">
+                          {driver.vehicle_categories.map((cat) => (
                             <span
-                              key={c}
-                              className="px-1.5 py-0.2 rounded text-[10px] font-bold bg-gray-100 text-gray-700"
+                              key={cat}
+                              className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-900 border border-purple-100"
                             >
-                              {c}
+                              {cat}
                             </span>
                           ))}
-                          {driver.vehicle_categories.length > 2 && (
-                            <span className="text-[10px] text-gray-400">+{driver.vehicle_categories.length - 2}</span>
-                          )}
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 text-gray-500 whitespace-nowrap">
-                        {new Date(driver.created_at).toLocaleDateString('en-IN', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+
+                      {/* 3. Location & PIN */}
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-gray-800">{driver.city}</div>
+                        <div className="text-[11px] text-gray-500 font-mono mt-0.5">PIN: {driver.pincode}</div>
                       </td>
-                      <td className="py-3.5 px-4 whitespace-nowrap">
+
+                      {/* 4. Status Badge */}
+                      <td className="py-3.5 px-4">
                         {renderStatusBadge(driver.status)}
                       </td>
+
+                      {/* 5. Action */}
                       <td className="py-3.5 px-4 text-right">
                         <button
                           type="button"
                           onClick={() => setSelectedDriver(driver)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-px-primary hover:bg-px-deep text-white text-xs font-bold shadow-xs transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-px-primary text-white font-bold text-xs hover:bg-purple-900 transition-all shadow-xs"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>View & Verify</span>
@@ -437,49 +532,64 @@ export const DriverApplicationsAdminPage: React.FC = () => {
               </table>
             </div>
 
-            {/* Mobile / Tablet Card View (Shown on screens < lg) */}
+            {/* Mobile Stacked Cards (Hidden on Desktop) */}
             <div className="block lg:hidden divide-y divide-gray-100">
               {filteredDrivers.map((driver) => (
                 <div key={driver.id} className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-bold text-xs text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-                      {driver.application_code}
-                    </span>
-                    {renderStatusBadge(driver.status)}
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-black text-gray-900">{driver.full_name}</h3>
-                    <p className="text-xs text-gray-600 mt-0.5">
-                      +91 {driver.mobile_number} • {driver.city}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 text-xs">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Licence:</span>
-                      <span className="font-mono font-bold text-gray-900">{driver.dl_number}</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-gray-900 text-base">{driver.full_name}</div>
+                      <div className="text-xs text-gray-500 font-mono">{driver.application_code}</div>
                     </div>
-                    <div className="flex flex-wrap gap-1 mt-1.5">
-                      {driver.vehicle_categories.map((c) => (
-                        <span key={c} className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">
-                          {c}
-                        </span>
-                      ))}
+                    <div>{renderStatusBadge(driver.status)}</div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                    <div>
+                      <span className="text-[10px] text-gray-400 block uppercase font-bold">Licence</span>
+                      <span className="font-mono font-bold text-gray-800">{driver.dl_number}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-gray-400 block uppercase font-bold">Location</span>
+                      <span className="font-bold text-gray-800">{driver.city}</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-gray-400">
-                      {new Date(driver.created_at).toLocaleDateString('en-IN')}
-                    </span>
+                  <div className="flex flex-wrap gap-1">
+                    {driver.vehicle_categories.map((c) => (
+                      <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-900">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Thumb-friendly mobile buttons */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <a
+                      href={`tel:${driver.mobile_number}`}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-purple-200 text-purple-800 font-bold text-xs bg-purple-50"
+                    >
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Call</span>
+                    </a>
+
+                    <a
+                      href={`https://wa.me/${getCleanWhatsAppNumber(driver.whatsapp_number || driver.mobile_number)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </a>
+
                     <button
                       type="button"
                       onClick={() => setSelectedDriver(driver)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-px-primary text-white text-xs font-bold shadow-sm"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-px-primary text-white font-bold text-xs shadow-xs"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span>View & Verify</span>
+                      <span>Verify</span>
                     </button>
                   </div>
                 </div>
@@ -489,20 +599,20 @@ export const DriverApplicationsAdminPage: React.FC = () => {
         )}
       </div>
 
-      {/* 5. DRIVER VERIFICATION DRAWER / MODAL */}
+      {/* 5. Driver Verification Modal (Primary Actions at Top) */}
       {selectedDriver && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto border border-gray-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto border border-gray-200">
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 bg-gradient-to-r from-purple-50 via-white to-purple-50 border-b border-gray-200 flex items-center justify-between">
+            <div className="p-4 sm:p-5 bg-gradient-to-r from-purple-50 via-white to-purple-50 border-b border-gray-200 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-black text-sm text-px-primary bg-purple-100/80 px-2.5 py-0.5 rounded-lg border border-purple-200">
+                  <span className="font-mono font-bold text-xs text-px-primary bg-purple-100 px-2 py-0.5 rounded">
                     {selectedDriver.application_code}
                   </span>
                   {renderStatusBadge(selectedDriver.status)}
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-gray-900 mt-1">
+                <h2 className="text-base sm:text-lg font-black text-gray-900 mt-1">
                   {selectedDriver.full_name}
                 </h2>
               </div>
@@ -516,115 +626,258 @@ export const DriverApplicationsAdminPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Modal Body (Scrollable) */}
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 text-xs sm:text-sm">
-              {/* Quick Contact Bar */}
-              <div className="p-3 bg-purple-50/70 rounded-xl border border-purple-100 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-purple-700" />
-                  <span className="font-bold text-gray-800">
-                    Contact Driver: <span className="text-purple-950 font-black">+91 {selectedDriver.mobile_number}</span>
-                  </span>
-                </div>
+            {/* One-Click Pre-Filled WhatsApp Notification Banner (Approve or Reject) */}
+            {recentActionResult && (
+              <div className="border-b border-gray-100">
+                {recentActionResult.type === 'approved' ? (
+                  <div className="p-3.5 sm:p-4 bg-emerald-50 text-emerald-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
+                    <div className="flex items-center gap-2.5">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                      <div>
+                        <p className="text-xs sm:text-sm font-bold text-emerald-900">
+                          ✓ Driver Approved! Notify {recentActionResult.driver.full_name} on WhatsApp?
+                        </p>
+                        <p className="text-[11px] text-emerald-700">
+                          Reference: <span className="font-mono font-bold">{recentActionResult.driver.application_code}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={`https://wa.me/${getCleanWhatsAppNumber(
+                        recentActionResult.driver.whatsapp_number || recentActionResult.driver.mobile_number
+                      )}?text=${encodeURIComponent(
+                        `Namaste ${recentActionResult.driver.full_name}, congratulations! Your driver application (${recentActionResult.driver.application_code}) with Prisha Xpress Pvt. Ltd. has been APPROVED. Please visit our Pune office with your original Driving Licence and ID documents for onboarding. Contact: +91 7276897727`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Send Approval on WhatsApp</span>
+                    </a>
+                  </div>
+                ) : (
+                  <div className="p-3.5 sm:p-4 bg-rose-50 text-rose-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
+                    <div className="flex items-center gap-2.5">
+                      <XCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                      <div>
+                        <p className="text-xs sm:text-sm font-bold text-rose-900">
+                          Application Rejected. Send update to {recentActionResult.driver.full_name} on WhatsApp?
+                        </p>
+                        <p className="text-[11px] text-rose-700">
+                          Reason: {recentActionResult.driver.admin_remarks || adminRemarks}
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href={`https://wa.me/${getCleanWhatsAppNumber(
+                        recentActionResult.driver.whatsapp_number || recentActionResult.driver.mobile_number
+                      )}?text=${encodeURIComponent(
+                        `Namaste ${recentActionResult.driver.full_name}, your driver application (${recentActionResult.driver.application_code}) with Prisha Xpress Pvt. Ltd. could not be approved due to: ${
+                          recentActionResult.driver.admin_remarks || adminRemarks
+                        }. Please re-apply with clear documents or contact our Pune team at +91 7276897727.`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-all"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Send Update on WhatsApp</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
 
+            {/* Quick Action Bar RIGHT AT THE TOP - With Remarks & Actions */}
+            <div className="p-3 sm:p-4 bg-purple-50/80 border-b border-purple-100 space-y-3">
+              {/* Admin Remarks / Notes Input (Always visible at top) */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider shrink-0">
+                  Admin Remarks / Notes:
+                </label>
+                <input
+                  type="text"
+                  value={adminRemarks}
+                  onChange={(e) => setAdminRemarks(e.target.value)}
+                  placeholder="e.g. DL & ID verified, ready for Pune route..."
+                  className="flex-1 px-3 py-1.5 text-xs border border-gray-300 rounded-xl focus:border-px-primary focus:outline-none bg-white font-medium shadow-2xs"
+                />
+              </div>
+
+              {/* Action Buttons Row */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-purple-100/70">
                 <div className="flex items-center gap-2">
                   <a
-                    href={`tel:+91${selectedDriver.mobile_number}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-purple-200 text-purple-800 font-bold hover:bg-purple-100 transition-colors"
+                    href={`tel:${selectedDriver.mobile_number}`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-purple-200 text-purple-900 font-bold text-xs hover:bg-purple-100 transition-colors"
                   >
-                    <Phone className="w-3.5 h-3.5" /> Call Driver
+                    <Phone className="w-3.5 h-3.5 text-purple-700" />
+                    <span>Call {selectedDriver.mobile_number}</span>
                   </a>
+
                   <a
-                    href={`https://wa.me/91${selectedDriver.whatsapp_number || selectedDriver.mobile_number}?text=${encodeURIComponent(
-                      `Hello ${selectedDriver.full_name}, this is Prisha Xpress fleet operations regarding your driver application (${selectedDriver.application_code}).`
+                    href={`https://wa.me/${getCleanWhatsAppNumber(selectedDriver.whatsapp_number || selectedDriver.mobile_number)}?text=${encodeURIComponent(
+                      `Hello ${selectedDriver.full_name}, this is Prisha Xpress regarding your driver application (${selectedDriver.application_code}).`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-colors shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors"
                   >
-                    <MessageSquare className="w-3.5 h-3.5" /> WhatsApp Driver
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
                   </a>
                 </div>
-              </div>
 
-              {/* Personal & Licence Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Personal Information */}
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-2.5">
-                  <h3 className="text-xs font-black text-gray-700 uppercase tracking-wider pb-2 border-b border-gray-200">
-                    Personal Information
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div>
-                      <span className="text-gray-500 block">Full Name:</span>
-                      <span className="font-bold text-gray-900">{selectedDriver.full_name}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block">Date of Birth:</span>
-                      <span className="font-bold text-gray-900">{selectedDriver.date_of_birth}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block">Mobile Number:</span>
-                      <span className="font-bold text-gray-900">+91 {selectedDriver.mobile_number}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block">WhatsApp Number:</span>
-                      <span className="font-bold text-gray-900">+91 {selectedDriver.whatsapp_number || selectedDriver.mobile_number}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block">City & PIN:</span>
-                      <span className="font-bold text-gray-900">{selectedDriver.city} - {selectedDriver.pincode}</span>
-                    </div>
-                    {selectedDriver.emergency_contact && (
-                      <div>
-                        <span className="text-gray-500 block">Emergency Contact:</span>
-                        <span className="font-bold text-gray-900">{selectedDriver.emergency_contact}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleApprove}
+                    disabled={isProcessingAction || selectedDriver.status === 'approved'}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-xs disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>{selectedDriver.status === 'approved' ? 'Approved' : 'Approve Driver'}</span>
+                  </button>
 
-                {/* Driving Licence Information */}
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 space-y-2.5">
-                  <h3 className="text-xs font-black text-gray-700 uppercase tracking-wider pb-2 border-b border-gray-200">
-                    Driving Licence & Categories
-                  </h3>
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <span className="text-gray-500 block">Driving Licence Number:</span>
-                      <span className="font-mono font-black text-sm text-purple-950">{selectedDriver.dl_number}</span>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block mb-1">Authorized Categories:</span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selectedDriver.vehicle_categories.map((c) => (
-                          <span
-                            key={c}
-                            className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold text-xs border border-purple-200"
-                          >
-                            {c}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 block">Submitted At:</span>
-                      <span className="font-medium text-gray-800">
-                        {new Date(selectedDriver.created_at).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRejectClick}
+                    disabled={isProcessingAction || selectedDriver.status === 'rejected'}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-all shadow-xs disabled:opacity-50"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    <span>Reject</span>
+                  </button>
                 </div>
               </div>
+            </div>
 
-              {/* DOCUMENT VIEWER: Side-by-Side Thumbnails with Click-to-Zoom */}
+            {/* Inline Rejection Reason Panel (Shown when clicking Reject) */}
+            {rejectionPanelOpen && (
+              <div className="p-3.5 sm:p-4 bg-rose-50 border-b border-rose-200 space-y-2.5 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-rose-900 flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-rose-600" />
+                    Select or type rejection reason (Required):
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setRejectionPanelOpen(false)}
+                    className="text-xs text-rose-600 hover:text-rose-800 font-bold"
+                  >
+                    ✕ Cancel
+                  </button>
+                </div>
+
+                {/* Quick-select chips */}
+                <div className="flex flex-wrap gap-1.5">
+                  {REJECTION_REASON_CHIPS.map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => setAdminRemarks(chip)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                        adminRemarks === chip
+                          ? 'bg-rose-700 text-white shadow-xs'
+                          : 'bg-white border border-rose-200 text-rose-800 hover:bg-rose-100'
+                      }`}
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom input */}
+                <input
+                  type="text"
+                  value={adminRemarks}
+                  onChange={(e) => setAdminRemarks(e.target.value)}
+                  placeholder="Enter specific rejection reason..."
+                  className="w-full px-3 py-2 text-xs border border-rose-300 rounded-xl bg-white focus:outline-none focus:border-rose-600 font-medium"
+                />
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setRejectionPanelOpen(false)}
+                    className="px-3 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleConfirmReject}
+                    disabled={isProcessingAction}
+                    className="px-4 py-1.5 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    <span>Confirm Rejection & Save</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {actionError && (
+              <div className="mx-4 mt-3 p-2.5 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-xl flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>{actionError}</span>
+              </div>
+            )}
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-4">
+              {/* Driver Details Card */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-3.5 rounded-xl border border-gray-100 text-xs">
+                <div>
+                  <span className="text-[10px] text-gray-400 block uppercase font-bold">Date of Birth</span>
+                  <span className="font-semibold text-gray-800">{selectedDriver.date_of_birth}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-400 block uppercase font-bold">City / Location</span>
+                  <span className="font-semibold text-gray-800">{selectedDriver.city} ({selectedDriver.pincode})</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-400 block uppercase font-bold">Driving Licence</span>
+                  <span className="font-mono font-bold text-purple-900">{selectedDriver.dl_number}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-gray-400 block uppercase font-bold">Emergency Contact</span>
+                  <span className="font-semibold text-gray-800">
+                    {selectedDriver.emergency_contact || 'None provided'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Vehicle Categories */}
               <div>
-                <h3 className="text-xs font-black text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-px-primary" />
-                  Uploaded Verification Documents (Click to Zoom)
-                </h3>
+                <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider block mb-1.5">
+                  Authorized Vehicle Categories
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedDriver.vehicle_categories.map((cat) => (
+                    <span
+                      key={cat}
+                      className="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-900 border border-purple-200 flex items-center gap-1.5"
+                    >
+                      <Check className="w-3 h-3 text-purple-700" />
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              {/* Document Thumbnails with Click-to-Zoom */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider">
+                    Uploaded Documents (Click thumbnail to view full-screen)
+                  </span>
+                  <span className="text-[10px] text-purple-800 font-bold">Click any document to inspect</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {[
                     { title: 'DL Front', url: selectedDriver.dl_front_url },
                     { title: 'DL Back', url: selectedDriver.dl_back_url },
@@ -640,8 +893,8 @@ export const DriverApplicationsAdminPage: React.FC = () => {
                       <div className="aspect-4/3 relative bg-gray-100 flex items-center justify-center overflow-hidden">
                         {doc.url.endsWith('.pdf') ? (
                           <div className="flex flex-col items-center justify-center p-2 text-center">
-                            <FileText className="w-8 h-8 text-red-500 mb-1" />
-                            <span className="text-[10px] text-gray-500 font-bold">PDF Document</span>
+                            <FileText className="w-7 h-7 text-red-500 mb-1" />
+                            <span className="text-[10px] text-gray-500 font-bold">PDF</span>
                           </div>
                         ) : (
                           <img
@@ -651,110 +904,145 @@ export const DriverApplicationsAdminPage: React.FC = () => {
                           />
                         )}
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
-                          <Maximize2 className="w-5 h-5" />
+                          <Maximize2 className="w-4 h-4" />
                         </div>
                       </div>
-                      <div className="p-2 text-center bg-white border-t border-gray-100">
+                      <div className="p-1.5 text-center bg-white border-t border-gray-100">
                         <p className="text-[11px] font-bold text-gray-800 truncate">{doc.title}</p>
-                        <p className="text-[10px] text-px-primary font-bold">Click to view</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* ADMIN REMARKS & ACTION CONTROLS */}
-              <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3">
-                <label className="block text-xs font-black text-gray-700 uppercase tracking-wider">
-                  Admin Remarks & Verification Notes
-                </label>
-                <textarea
-                  rows={3}
-                  value={adminRemarks}
-                  onChange={(e) => setAdminRemarks(e.target.value)}
-                  placeholder="e.g. DL & Aadhaar numbers verified with RTO database. Approved for Pune hub operations."
-                  className="w-full p-3 rounded-xl border border-gray-300 text-xs font-medium focus:border-px-primary focus:outline-none bg-white"
-                />
-
-                {actionError && (
-                  <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                    {actionError}
-                  </p>
-                )}
-
-                <div className="flex flex-wrap items-center justify-end gap-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={handleReject}
-                    disabled={isProcessingAction}
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors disabled:opacity-50 shadow-xs"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    Reject Application
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleApprove}
-                    disabled={isProcessingAction}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black transition-colors disabled:opacity-50 shadow-md"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    Approve Driver
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3 bg-gray-100 border-t border-gray-200 text-right">
+            <div className="p-3 bg-gray-50 border-t border-gray-200 text-right">
               <button
                 type="button"
                 onClick={() => setSelectedDriver(null)}
-                className="px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-4 py-1.5 text-xs font-bold text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
               >
-                Close Drawer
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 6. FULL-SCREEN DOCUMENT ZOOM MODAL */}
-      {zoomedImage && (
-        <div
-          onClick={() => setZoomedImage(null)}
-          className="fixed inset-0 z-60 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
-        >
+      {/* 6. Full-Screen Document Zoom Lightbox (React Portal to document.body, z-[9999]) */}
+      {zoomedImage &&
+        typeof document !== 'undefined' &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            className="relative max-w-4xl max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+            onClick={(e) => {
+              e.stopPropagation();
+              setZoomedImage(null);
+            }}
+            className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col animate-fadeIn select-none"
           >
-            <div className="p-3.5 bg-gray-900 text-white flex items-center justify-between">
-              <span className="font-bold text-xs">{zoomedImage.title}</span>
-              <button
-                type="button"
-                onClick={() => setZoomedImage(null)}
-                className="text-gray-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            {/* Top Toolbar */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="p-3 sm:p-4 bg-gray-900/95 border-b border-gray-800 text-white flex items-center justify-between gap-3 shrink-0"
+            >
+              {/* Document Title with Driver Name */}
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText className="w-4 h-4 text-purple-400 shrink-0" />
+                <h3 className="font-bold text-xs sm:text-sm truncate">
+                  {zoomedImage.title} {selectedDriver ? `— ${selectedDriver.full_name}` : ''}
+                </h3>
+              </div>
+
+              {/* Action Controls: Zoom In, Zoom Out, Rotate, Open in Tab, Close */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setZoomScale((prev) => Math.min(prev + 0.25, 3))}
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white transition-colors"
+                  title="Zoom In (+)"
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setZoomScale((prev) => Math.max(prev - 0.25, 0.5))}
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white transition-colors"
+                  title="Zoom Out (-)"
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRotation((prev) => (prev + 90) % 360)}
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white transition-colors"
+                  title="Rotate 90°"
+                >
+                  <RotateCw className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setZoomScale(1);
+                    setRotation(0);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-[11px] font-bold text-gray-300 hover:text-white transition-colors"
+                  title="Reset Zoom & Rotation"
+                >
+                  Reset
+                </button>
+                <a
+                  href={zoomedImage.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 hover:text-white transition-colors"
+                  title="Open Full Image in New Tab"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setZoomedImage(null);
+                  }}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-colors ml-1 shadow-sm"
+                  title="Close Preview (Esc)"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Close</span>
+                </button>
+              </div>
             </div>
-            <div className="p-2 overflow-auto max-h-[82vh] flex items-center justify-center bg-gray-100">
+
+            {/* Document Viewer Body */}
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 overflow-auto p-4 sm:p-8 flex items-center justify-center bg-black/40"
+            >
               {zoomedImage.url.endsWith('.pdf') ? (
-                <iframe src={zoomedImage.url} title={zoomedImage.title} className="w-[80vw] h-[75vh]" />
-              ) : (
-                <img
+                <iframe
                   src={zoomedImage.url}
-                  alt={zoomedImage.title}
-                  className="max-h-[78vh] w-auto object-contain rounded-lg shadow-md"
+                  title={zoomedImage.title}
+                  className="w-[90vw] h-[82vh] rounded-xl border border-gray-800 bg-white shadow-2xl"
                 />
+              ) : (
+                <div className="transition-transform duration-200 ease-out flex items-center justify-center max-w-full max-h-full">
+                  <img
+                    src={zoomedImage.url}
+                    alt={zoomedImage.title}
+                    style={{
+                      transform: `scale(${zoomScale}) rotate(${rotation}deg)`,
+                      transition: 'transform 0.2s ease-out',
+                    }}
+                    className="max-h-[80vh] max-w-[85vw] object-contain rounded-xl shadow-2xl border border-gray-800/60 bg-gray-900"
+                  />
+                </div>
               )}
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 };
