@@ -5,8 +5,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { PageTransition } from '../components/animations/PageTransition';
 import { Button } from '../components/common/Button';
+import { CareersHero } from '../components/careers/CareersHero';
 import {
-  Briefcase,
   Building2,
   Truck,
   ArrowRight,
@@ -20,49 +20,8 @@ import {
 export const CareersPage: React.FC = () => {
   return (
     <PageTransition>
-      {/* 1. Hero Section */}
-      <section className="relative pt-32 pb-16 lg:pt-36 lg:pb-20 text-white overflow-hidden bg-px-deep flex items-center justify-center min-h-[460px]">
-        {/* Background Photograph - Bright Natural Daylight Office Environment */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/assets/images/careers-staff.jpg"
-            alt="Corporate Careers at Prisha Xpress"
-            className="w-full h-full object-cover object-[75%_center] md:object-center filter brightness-100 contrast-100"
-          />
-          {/* Soft Ambient Directional Support Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-px-deep/65 via-transparent to-px-deep/40 hidden md:block" />
-          <div className="absolute inset-0 bg-gradient-to-t from-px-deep/75 via-transparent to-px-deep/35 md:hidden" />
-        </div>
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center w-full py-6">
-          <div className="p-6 sm:p-10 lg:p-12 rounded-3xl bg-px-deep/80 backdrop-blur-md border border-white/20 shadow-2xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-purple-200 border border-white/20">
-              <Briefcase className="w-4 h-4 text-px-accent" />
-              <span>Careers & Professional Opportunities</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight max-w-3xl mx-auto">
-              Build Your Future with <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-white to-px-accent">Prisha Xpress</span>
-            </h1>
-
-            <p className="text-sm sm:text-base lg:text-lg text-gray-100 max-w-2xl mx-auto leading-relaxed font-medium">
-              Explore professional opportunities and become part of our growing transportation and logistics operations.
-            </p>
-
-            <div className="pt-2 flex flex-wrap justify-center gap-3 text-xs text-purple-200">
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/15">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Transparent Verification
-              </span>
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/15">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Driver Welfare & Timely Payouts
-              </span>
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 border border-white/15">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Corporate Base in Pune
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 1. Compact Premium Careers Hero Section */}
+      <CareersHero />
 
       {/* 2. Clear Disclaimer Note */}
       <section className="bg-px-lavender/60 border-y border-purple-200/60 py-4">
