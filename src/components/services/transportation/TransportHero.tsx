@@ -193,7 +193,7 @@ export const TransportHero: React.FC = () => {
             {/* Description (Readable, Clear, Plain English) */}
             <motion.p
               variants={itemVariants}
-              className="text-sm sm:text-base text-gray-700 leading-relaxed font-normal"
+              className="text-sm sm:text-base text-[#F5C7FF] drop-shadow-[0_1px_2px_rgba(26,5,46,0.85)] leading-relaxed font-normal"
             >
               {t.desc}
             </motion.p>
