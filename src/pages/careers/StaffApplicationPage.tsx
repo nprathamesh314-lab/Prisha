@@ -96,21 +96,24 @@ export const StaffApplicationPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submittedApp, setSubmittedApp] = useState<StaffApplication | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
+
+  const DRAFT_STORAGE_KEY = 'px_staff_form_draft';
 
   // Form State
   const [formData, setFormData] = useState({
     // Step 1: Personal Info
     full_name: '',
     date_of_birth: '',
-    gender: 'Male' as 'Male' | 'Female' | 'Other',
+    gender: '' as 'Male' | 'Female' | 'Other',
     mobile_number: '',
     alternate_mobile_number: '',
     email: '',
     current_address: '',
     city: 'Pune',
     state: 'Maharashtra',
-    pin_code: '',
+    pin_code: '411001',
     // Step 2: Educational Details
     qualification: 'Graduate',
     course_degree: '',
@@ -152,21 +155,51 @@ export const StaffApplicationPage: React.FC = () => {
     profile_photograph: { type: 'profile_photograph', file: null, filename: '', size: 0, progress: 0 },
   });
 
+  const isMobileValid = (num: string) => num.replace(/\D/g, '').length === 10;
+  const isEmailValid = (em: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.trim());
+  const isNameValid = (nm: string) => nm.trim().length >= 3;
+
+  // Load draft from localStorage on mount
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object') {
+          setFormData((prev) => ({ ...prev, ...parsed }));
+        }
+      }
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
+    let nextForm: typeof formData;
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
+      nextForm = { ...formData, [name]: checked };
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      nextForm = { ...formData, [name]: value };
       if (name === 'department') {
         const dept = value as StaffDepartment;
-        setFormData((prev) => ({
-          ...prev,
-          department: dept,
-          position_applied_for: POSITIONS_BY_DEPT[dept]?.[0] || 'Executive',
-        }));
+        nextForm.department = dept;
+        nextForm.position_applied_for = POSITIONS_BY_DEPT[dept]?.[0] || 'Executive';
       }
+    }
+    setFormData(nextForm);
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(nextForm));
+    } catch {
+      // Ignore quota errors
+    }
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => {
+        const copy = { ...prev };
+        delete copy[name];
+        return copy;
+      });
     }
   };
 
@@ -239,41 +272,48 @@ export const StaffApplicationPage: React.FC = () => {
   const validateStep = (step: number): boolean => {
     setErrorMsg(null);
     if (step === 1) {
+      const errors: Record<string, string> = {};
       if (!formData.full_name.trim() || formData.full_name.trim().length < 3) {
-        setErrorMsg('Please enter your full name (minimum 3 characters, valid letters).');
-        return false;
+        errors.full_name = 'Please enter your full name as per official ID (at least 3 characters).';
       }
       if (!formData.date_of_birth) {
-        setErrorMsg('Please select your date of birth.');
-        return false;
+        errors.date_of_birth = 'Please enter your date of birth.';
+      } else if (new Date(formData.date_of_birth) > new Date()) {
+        errors.date_of_birth = 'Date of birth cannot be in the future.';
       }
-      if (new Date(formData.date_of_birth) > new Date()) {
-        setErrorMsg('Invalid Date of Birth: Date of birth cannot be in the future.');
-        return false;
+      if (!formData.gender) {
+        errors.gender = 'Please select your gender.';
       }
       const cleanMobile = formData.mobile_number.replace(/\D/g, '');
       if (cleanMobile.length < 10) {
-        setErrorMsg('Please enter a valid 10-digit Indian mobile number.');
-        return false;
+        errors.mobile_number = 'Please enter a valid 10-digit Indian mobile number.';
       }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
-        setErrorMsg('Please enter a valid email address.');
-        return false;
+      if (formData.alternate_mobile_number) {
+        const cleanAlt = formData.alternate_mobile_number.replace(/\D/g, '');
+        if (cleanAlt.length > 0 && cleanAlt.length < 10) {
+          errors.alternate_mobile_number = 'Please enter a valid 10-digit mobile number or leave blank.';
+        }
+      }
+      if (!formData.email.trim() || !isEmailValid(formData.email)) {
+        errors.email = 'Please enter a valid email address.';
       }
       if (!formData.city.trim()) {
-        setErrorMsg('City is required.');
-        return false;
+        errors.city = 'City is required.';
       }
       if (!formData.state.trim()) {
-        setErrorMsg('State is required.');
-        return false;
+        errors.state = 'State is required.';
       }
       const pinRegex = /^\d{6}$/;
       if (formData.pin_code.trim() && !pinRegex.test(formData.pin_code.trim())) {
-        setErrorMsg('PIN code must be exactly 6 digits.');
+        errors.pin_code = 'PIN code must be exactly 6 digits.';
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        setErrorMsg(Object.values(errors)[0]);
         return false;
       }
+      setFieldErrors({});
       return true;
     } else if (step === 2) {
       if (!formData.course_degree.trim()) {
@@ -378,6 +418,12 @@ export const StaffApplicationPage: React.FC = () => {
         uploadedDocsList
       );
 
+      try {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+
       setSubmittedApp(res);
       window.scrollTo({ top: 200, behavior: 'smooth' });
     } catch (err: any) {
@@ -397,39 +443,55 @@ export const StaffApplicationPage: React.FC = () => {
 
   return (
     <PageTransition>
-      {/* 1. Header Banner */}
-      <section className="relative pt-32 pb-16 lg:pt-36 lg:pb-20 text-white overflow-hidden bg-px-deep flex items-center justify-center min-h-[440px]">
+      {/* 1. Compact Hero Banner (All Devices) */}
+      <section className="relative pt-20 pb-6 sm:pt-24 sm:pb-8 text-white overflow-hidden bg-[#160424] flex items-center justify-center min-h-[160px] sm:min-h-[200px] md:min-h-[220px]">
         {/* Background Office Photograph - Bright Natural Daylight */}
         <div className="absolute inset-0 z-0">
           <img
             src="/assets/images/careers-staff.jpg"
             alt="Corporate Staff Careers"
-            className="w-full h-full object-cover object-[75%_center] md:object-center filter brightness-100 contrast-100"
+            className="w-full h-full object-cover object-center filter brightness-[0.9] contrast-[1.05]"
           />
-          {/* Soft Ambient Directional Support Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-px-deep/65 via-transparent to-px-deep/40 hidden md:block" />
-          <div className="absolute inset-0 bg-gradient-to-t from-px-deep/75 via-transparent to-px-deep/35 md:hidden" />
+          {/* Subtle Directional Support Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#1A052E]/75 via-[#1A052E]/55 to-[#1A052E]/75" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1A052E]/65 via-transparent to-[#1A052E]/55" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center w-full py-6">
-          <div className="p-6 sm:p-10 rounded-3xl bg-px-deep/80 backdrop-blur-md border border-white/20 shadow-2xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-purple-200 border border-white/20">
-              <Building2 className="w-3.5 h-3.5 text-px-accent" />
-              <span>Staff Recruitment Module • Corporate Positions</span>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center w-full py-2 sm:py-4">
+          <div className="max-w-2xl mx-auto space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[11px] sm:text-xs font-bold uppercase tracking-wider text-purple-200 border border-white/20">
+              <Building2 className="w-3.5 h-3.5 text-purple-300" />
+              <span>OFFICE & CORPORATE JOBS</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
-              Build Your Career With Prisha Xpress
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white leading-tight">
+              Apply for Office Roles at Prisha Xpress
             </h1>
-            <p className="text-sm sm:text-base text-gray-100 max-w-2xl mx-auto font-medium leading-relaxed">
-              Join our team and become part of a growing transportation and logistics organization.
+            <p className="text-xs sm:text-sm text-purple-100 max-w-xl mx-auto font-normal leading-relaxed">
+              Join our growing logistics team across India.
             </p>
           </div>
         </div>
       </section>
 
       {/* 2. Wizard Container */}
-      <section className="py-16 bg-px-bg min-h-screen">
+      <section className="py-8 sm:py-12 bg-px-bg min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Top Form Navigation: Back to Careers & Draft Status */}
+          <div className="flex items-center justify-between mb-4 px-1">
+            <Link
+              to="/careers"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-purple-700 hover:text-purple-900 transition-colors py-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>← Back to Careers</span>
+            </Link>
+            <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-emerald-700 font-medium bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full shadow-2xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>✓ Draft saved automatically</span>
+            </span>
+          </div>
+
           {/* Submission Success Screen */}
           {submittedApp ? (
             <div className="bg-white rounded-3xl border border-px-border shadow-2xl p-8 sm:p-14 text-center animate-fadeIn">
@@ -497,12 +559,24 @@ export const StaffApplicationPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-3xl border border-px-border shadow-soft-purple p-6 sm:p-10">
+            <div className="bg-white rounded-3xl border border-px-border shadow-soft-purple p-5 sm:p-8 md:p-10">
               {/* Progress Steps Header */}
-              <div className="mb-10">
-                <div className="flex justify-between items-center mb-3 text-xs sm:text-sm font-bold text-gray-500">
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-2.5 text-xs sm:text-sm font-bold">
                   <span className="text-px-primary">Step {currentStep} of 6</span>
-                  <span>{Math.round((currentStep / 6) * 100)}% Complete</span>
+                  <span className="text-gray-500 font-medium">
+                    {currentStep === 1
+                      ? '17% Complete (Takes about 3 minutes)'
+                      : currentStep === 2
+                      ? '33% Complete (Takes about 3 minutes)'
+                      : currentStep === 3
+                      ? '50% Complete (Takes about 2 minutes)'
+                      : currentStep === 4
+                      ? '67% Complete (Takes about 2 minutes)'
+                      : currentStep === 5
+                      ? '83% Complete (Takes about 1 minute)'
+                      : '100% Complete (Final review)'}
+                  </span>
                 </div>
                 {/* Progress Bar */}
                 <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
@@ -512,8 +586,8 @@ export const StaffApplicationPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Step Icons Row */}
-                <div className="grid grid-cols-6 gap-1 mt-6 text-center">
+                {/* Step Icons Row: Horizontally scrollable on mobile */}
+                <div className="flex sm:grid sm:grid-cols-6 gap-2 sm:gap-1 mt-6 text-center overflow-x-auto no-scrollbar pb-1">
                   {[
                     { s: 1, label: 'Personal', icon: User },
                     { s: 2, label: 'Education', icon: GraduationCap },
@@ -529,28 +603,30 @@ export const StaffApplicationPage: React.FC = () => {
                       <div
                         key={step.s}
                         onClick={() => {
-                          if (step.s < currentStep) setCurrentStep(step.s);
+                          if (step.s <= currentStep) setCurrentStep(step.s);
                         }}
-                        className={`flex flex-col items-center gap-1.5 cursor-pointer transition-all ${
+                        className={`flex flex-col items-center gap-1.5 transition-all shrink-0 min-w-[56px] sm:min-w-0 ${
+                          step.s <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
+                        } ${
                           isActive
                             ? 'text-px-primary font-bold'
                             : isPassed
-                            ? 'text-emerald-600'
+                            ? 'text-emerald-600 font-medium'
                             : 'text-gray-400'
                         }`}
                       >
                         <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs transition-all ${
+                          className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-xs transition-all ${
                             isActive
                               ? 'bg-px-primary text-white shadow-md'
                               : isPassed
-                              ? 'bg-emerald-100 text-emerald-700'
+                              ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                               : 'bg-gray-100 text-gray-500'
                           }`}
                         >
                           <Icon className="w-4 h-4" />
                         </div>
-                        <span className="text-[11px] hidden sm:block truncate max-w-full">
+                        <span className="text-[11px] font-medium truncate max-w-full">
                           {step.label}
                         </span>
                       </div>
@@ -572,115 +648,220 @@ export const StaffApplicationPage: React.FC = () => {
                 <div className="space-y-6 animate-fadeIn">
                   <div className="border-b border-gray-100 pb-4">
                     <h3 className="text-xl font-bold text-px-dark">Step 1: Personal Information</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Enter your official contact and residential information.
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                      Please fill in your basic details and current address.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Full Name */}
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Full Name <span className="text-rose-500">*</span>
+                        Full Name (As per Aadhaar/PAN) <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        name="full_name"
-                        value={formData.full_name}
-                        onChange={handleInputChange}
-                        placeholder="e.g. Pooja Sanjay Kulkarni"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="full_name"
+                          value={formData.full_name}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Pooja Sanjay Kulkarni"
+                          className={`w-full px-4 py-3 rounded-xl border text-sm transition-all duration-200 pr-10 ${
+                            fieldErrors.full_name
+                              ? 'border-rose-400 focus:border-rose-500 bg-rose-50/20'
+                              : isNameValid(formData.full_name)
+                              ? 'border-emerald-500 focus:border-emerald-500 bg-emerald-50/15'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
+                          required
+                        />
+                        {isNameValid(formData.full_name) && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        )}
+                      </div>
+                      {fieldErrors.full_name && (
+                        <p className="text-xs text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {fieldErrors.full_name}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Date of Birth */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 mb-1">
                         Date of Birth <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        type="date"
-                        name="date_of_birth"
-                        value={formData.date_of_birth}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type="date"
+                          name="date_of_birth"
+                          value={formData.date_of_birth}
+                          onChange={handleInputChange}
+                          placeholder="dd-mm-yyyy"
+                          className={`w-full px-4 py-3 rounded-xl border text-sm transition-all duration-200 ${
+                            fieldErrors.date_of_birth
+                              ? 'border-rose-400 focus:border-rose-500 bg-rose-50/20'
+                              : formData.date_of_birth
+                              ? 'border-emerald-500 focus:border-emerald-500 bg-emerald-50/15'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
+                          required
+                        />
+                        {formData.date_of_birth && !fieldErrors.date_of_birth && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        )}
+                      </div>
+                      {fieldErrors.date_of_birth && (
+                        <p className="text-xs text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {fieldErrors.date_of_birth}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Gender */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 mb-1">
                         Gender <span className="text-rose-500">*</span>
                       </label>
-                      <select
-                        name="gender"
-                        value={formData.gender}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleInputChange}
+                          className={`w-full px-4 py-3 rounded-xl border text-sm transition-all duration-200 bg-white ${
+                            fieldErrors.gender
+                              ? 'border-rose-400 focus:border-rose-500 bg-rose-50/20'
+                              : formData.gender
+                              ? 'border-emerald-500 focus:border-emerald-500 bg-emerald-50/15'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
+                          required
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                          <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                      </div>
+                      {fieldErrors.gender && (
+                        <p className="text-xs text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {fieldErrors.gender}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Mobile Number (+91) */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Mobile Number <span className="text-rose-500">*</span>
+                        Mobile Number (+91) <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        type="tel"
-                        name="mobile_number"
-                        value={formData.mobile_number}
-                        onChange={handleInputChange}
-                        placeholder="+91 98230 00000"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type="tel"
+                          name="mobile_number"
+                          value={formData.mobile_number}
+                          onChange={handleInputChange}
+                          placeholder="e.g. 98230 00000"
+                          maxLength={14}
+                          className={`w-full px-4 py-3 rounded-xl border text-sm transition-all duration-200 pr-10 ${
+                            fieldErrors.mobile_number
+                              ? 'border-rose-400 focus:border-rose-500 bg-rose-50/20'
+                              : isMobileValid(formData.mobile_number)
+                              ? 'border-emerald-500 focus:border-emerald-500 bg-emerald-50/15'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
+                          required
+                        />
+                        {isMobileValid(formData.mobile_number) && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        )}
+                      </div>
+                      {fieldErrors.mobile_number && (
+                        <p className="text-xs text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {fieldErrors.mobile_number}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Alternate Mobile Number (Optional) */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 mb-1">
                         Alternate Mobile Number <span className="text-gray-400 font-normal">(Optional)</span>
                       </label>
-                      <input
-                        type="tel"
-                        name="alternate_mobile_number"
-                        value={formData.alternate_mobile_number}
-                        onChange={handleInputChange}
-                        placeholder="+91 98230 11111"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                      />
+                      <div className="relative">
+                        <input
+                          type="tel"
+                          name="alternate_mobile_number"
+                          value={formData.alternate_mobile_number}
+                          onChange={handleInputChange}
+                          placeholder="e.g. 98230 11111"
+                          maxLength={14}
+                          className={`w-full px-4 py-3 rounded-xl border text-sm transition-all duration-200 pr-10 ${
+                            formData.alternate_mobile_number && isMobileValid(formData.alternate_mobile_number)
+                              ? 'border-emerald-500 focus:border-emerald-500 bg-emerald-50/15'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
+                        />
+                        {formData.alternate_mobile_number && isMobileValid(formData.alternate_mobile_number) && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        )}
+                      </div>
+                      {fieldErrors.alternate_mobile_number && (
+                        <p className="text-xs text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {fieldErrors.alternate_mobile_number}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Email Address */}
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 mb-1">
                         Email Address <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="candidate@example.com"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
+                      <div className="relative">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="e.g. pooja.k@example.com"
+                          className={`w-full px-4 py-3 rounded-xl border text-sm transition-all duration-200 pr-10 ${
+                            fieldErrors.email
+                              ? 'border-rose-400 focus:border-rose-500 bg-rose-50/20'
+                              : isEmailValid(formData.email)
+                              ? 'border-emerald-500 focus:border-emerald-500 bg-emerald-50/15'
+                              : 'border-gray-200 focus:border-px-primary'
+                          }`}
+                          required
+                        />
+                        {isEmailValid(formData.email) && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        )}
+                      </div>
+                      {fieldErrors.email && (
+                        <p className="text-xs text-rose-600 mt-1 flex items-center gap-1 font-medium">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {fieldErrors.email}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Current Address (Optional) */}
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Current Residential Address (Optional)
+                        Current Address <span className="text-gray-400 font-normal">(Optional)</span>
                       </label>
                       <textarea
                         name="current_address"
                         rows={2}
                         value={formData.current_address}
                         onChange={handleInputChange}
-                        placeholder="House / Flat No., Street, Landmark (Optional)..."
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm resize-none"
+                        placeholder="Full address with Pincode"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-px-primary text-sm resize-none transition-all duration-200"
                       />
                     </div>
 
+                    {/* City */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 mb-1">
                         City <span className="text-rose-500">*</span>
@@ -690,11 +871,13 @@ export const StaffApplicationPage: React.FC = () => {
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
+                        placeholder="e.g. Pune"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-px-primary text-sm"
                         required
                       />
                     </div>
 
+                    {/* State */}
                     <div>
                       <label className="block text-xs font-bold text-gray-700 mb-1">
                         State <span className="text-rose-500">*</span>
@@ -703,7 +886,8 @@ export const StaffApplicationPage: React.FC = () => {
                         name="state"
                         value={formData.state}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-px-primary text-sm bg-white"
+                        required
                       >
                         {INDIAN_STATES.map((st) => (
                           <option key={st} value={st}>
@@ -713,19 +897,19 @@ export const StaffApplicationPage: React.FC = () => {
                       </select>
                     </div>
 
-                    <div>
+                    {/* PIN Code */}
+                    <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-gray-700 mb-1">
-                        PIN Code <span className="text-rose-500">*</span>
+                        PIN Code (6 Digits)
                       </label>
                       <input
                         type="text"
                         name="pin_code"
                         value={formData.pin_code}
                         onChange={handleInputChange}
-                        placeholder="411001"
+                        placeholder="e.g. 411001"
                         maxLength={6}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-px-primary text-sm"
                       />
                     </div>
                   </div>
@@ -1454,25 +1638,25 @@ export const StaffApplicationPage: React.FC = () => {
                     <span className="font-semibold">{errorMsg}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 {currentStep > 1 ? (
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold text-xs sm:text-sm hover:bg-gray-50 flex items-center gap-1.5 transition-all"
+                    className="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold text-sm hover:bg-gray-50 flex items-center justify-center gap-2 transition-all cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     <span>Previous</span>
                   </button>
                 ) : (
-                  <div />
+                  <div className="hidden sm:block" />
                 )}
 
                 {currentStep < 6 ? (
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] px-6 py-2.5 text-xs sm:text-sm bg-px-primary hover:bg-px-violet text-white shadow-soft-purple hover:shadow-glow-purple border border-px-primary/40 gap-1.5 cursor-pointer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] px-7 py-3 sm:py-2.5 text-sm bg-px-primary hover:bg-px-violet text-white shadow-soft-purple hover:shadow-glow-purple border border-px-primary/40 gap-2 cursor-pointer"
                   >
                     <span>Next Step</span>
                     <ArrowRight className="w-4 h-4" />
@@ -1482,7 +1666,7 @@ export const StaffApplicationPage: React.FC = () => {
                     type="button"
                     onClick={handleSubmit}
                     disabled={submitting}
-                    className="inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none px-8 py-3 text-xs sm:text-sm bg-gradient-to-r from-px-primary to-px-violet text-white shadow-lg hover:shadow-xl gap-1.5 cursor-pointer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none px-8 py-3 text-sm bg-gradient-to-r from-px-primary to-px-violet text-white shadow-lg hover:shadow-xl gap-2 cursor-pointer"
                   >
                     {submitting ? 'Submitting Application...' : 'SUBMIT STAFF APPLICATION'}
                   </button>
