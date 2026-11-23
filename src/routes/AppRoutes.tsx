@@ -102,6 +102,7 @@ export const AppRoutes: React.FC = () => {
           <Route index element={<AdminDashboardOverviewPage />} />
           <Route path="enquiries" element={<BusinessEnquiriesAdminPage />} />
           <Route path="staff-applications" element={<StaffApplicationsAdminPage />} />
+          <Route path="drivers" element={<DriverApplicationsAdminPage />} />
           <Route path="driver-applications" element={<DriverApplicationsAdminPage />} />
           <Route path="driver-verification" element={<DriverVerificationPage />} />
           <Route path="approved-drivers" element={<ApprovedDriversPage />} />

@@ -1,1620 +1,1288 @@
-// PRISHA XPRESS PVT. LTD. - MODULE B: DRIVER REGISTRATION WIZARD
-// ROUTE: /careers/driver-registration
-// STRICT SEPARATION: SAVES TO DRIVER REGISTRATION DATABASE ONLY
+// PRISHA XPRESS PVT. LTD. - 3-STEP DRIVER REGISTRATION FLOW
+// ROUTE: /careers/driver & /careers/driver-registration
+// CONNECTED TO SUPABASE (PostgreSQL Database + Storage bucket 'driver-documents')
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { PageTransition } from '../../components/animations/PageTransition';
-import { Button } from '../../components/common/Button';
-import { recruitmentService } from '../../services/recruitmentService';
 import {
-  DriverApplication,
-  VehicleCategory,
-  DriverDocumentType,
-} from '../../types/recruitment';
-import { supabaseStorageService } from '../../services/supabaseClient';
+  driverApplicationService,
+} from '../../services/driverApplicationService';
+import {
+  DriverApplicationFormData,
+  DriverUploadedFiles,
+  DriverApplicationRecord,
+  DriverVehicleCategory,
+} from '../../types/driverApplication';
 import {
   Truck,
-  CreditCard,
-  History,
-  UploadCloud,
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
   Trash2,
-  Phone,
-  MapPin,
   AlertCircle,
   Copy,
   Printer,
   Edit,
   ShieldCheck,
-  AlertTriangle,
+  UploadCloud,
+  Camera,
+  FileText,
+  MessageSquare,
+  Check,
+  RotateCcw,
 } from 'lucide-react';
 
-const INDIAN_STATES = [
-  'Maharashtra',
-  'Gujarat',
-  'Karnataka',
-  'Goa',
-  'Madhya Pradesh',
-  'Telangana',
-  'Delhi NCR',
-  'Rajasthan',
-  'Tamil Nadu',
-  'Uttar Pradesh',
+const MAHARASHTRA_CITIES = [
+  'Pune',
+  'Mumbai',
+  'Thane',
+  'Nashik',
+  'Nagpur',
+  'Kolhapur',
+  'Chhatrapati Sambhajinagar',
+  'Solapur',
+  'Satara',
   'Other',
 ];
 
-const VEHICLE_CATEGORIES: VehicleCategory[] = [
+const VEHICLE_CATEGORIES: DriverVehicleCategory[] = [
   'LMV',
   'HMV',
   'HGMV',
   'Transport Vehicle',
   'Trailer / Multi-Axle',
   'Container Vehicle',
-  'Other',
 ];
-
-const COMMON_VEHICLE_TYPES = [
-  'BharatBenz 2823R (Heavy Rigid)',
-  'Tata Signa 4825.TK (Multi-Axle)',
-  'Ashok Leyland 5525 (Tractor Trailer)',
-  'Eicher Pro 6028 (Container Body)',
-  'Tata 1613 / 1109 (Medium Goods)',
-  'Mahindra Blazo X 35',
-];
-
-interface UploadedDriverDoc {
-  type: DriverDocumentType;
-  file: File | null;
-  filename: string;
-  size: number;
-  progress: number;
-  fileUrl?: string;
-}
 
 export const DriverRegistrationPage: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [submitting, setSubmitting] = useState(false);
-  const [submittedDriver, setSubmittedDriver] = useState<DriverApplication | null>(null);
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submittedDriver, setSubmittedDriver] = useState<DriverApplicationRecord | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [licenceWarning, setLicenceWarning] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [sameAsMobile, setSameAsMobile] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
 
   // Form State
-  const [formData, setFormData] = useState({
-    // Step 1: Personal Info
+  const [formData, setFormData] = useState<DriverApplicationFormData>({
     full_name: '',
-    date_of_birth: '',
-    gender: 'Male' as 'Male' | 'Female' | 'Other',
     mobile_number: '',
-    alternate_mobile_number: '',
-    email: '',
-    current_address: '',
+    whatsapp_number: '',
+    date_of_birth: '',
     city: 'Pune',
-    state: 'Maharashtra',
-    pin_code: '',
-    emergency_contact_name: '',
-    emergency_contact_number: '',
-    // Step 2: Driving Licence Details
-    licence_number: '',
-    licence_type: 'Commercial Heavy Transport (TRANS)',
-    vehicle_categories: ['HMV', 'Transport Vehicle'] as VehicleCategory[],
-    licence_issue_date: '',
-    licence_expiry_date: '',
-    issuing_rto: 'MH-14 Pimpri Chinchwad RTO',
-    licence_issuing_state: 'Maharashtra',
-    is_licence_expired_flag: false,
-    // Step 3: Driving Experience
-    total_driving_experience: '5-8 Years',
-    heavy_vehicle_experience: '5 Years',
-    previous_company_name: '',
-    previous_job_role: 'Commercial Long Haul Driver',
-    types_of_vehicles_driven: ['BharatBenz 2823R (Heavy Rigid)'],
-    preferred_work_location: 'Pune – Mumbai – Gujarat Corridor',
-    expected_monthly_salary: 35000,
-    availability_to_join: 'Immediate',
-    willingness_to_travel: true,
-    additional_skills: '',
-    // Step 6: Declarations
+    pincode: '',
+    emergency_contact: '',
+    dl_number: '',
+    vehicle_categories: ['HMV', 'Transport Vehicle'],
     declaration_accepted: false,
-    licence_review_authorized: false,
-    consent_accepted: false,
-    privacy_accepted: false,
   });
 
-  // Step 4 Documents State (Bucket: driver-application-documents)
-  const [documents, setDocuments] = useState<Record<string, UploadedDriverDoc>>({
-    driving_licence_front: { type: 'driving_licence_front', file: null, filename: '', size: 0, progress: 0 },
-    driving_licence_back: { type: 'driving_licence_back', file: null, filename: '', size: 0, progress: 0 },
-    recent_photograph: { type: 'recent_photograph', file: null, filename: '', size: 0, progress: 0 },
-    address_proof: { type: 'address_proof', file: null, filename: '', size: 0, progress: 0 },
-    resume: { type: 'resume', file: null, filename: '', size: 0, progress: 0 },
-    experience_certificate: { type: 'experience_certificate', file: null, filename: '', size: 0, progress: 0 },
-    pan_card: { type: 'pan_card', file: null, filename: '', size: 0, progress: 0 },
+  // Document Files State
+  const [files, setFiles] = useState<DriverUploadedFiles>({
+    dl_front: null,
+    dl_back: null,
+    aadhaar_front: null,
+    aadhaar_back: null,
+    pan_card: null,
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+  // Preview URLs for instant thumbnail render
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+
+  // Restore draft on mount
+  useEffect(() => {
+    const draft = driverApplicationService.loadDraft();
+    if (draft) {
+      setFormData((prev) => ({
+        ...prev,
+        ...draft,
+      }));
+      if (draft.whatsapp_number && draft.whatsapp_number === draft.mobile_number) {
+        setSameAsMobile(true);
+      }
+    }
+  }, []);
+
+  // Save draft on formData change
+  useEffect(() => {
+    if (!submittedDriver) {
+      driverApplicationService.saveDraft(formData);
+    }
+  }, [formData, submittedDriver]);
+
+  // Clean up object URLs on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(previewUrls).forEach((url) => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [previewUrls]);
+
+  // Validation Helpers
+  const isMobileValid = (num: string): boolean => {
+    const clean = num.replace(/\D/g, '');
+    return clean.length === 10 && /^[6-9]/.test(clean);
+  };
+
+  const isPinValid = (pin: string): boolean => {
+    return /^[1-9][0-9]{5}$/.test(pin.trim());
+  };
+
+  const calculateAge = (dobString: string): number => {
+    if (!dobString) return 0;
+    const dob = new Date(dobString);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Field change handlers
+  const handleInputChange = (field: keyof DriverApplicationFormData, value: any) => {
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      if (field === 'mobile_number' && sameAsMobile) {
+        updated.whatsapp_number = value;
+      }
+      return updated;
+    });
+
+    // Clear error for that field
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
     }
   };
 
-  const toggleCategory = (cat: VehicleCategory) => {
+  const handleSameAsMobileToggle = (checked: boolean) => {
+    setSameAsMobile(checked);
+    if (checked) {
+      setFormData((prev) => ({ ...prev, whatsapp_number: prev.mobile_number }));
+      if (fieldErrors.whatsapp_number) {
+        setFieldErrors((prev) => {
+          const next = { ...prev };
+          delete next.whatsapp_number;
+          return next;
+        });
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, whatsapp_number: '' }));
+    }
+  };
+
+  const toggleCategory = (cat: DriverVehicleCategory) => {
     setFormData((prev) => {
       const exists = prev.vehicle_categories.includes(cat);
-      if (exists) {
-        if (prev.vehicle_categories.length <= 1) return prev; // Keep at least one
-        return { ...prev, vehicle_categories: prev.vehicle_categories.filter((c) => c !== cat) };
-      } else {
-        return { ...prev, vehicle_categories: [...prev.vehicle_categories, cat] };
-      }
+      const updated = exists
+        ? prev.vehicle_categories.filter((c) => c !== cat)
+        : [...prev.vehicle_categories, cat];
+      return { ...prev, vehicle_categories: updated };
     });
+
+    if (fieldErrors.vehicle_categories) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next.vehicle_categories;
+        return next;
+      });
+    }
   };
 
-  const toggleVehicleModel = (model: string) => {
-    setFormData((prev) => {
-      const exists = prev.types_of_vehicles_driven.includes(model);
-      if (exists) {
-        return { ...prev, types_of_vehicles_driven: prev.types_of_vehicles_driven.filter((m) => m !== model) };
-      } else {
-        return { ...prev, types_of_vehicles_driven: [...prev.types_of_vehicles_driven, model] };
-      }
-    });
-  };
-
-  const handleFileSelect = async (type: string, file: File | null) => {
+  // File change handler
+  const handleFileSelect = (key: keyof DriverUploadedFiles, file: File | null) => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg('File size exceeds 5MB limit. Please upload a compressed document or photo.');
+      setFieldErrors((prev) => ({
+        ...prev,
+        [key]: 'File size exceeds 5 MB limit. Please upload a smaller file.',
+      }));
       return;
     }
 
-    const ext = file.name.split('.').pop()?.toLowerCase();
-    const validExts = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
-    if (!validExts.includes(ext || '')) {
-      setErrorMsg('Invalid File Format: Accepted file types are PDF, JPG, JPEG, and PNG.');
-      return;
+    setFiles((prev) => ({ ...prev, [key]: file }));
+
+    // Revoke previous URL if exists
+    if (previewUrls[key] && previewUrls[key].startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrls[key]);
     }
 
-    setErrorMsg(null);
+    // Set new preview URL
+    const url = URL.createObjectURL(file);
+    setPreviewUrls((prev) => ({ ...prev, [key]: url }));
 
-    setDocuments((prev) => ({
-      ...prev,
-      [type]: {
-        type: type as any,
-        file,
-        filename: file.name,
-        size: file.size,
-        progress: 40,
-      },
-    }));
-
-    // Upload to Supabase Storage bucket: driver-application-documents
-    try {
-      const uploadRes = await supabaseStorageService.uploadDriverDocument(file, 'draft', type);
-      setDocuments((prev) => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          progress: 100,
-          fileUrl: uploadRes.fileUrl,
-        },
-      }));
-    } catch {
-      setDocuments((prev) => ({
-        ...prev,
-        [type]: {
-          ...prev[type],
-          progress: 100,
-        },
-      }));
+    // Clear field error
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
     }
   };
 
-  const removeDoc = (type: string) => {
-    setDocuments((prev) => ({
-      ...prev,
-      [type]: { type: type as any, file: null, filename: '', size: 0, progress: 0 },
-    }));
-  };
-
-  // Step Validations
-  const validateStep = (step: number): boolean => {
-    setErrorMsg(null);
-    setLicenceWarning(null);
-
-    if (step === 1) {
-      if (!formData.full_name.trim() || formData.full_name.trim().length < 3) {
-        setErrorMsg('Please enter your full name as printed on driving licence (minimum 3 characters).');
-        return false;
-      }
-      if (!formData.date_of_birth) {
-        setErrorMsg('Please select your date of birth.');
-        return false;
-      }
-      if (new Date(formData.date_of_birth) > new Date()) {
-        setErrorMsg('Invalid Date of Birth: Date of birth cannot be in the future.');
-        return false;
-      }
-      const cleanMobile = formData.mobile_number.replace(/\D/g, '');
-      if (cleanMobile.length < 10) {
-        setErrorMsg('Please enter a valid 10-digit primary mobile number.');
-        return false;
-      }
-      if (!formData.city.trim()) {
-        setErrorMsg('City is required.');
-        return false;
-      }
-      if (!formData.state.trim()) {
-        setErrorMsg('State is required.');
-        return false;
-      }
-      const pinRegex = /^\d{6}$/;
-      if (formData.pin_code.trim() && !pinRegex.test(formData.pin_code.trim())) {
-        setErrorMsg('PIN code must be exactly 6 digits.');
-        return false;
-      }
-      if (formData.emergency_contact_number.trim()) {
-        const cleanEmerg = formData.emergency_contact_number.replace(/\D/g, '');
-        if (cleanEmerg.length < 10) {
-          setErrorMsg('Emergency contact phone number must be a valid 10-digit number.');
-          return false;
-        }
-      }
-      return true;
-    } else if (step === 2) {
-      if (!formData.licence_number.trim() || formData.licence_number.trim().length < 5) {
-        setErrorMsg('Please enter a valid Driving Licence Number (e.g. MH14 20120045612).');
-        return false;
-      }
-      if (formData.vehicle_categories.length === 0) {
-        setErrorMsg('Please select at least one vehicle category authorized on your licence.');
-        return false;
-      }
-      if (!formData.licence_issue_date || !formData.licence_expiry_date) {
-        setErrorMsg('Please specify both licence issue date and expiry date.');
-        return false;
-      }
-      // Licence date validation: Expiry must be later than Issue date
-      if (new Date(formData.licence_expiry_date) <= new Date(formData.licence_issue_date)) {
-        setErrorMsg('Invalid Licence Dates: Licence expiry date must be later than the issue date.');
-        return false;
-      }
-      // Expired licence warning (flagged for review, not completely blocking testing)
-      if (new Date(formData.licence_expiry_date) < new Date()) {
-        formData.is_licence_expired_flag = true;
-        setLicenceWarning('Notice: Driving licence expiry date is past. This application will be flagged for RTO renewal verification.');
-      } else {
-        formData.is_licence_expired_flag = false;
-      }
-      if (!formData.issuing_rto.trim()) {
-        setErrorMsg('Please enter the Issuing RTO authority name.');
-        return false;
-      }
-      return true;
-    } else if (step === 3) {
-      if (!formData.preferred_work_location.trim()) {
-        setErrorMsg('Please enter your preferred transport route or city location.');
-        return false;
-      }
-      if (!formData.availability_to_join.trim()) {
-        setErrorMsg('Please specify your availability to join.');
-        return false;
-      }
-      return true;
-    } else if (step === 4) {
-      // Required: Driving Licence front & back, Recent Photograph
-      if (!documents.driving_licence_front.filename && !documents.driving_licence_back.filename) {
-        setErrorMsg('Driving Licence documents (Front and Back) are mandatory. Please upload clear photos or PDF.');
-        return false;
-      }
-      if (!documents.driving_licence_front.filename) {
-        setErrorMsg('Driving Licence (Front Side) is mandatory.');
-        return false;
-      }
-      if (!documents.driving_licence_back.filename) {
-        setErrorMsg('Driving Licence (Back Side showing endorsements) is mandatory.');
-        return false;
-      }
-      if (!documents.recent_photograph.filename) {
-        setErrorMsg('Recent driver photograph is mandatory for profile verification.');
-        return false;
-      }
-      return true;
-    } else if (step === 5) {
-      return true;
-    } else if (step === 6) {
-      if (!formData.declaration_accepted) {
-        setErrorMsg('Please confirm that the information provided is accurate.');
-        return false;
-      }
-      if (!formData.licence_review_authorized) {
-        setErrorMsg('Please authorize Prisha Xpress to review the submitted driving licence and documents.');
-        return false;
-      }
-      if (!formData.consent_accepted) {
-        setErrorMsg('Please consent to the processing of your application for recruitment purposes.');
-        return false;
-      }
-      if (!formData.privacy_accepted) {
-        setErrorMsg('Please agree to the applicable Privacy Policy.');
-        return false;
-      }
-      return true;
+  const handleRemoveFile = (key: keyof DriverUploadedFiles) => {
+    setFiles((prev) => ({ ...prev, [key]: null }));
+    if (previewUrls[key] && previewUrls[key].startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrls[key]);
     }
-    return true;
+    setPreviewUrls((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
 
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 6));
-      window.scrollTo({ top: 220, behavior: 'smooth' });
+  // Step Validation
+  const validateStep1 = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!formData.full_name.trim()) {
+      errors.full_name = 'Full name as per Driving Licence is required.';
+    } else if (formData.full_name.trim().length < 3) {
+      errors.full_name = 'Please enter a valid full name (minimum 3 characters).';
+    }
+
+    if (!formData.mobile_number.trim()) {
+      errors.mobile_number = 'Mobile number is required.';
+    } else if (!isMobileValid(formData.mobile_number)) {
+      errors.mobile_number = 'Please enter a valid 10-digit Indian mobile number.';
+    }
+
+    if (formData.whatsapp_number && formData.whatsapp_number.trim()) {
+      if (!isMobileValid(formData.whatsapp_number)) {
+        errors.whatsapp_number = 'Please enter a valid 10-digit WhatsApp number.';
+      }
+    }
+
+    if (!formData.date_of_birth) {
+      errors.date_of_birth = 'Date of birth is required.';
     } else {
-      const errorEl = document.getElementById('driver-wizard-error-banner');
-      if (errorEl) {
-        errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      } else {
-        window.scrollTo({ top: 220, behavior: 'smooth' });
+      const age = calculateAge(formData.date_of_birth);
+      if (age < 18) {
+        errors.date_of_birth = 'Driver must be at least 18 years old to apply.';
+      } else if (age > 65) {
+        errors.date_of_birth = 'Maximum driver recruitment age is 65 years.';
+      }
+    }
+
+    if (!formData.city) {
+      errors.city = 'Please select your current city or district.';
+    }
+
+    if (!formData.pincode.trim()) {
+      errors.pincode = 'PIN code is required.';
+    } else if (!isPinValid(formData.pincode)) {
+      errors.pincode = 'Please enter a valid 6-digit PIN code.';
+    }
+
+    if (!formData.dl_number.trim()) {
+      errors.dl_number = 'Driving Licence number is required.';
+    } else if (formData.dl_number.trim().length < 8) {
+      errors.dl_number = 'Please enter a valid Driving Licence number (e.g. MH14 20120045612).';
+    }
+
+    if (!formData.vehicle_categories || formData.vehicle_categories.length === 0) {
+      errors.vehicle_categories = 'Please select at least one authorized vehicle category.';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateStep2 = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!files.dl_front) {
+      errors.dl_front = 'Please upload Driving Licence (Front Side).';
+    }
+    if (!files.dl_back) {
+      errors.dl_back = 'Please upload Driving Licence (Back Side).';
+    }
+    if (!files.aadhaar_front) {
+      errors.aadhaar_front = 'Please upload Aadhaar Card (Front Side).';
+    }
+    if (!files.aadhaar_back) {
+      errors.aadhaar_back = 'Please upload Aadhaar Card (Back Side).';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleNext = () => {
+    setErrorMsg(null);
+    if (currentStep === 1) {
+      if (validateStep1()) {
+        setCurrentStep(2);
+        window.scrollTo({ top: 120, behavior: 'smooth' });
+      }
+    } else if (currentStep === 2) {
+      if (validateStep2()) {
+        setCurrentStep(3);
+        window.scrollTo({ top: 120, behavior: 'smooth' });
       }
     }
   };
 
-  const prevStep = () => {
+  const handlePrev = () => {
     setErrorMsg(null);
-    setLicenceWarning(null);
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-    window.scrollTo({ top: 220, behavior: 'smooth' });
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
   };
 
+  // Final Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateStep(6)) return;
-
-    setSubmitting(true);
     setErrorMsg(null);
 
+    if (!formData.declaration_accepted) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        declaration_accepted: 'You must confirm the declaration to submit your application.',
+      }));
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      const uploadedDocsList = Object.values(documents)
-        .filter((d) => d.filename)
-        .map((d) => ({
-          document_type: d.type,
-          filename: d.filename,
-          fileType: d.file?.type || 'application/pdf',
-          size: d.size || 350000,
-        }));
-
-      const res = await recruitmentService.submitDriverRegistration(
-        {
-          ...formData,
-          expected_monthly_salary: Number(formData.expected_monthly_salary) || 0,
-        },
-        uploadedDocsList
-      );
-
-      setSubmittedDriver(res);
-      window.scrollTo({ top: 200, behavior: 'smooth' });
+      const record = await driverApplicationService.submitDriverApplication(formData, files);
+      setSubmittedDriver(record);
+      window.scrollTo({ top: 100, behavior: 'smooth' });
     } catch (err: any) {
-      setErrorMsg(err?.message || 'Failed to submit driver registration. Please try again.');
+      console.error('Error submitting driver registration:', err);
+      setErrorMsg(err.message || 'Failed to submit application. Please check your network and try again.');
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  const copyRef = () => {
-    if (submittedDriver?.application_reference) {
-      navigator.clipboard.writeText(submittedDriver.application_reference);
+  const handleCopyCode = () => {
+    if (submittedDriver?.application_code) {
+      navigator.clipboard.writeText(submittedDriver.application_code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
   };
 
+  // Reusable File Upload Box Component
+  const FileUploadBox: React.FC<{
+    idKey: keyof DriverUploadedFiles;
+    title: string;
+    required?: boolean;
+    helperText?: string;
+  }> = ({ idKey, title, required, helperText }) => {
+    const file = files[idKey];
+    const preview = previewUrls[idKey];
+    const inputRef = useRef<HTMLInputElement>(null);
+    const hasError = Boolean(fieldErrors[idKey]);
+
+    return (
+      <div className={`rounded-xl border p-4 transition-all duration-200 ${
+        hasError
+          ? 'border-red-400 bg-red-50/50'
+          : file
+          ? 'border-emerald-300 bg-emerald-50/30'
+          : 'border-gray-200 bg-white hover:border-purple-300'
+      }`}>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+            {title} {required && <span className="text-red-500 font-bold">*</span>}
+          </label>
+          {file && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+              <Check className="w-3 h-3" /> Ready
+            </span>
+          )}
+        </div>
+
+        {helperText && <p className="text-xs text-gray-500 mb-3">{helperText}</p>}
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0] || null;
+            handleFileSelect(idKey, f);
+          }}
+        />
+
+        {file ? (
+          <div className="flex items-center gap-3 bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+            {/* Thumbnail Preview */}
+            <div className="w-14 h-14 rounded-md overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center border border-gray-200">
+              {file.type === 'application/pdf' ? (
+                <FileText className="w-7 h-7 text-red-500" />
+              ) : preview ? (
+                <img src={preview} alt={title} className="w-full h-full object-cover" />
+              ) : (
+                <FileText className="w-7 h-7 text-purple-600" />
+              )}
+            </div>
+
+            {/* File Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-gray-900 truncate">{file.name}</p>
+              <p className="text-[11px] text-gray-500">{(file.size / 1024).toFixed(0)} KB</p>
+            </div>
+
+            {/* Replace & Remove Buttons */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="text-xs font-medium text-purple-700 hover:text-purple-900 px-2.5 py-1.5 bg-purple-50 rounded hover:bg-purple-100 transition-colors"
+              >
+                Replace
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRemoveFile(idKey)}
+                className="text-xs font-medium text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded transition-colors"
+                title="Remove file"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div
+            onClick={() => inputRef.current?.click()}
+            className="border-2 border-dashed border-gray-300 hover:border-px-primary/60 rounded-lg p-5 text-center cursor-pointer transition-colors bg-gray-50/50 hover:bg-purple-50/30"
+          >
+            <div className="flex justify-center items-center gap-2 mb-2 text-purple-700">
+              <Camera className="w-5 h-5" />
+              <UploadCloud className="w-5 h-5" />
+            </div>
+            <p className="text-xs font-bold text-gray-700">Tap to Take Photo or Upload</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">JPG, PNG, or PDF up to 5 MB</p>
+          </div>
+        )}
+
+        {hasError && (
+          <p className="mt-2 text-xs font-medium text-red-600 flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+            {fieldErrors[idKey]}
+          </p>
+        )}
+      </div>
+    );
+  };
+
   return (
     <PageTransition>
-      {/* 1. Header Banner */}
-      <section className="relative pt-32 pb-16 lg:pt-36 lg:pb-20 text-white overflow-hidden bg-px-deep flex items-center justify-center min-h-[440px]">
-        {/* Background Driver & Truck Photograph - Bright Natural Daylight */}
+      {/* 1. Compact Hero Banner (All Devices: ~180px desktop, ~150px mobile) */}
+      <section className="relative pt-16 pb-6 sm:pt-20 sm:pb-8 text-white overflow-hidden bg-[#160424] flex items-center justify-center min-h-[150px] sm:min-h-[180px]">
+        {/* Background Driver & Truck Photograph with subtle purple tint */}
         <div className="absolute inset-0 z-0">
           <img
             src="/assets/images/careers-driver.jpg"
-            alt="Commercial Driver Registration"
-            className="w-full h-full object-cover object-[75%_center] md:object-center filter brightness-100 contrast-100"
+            alt="Prisha Xpress Driver Operations"
+            className="w-full h-full object-cover object-center brightness-90"
+            loading="eager"
           />
-          {/* Soft Ambient Directional Support Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-px-deep/65 via-transparent to-px-deep/40 hidden md:block" />
-          <div className="absolute inset-0 bg-gradient-to-t from-px-deep/75 via-transparent to-px-deep/35 md:hidden" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#160424]/90 via-[#26053D]/80 to-[#160424]/90" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center w-full py-6">
-          <div className="p-6 sm:p-10 rounded-3xl bg-px-deep/80 backdrop-blur-md border border-white/20 shadow-2xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">
-              <Truck className="w-3.5 h-3.5 text-px-accent" />
-              <span>Fleet & Highway Operations • Driver Portal</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
-              Join Prisha Xpress as a Professional Driver
-            </h1>
-            <p className="text-sm sm:text-base text-gray-100 max-w-2xl mx-auto font-medium leading-relaxed">
-              Apply to drive for one of Maharashtra's premier logistics operations. Competitive compensation, modern fleet, and professional working environment.
-            </p>
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-300/30 text-purple-200 text-xs font-extrabold uppercase tracking-wider mb-2">
+            <Truck className="w-3.5 h-3.5 text-purple-300" />
+            DRIVING JOBS
           </div>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight">
+            Join Prisha Xpress as a Driver
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-purple-100/90 max-w-xl mx-auto leading-relaxed">
+            Apply to drive with Maharashtra's trusted logistics team. Good monthly pay, incentives, and rest rooms.
+          </p>
         </div>
       </section>
 
-      {/* 2. Wizard Container */}
-      <section className="py-16 bg-px-bg min-h-screen">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Submission Success Screen */}
+      {/* 2. Form Wrapper Container */}
+      <div className="min-h-screen bg-gray-50/70 py-6 sm:py-10 px-3 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          {/* Top Form Navigation & Autosave Status */}
+          <div className="flex items-center justify-between mb-4 px-1">
+            <Link
+              to="/careers"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-purple-800 hover:text-purple-950 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Careers
+            </Link>
+
+            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              Draft saved automatically
+            </span>
+          </div>
+
+          {/* SUCCESS SCREEN */}
           {submittedDriver ? (
-            <div className="bg-white rounded-3xl border border-px-border shadow-2xl p-8 sm:p-14 text-center animate-fadeIn">
-              <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-6 shadow-md">
+            <div className="bg-white rounded-2xl border border-emerald-200 shadow-xl p-6 sm:p-10 text-center animate-fadeIn">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
 
-              <span className="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-2">
-                Registration Submitted Successfully!
+              <span className="inline-block px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-extrabold text-xs uppercase tracking-wider mb-2 border border-emerald-200">
+                Application Submitted!
               </span>
 
-              <h2 className="text-3xl font-black text-px-dark">
-                Thank you for registering with Prisha Xpress.
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                Welcome to Prisha Xpress
               </h2>
 
-              <p className="mt-2 text-gray-700 text-sm sm:text-base max-w-lg mx-auto font-normal leading-relaxed">
-                Your driver application has been submitted successfully. Our team will review your details and documents.
+              <p className="mt-2 text-sm text-gray-600 max-w-lg mx-auto leading-relaxed">
+                Our Pune fleet team will verify your documents and call you within 24 hours.
               </p>
 
-              {/* Reference Card */}
-              <div className="my-8 max-w-md mx-auto p-6 rounded-2xl bg-px-lavender/60 border border-purple-200 text-left">
-                <span className="text-xs font-bold text-px-violet uppercase tracking-widest block">
-                  Driver Application Reference Number
-                </span>
-                <div className="flex items-center justify-between gap-3 mt-1.5">
-                  <span className="text-2xl font-black tracking-wider text-px-primary font-mono">
-                    {submittedDriver.application_reference}
-                  </span>
-                  <button
-                    onClick={copyRef}
-                    className="p-2 rounded-lg bg-white border border-purple-200 text-px-primary hover:bg-px-primary hover:text-white transition-all text-xs flex items-center gap-1 font-semibold"
-                    title="Copy Reference"
-                  >
-                    <Copy className="w-4 h-4" />
-                    <span>{copied ? 'Copied!' : 'Copy'}</span>
-                  </button>
+              {/* Generated Application ID Box */}
+              <div className="mt-6 max-w-md mx-auto p-4 rounded-xl bg-purple-50/70 border-2 border-dashed border-purple-200 flex items-center justify-between">
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-purple-700 uppercase tracking-wider">
+                    Your Application ID
+                  </p>
+                  <p className="text-xl font-black text-purple-950 font-mono tracking-tight">
+                    {submittedDriver.application_code}
+                  </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-purple-200 text-xs text-gray-600 flex justify-between">
-                  <span>Licence: <strong>{submittedDriver.licence_number.slice(0, 4)} •••• {submittedDriver.licence_number.slice(-4)}</strong></span>
-                  <span>Status: <strong className="text-amber-700">Pending Verification</strong></span>
-                </div>
-              </div>
-
-              <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 text-xs text-purple-900 text-left max-w-md mx-auto mb-6 space-y-2">
-                <p className="font-bold flex items-center gap-1.5 text-px-deep">
-                  <ShieldCheck className="w-4 h-4 text-px-primary shrink-0" />
-                  Next Steps:
-                </p>
-                <p>
-                  Our Fleet Operations & Document Verification Cell will verify your licence details with RTO records and contact you regarding the driving assessment and document inspection at our Pune / Talegaon depot.
-                </p>
-              </div>
-
-              {/* Crucial Legal Disclaimer */}
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-[11px] text-amber-900 text-left max-w-md mx-auto mb-8">
-                <p className="font-bold flex items-center gap-1 text-amber-800">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                  Important Disclaimer:
-                </p>
-                <p className="mt-0.5">
-                  Application submission does not constitute an offer of employment or registration in official company software. Induction is subject to driving assessment, document verification, and background clearance.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-4">
                 <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-px-primary hover:bg-px-deep rounded-lg transition-colors shadow-sm"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" /> Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" /> Copy ID
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Summary Details */}
+              <div className="mt-6 max-w-md mx-auto bg-gray-50 rounded-xl p-4 text-left border border-gray-100 text-xs space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Applicant:</span>
+                  <span className="font-bold text-gray-900">{submittedDriver.full_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Mobile:</span>
+                  <span className="font-bold text-gray-900">+91 {submittedDriver.mobile_number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Driving Licence:</span>
+                  <span className="font-bold text-gray-900 font-mono">{submittedDriver.dl_number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">City / District:</span>
+                  <span className="font-bold text-gray-900">{submittedDriver.city}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a
+                  href={`https://wa.me/917276897727?text=${encodeURIComponent(
+                    `Hello Prisha Xpress Fleet Team, I have submitted my driver application (Application ID: ${submittedDriver.application_code}). Please verify my details.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Chat on WhatsApp (+91 7276897727)
+                </a>
+
+                <button
+                  type="button"
                   onClick={() => window.print()}
-                  className="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 font-bold text-sm flex items-center gap-2 hover:bg-gray-50 transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-bold text-sm transition-colors"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Print Receipt</span>
+                  Print / Save
                 </button>
-                <Link to="/careers">
-                  <Button variant="primary">Return to Careers Hub</Button>
-                </Link>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmittedDriver(null);
+                    setCurrentStep(1);
+                    setFormData({
+                      full_name: '',
+                      mobile_number: '',
+                      whatsapp_number: '',
+                      date_of_birth: '',
+                      city: 'Pune',
+                      pincode: '',
+                      emergency_contact: '',
+                      dl_number: '',
+                      vehicle_categories: ['HMV', 'Transport Vehicle'],
+                      declaration_accepted: false,
+                    });
+                    setFiles({
+                      dl_front: null,
+                      dl_back: null,
+                      aadhaar_front: null,
+                      aadhaar_back: null,
+                      pan_card: null,
+                    });
+                  }}
+                  className="text-xs text-purple-700 hover:text-purple-900 font-bold underline inline-flex items-center gap-1"
+                >
+                  <RotateCcw className="w-3 h-3" /> Submit another application
+                </button>
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-3xl border border-px-border shadow-soft-purple p-6 sm:p-10">
-              {/* Step Navigation Bar */}
-              <div className="mb-10">
-                <div className="flex justify-between items-center mb-3 text-xs sm:text-sm font-bold text-gray-500">
-                  <span className="text-px-primary">Step {currentStep} of 6</span>
-                  <span>{Math.round((currentStep / 6) * 100)}% Complete</span>
+            /* 3-STEP APPLICATION WIZARD CARD */
+            <div className="bg-white rounded-2xl border border-purple-100 shadow-xl overflow-hidden">
+              {/* Stepper Header */}
+              <div className="p-4 sm:p-6 bg-gradient-to-r from-purple-50/80 via-white to-purple-50/80 border-b border-purple-100">
+                {/* Progress Indicators */}
+                <div className="flex items-center justify-between text-xs font-bold text-gray-600 mb-3">
+                  <span>Step {currentStep} of 3</span>
+                  <span className="text-px-primary">
+                    {currentStep === 1 ? '33% Complete (Takes 1 min)' : currentStep === 2 ? '66% Complete' : 'Almost Done!'}
+                  </span>
                 </div>
-                <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+
+                {/* Progress Bar Line */}
+                <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden mb-4">
                   <div
-                    className="h-full bg-gradient-to-r from-px-deep via-px-primary to-px-violet transition-all duration-300 rounded-full"
-                    style={{ width: `${(currentStep / 6) * 100}%` }}
+                    className="bg-px-primary h-full transition-all duration-300"
+                    style={{ width: `${(currentStep / 3) * 100}%` }}
                   />
                 </div>
 
-                {/* Step Icons */}
-                <div className="grid grid-cols-6 gap-1 mt-6 text-center">
+                {/* 3 Interactive Step Pills */}
+                <div className="grid grid-cols-3 gap-2">
                   {[
-                    { s: 1, label: 'Personal', icon: Truck },
-                    { s: 2, label: 'Licence', icon: CreditCard },
-                    { s: 3, label: 'Experience', icon: History },
-                    { s: 4, label: 'Documents', icon: UploadCloud },
-                    { s: 5, label: 'Review', icon: Edit },
-                    { s: 6, label: 'Submit', icon: CheckCircle2 },
-                  ].map((step) => {
-                    const Icon = step.icon;
-                    const isActive = currentStep === step.s;
-                    const isPassed = currentStep > step.s;
+                    { step: 1, label: '1. Personal & Licence' },
+                    { step: 2, label: '2. Upload Documents' },
+                    { step: 3, label: '3. Review & Submit' },
+                  ].map((s) => {
+                    const isPassed = currentStep > s.step;
+                    const isCurrent = currentStep === s.step;
+
                     return (
-                      <div
-                        key={step.s}
+                      <button
+                        key={s.step}
+                        type="button"
                         onClick={() => {
-                          if (step.s < currentStep) setCurrentStep(step.s);
+                          if (isPassed) setCurrentStep(s.step);
                         }}
-                        className={`flex flex-col items-center gap-1.5 cursor-pointer transition-all ${
-                          isActive
-                            ? 'text-px-primary font-bold'
+                        disabled={!isPassed && !isCurrent}
+                        className={`py-2 px-2 rounded-xl text-center text-xs font-extrabold transition-all border ${
+                          isCurrent
+                            ? 'bg-px-primary text-white border-px-primary shadow-md'
                             : isPassed
-                            ? 'text-emerald-600'
-                            : 'text-gray-400'
+                            ? 'bg-purple-100 text-purple-900 border-purple-200 hover:bg-purple-200 cursor-pointer'
+                            : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                         }`}
                       >
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs transition-all ${
-                            isActive
-                              ? 'bg-px-deep text-white shadow-md'
-                              : isPassed
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-gray-100 text-gray-500'
-                          }`}
-                        >
-                          <Icon className="w-4 h-4" />
-                        </div>
-                        <span className="text-[11px] hidden sm:block truncate max-w-full">
-                          {step.label}
-                        </span>
-                      </div>
+                        <span className="block truncate">{s.label}</span>
+                      </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Validation Error Banner */}
-              {errorMsg && (
-                <div id="driver-wizard-error-banner" className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 shrink-0" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
-
-              {/* Licence Warning Banner */}
-              {licenceWarning && (
-                <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs sm:text-sm flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 shrink-0 text-amber-600" />
-                  <span>{licenceWarning}</span>
-                </div>
-              )}
-
-              {/* STEP 1: PERSONAL INFORMATION */}
-              {currentStep === 1 && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h3 className="text-xl font-bold text-px-dark">Step 1: Driver Personal Details</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Enter your personal information and mandatory emergency contact details.
-                    </p>
+              {/* Form Content Body */}
+              <form onSubmit={handleSubmit} className="p-4 sm:p-8">
+                {errorMsg && (
+                  <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+                    <span>{errorMsg}</span>
                   </div>
+                )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Driver Full Name (As per Driving Licence) <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="full_name"
-                        value={formData.full_name}
-                        onChange={handleInputChange}
-                        placeholder="e.g. Ramesh Balasaheb Shinde"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
+                {/* STEP 1: Personal & Driving Licence Details */}
+                {currentStep === 1 && (
+                  <div className="space-y-6 animate-fadeIn">
+                    {/* Section A: Personal Information */}
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Date of Birth <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        name="date_of_birth"
-                        value={formData.date_of_birth}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Gender <span className="text-rose-500">*</span>
-                      </label>
-                      <select
-                        name="gender"
-                        value={formData.gender}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Primary Mobile Number <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        name="mobile_number"
-                        value={formData.mobile_number}
-                        onChange={handleInputChange}
-                        placeholder="+91 94220 00000"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Alternate Mobile Number (Optional)
-                      </label>
-                      <input
-                        type="tel"
-                        name="alternate_mobile_number"
-                        value={formData.alternate_mobile_number}
-                        onChange={handleInputChange}
-                        placeholder="+91 98900 00000"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Email Address (Optional)
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="driver@example.com"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Current Residential Address (Optional)
-                      </label>
-                      <textarea
-                        name="current_address"
-                        rows={2}
-                        value={formData.current_address}
-                        onChange={handleInputChange}
-                        placeholder="Village / Town, Post, Taluka, District (Optional)..."
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm resize-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        City / Town <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        State <span className="text-rose-500">*</span>
-                      </label>
-                      <select
-                        name="state"
-                        value={formData.state}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        {INDIAN_STATES.map((st) => (
-                          <option key={st} value={st}>
-                            {st}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        PIN Code <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="pin_code"
-                        maxLength={6}
-                        value={formData.pin_code}
-                        onChange={handleInputChange}
-                        placeholder="410501"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    {/* Emergency Contacts */}
-                    <div className="sm:col-span-2 pt-3 border-t border-gray-100">
-                      <p className="text-xs font-bold text-px-deep uppercase tracking-wider mb-2">
-                        Emergency Contact (Optional)
+                      <h2 className="text-base sm:text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-purple-100 text-px-primary flex items-center justify-center text-xs">
+                          A
+                        </span>
+                        Personal Information
+                      </h2>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Please enter your details exactly as shown on your Driving Licence.
                       </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
+
+                      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Full Name */}
+                        <div className="sm:col-span-2">
                           <label className="block text-xs font-bold text-gray-700 mb-1">
-                            Emergency Contact Name & Relation (Optional)
+                            Full Name (As per Driving Licence) <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
-                            name="emergency_contact_name"
-                            value={formData.emergency_contact_name}
-                            onChange={handleInputChange}
-                            placeholder="e.g. Sunita Shinde (Wife) or Father (Optional)"
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
+                            value={formData.full_name}
+                            onChange={(e) => handleInputChange('full_name', e.target.value)}
+                            placeholder="e.g. Ramesh Kumar Patil"
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                              fieldErrors.full_name
+                                ? 'border-red-400 bg-red-50/40 text-gray-900 focus:border-red-500'
+                                : formData.full_name.trim().length >= 3
+                                ? 'border-emerald-400 bg-emerald-50/20 text-gray-900 focus:border-emerald-500'
+                                : 'border-gray-300 focus:border-px-primary'
+                            } outline-none`}
                           />
+                          {fieldErrors.full_name && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.full_name}
+                            </p>
+                          )}
                         </div>
 
+                        {/* Mobile Number (+91) with Green Check inside */}
                         <div>
                           <label className="block text-xs font-bold text-gray-700 mb-1">
-                            Emergency Contact Phone (Optional)
+                            Mobile Number (+91) <span className="text-red-500">*</span>
                           </label>
+                          <div className="relative">
+                            <input
+                              type="tel"
+                              maxLength={10}
+                              value={formData.mobile_number}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '');
+                                handleInputChange('mobile_number', val);
+                              }}
+                              placeholder="e.g. 98220 45610"
+                              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium pr-10 transition-all ${
+                                fieldErrors.mobile_number
+                                  ? 'border-red-400 bg-red-50/40 focus:border-red-500'
+                                  : isMobileValid(formData.mobile_number)
+                                  ? 'border-emerald-400 bg-emerald-50/20 focus:border-emerald-500'
+                                  : 'border-gray-300 focus:border-px-primary'
+                              } outline-none`}
+                            />
+                            {isMobileValid(formData.mobile_number) && (
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 flex items-center justify-center">
+                                <CheckCircle2 className="w-5 h-5" />
+                              </div>
+                            )}
+                          </div>
+                          {fieldErrors.mobile_number && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.mobile_number}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* WhatsApp Number (Optional) + Same as Mobile Checkbox */}
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="text-xs font-bold text-gray-700">
+                              WhatsApp Number <span className="text-gray-400 font-normal">(Optional)</span>
+                            </label>
+                            <label className="inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold text-purple-800">
+                              <input
+                                type="checkbox"
+                                checked={sameAsMobile}
+                                onChange={(e) => handleSameAsMobileToggle(e.target.checked)}
+                                className="w-3.5 h-3.5 rounded text-px-primary focus:ring-purple-400 accent-px-primary"
+                              />
+                              Same as Mobile
+                            </label>
+                          </div>
                           <input
                             type="tel"
-                            name="emergency_contact_number"
-                            value={formData.emergency_contact_number}
-                            onChange={handleInputChange}
-                            placeholder="+91 98901 00000"
-                            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
+                            maxLength={10}
+                            disabled={sameAsMobile}
+                            value={sameAsMobile ? formData.mobile_number : formData.whatsapp_number}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              handleInputChange('whatsapp_number', val);
+                            }}
+                            placeholder={sameAsMobile ? 'Same as Mobile' : 'e.g. 98220 45610'}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                              sameAsMobile
+                                ? 'bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed'
+                                : fieldErrors.whatsapp_number
+                                ? 'border-red-400 bg-red-50/40 focus:border-red-500'
+                                : 'border-gray-300 focus:border-px-primary'
+                            } outline-none`}
+                          />
+                          {fieldErrors.whatsapp_number && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.whatsapp_number}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Date of Birth (dd-mm-yyyy picker, 18+ validation) */}
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Date of Birth <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.date_of_birth}
+                            max={new Date().toISOString().split('T')[0]}
+                            onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                              fieldErrors.date_of_birth
+                                ? 'border-red-400 bg-red-50/40 focus:border-red-500'
+                                : 'border-gray-300 focus:border-px-primary'
+                            } outline-none`}
+                          />
+                          {formData.date_of_birth && !fieldErrors.date_of_birth && (
+                            <p className="mt-1 text-[11px] text-gray-500">
+                              Age: <span className="font-bold text-purple-900">{calculateAge(formData.date_of_birth)} years</span>
+                            </p>
+                          )}
+                          {fieldErrors.date_of_birth && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.date_of_birth}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* City / District Dropdown */}
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Current City / District <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={formData.city}
+                            onChange={(e) => handleInputChange('city', e.target.value)}
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium bg-white transition-all ${
+                              fieldErrors.city ? 'border-red-400 focus:border-red-500' : 'border-gray-300 focus:border-px-primary'
+                            } outline-none`}
+                          >
+                            {MAHARASHTRA_CITIES.map((c) => (
+                              <option key={c} value={c}>
+                                {c}
+                              </option>
+                            ))}
+                          </select>
+                          {fieldErrors.city && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.city}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* PIN Code */}
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            PIN Code <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            maxLength={6}
+                            value={formData.pincode}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              handleInputChange('pincode', val);
+                            }}
+                            placeholder="e.g. 411018"
+                            className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-medium transition-all ${
+                              fieldErrors.pincode
+                                ? 'border-red-400 bg-red-50/40 focus:border-red-500'
+                                : isPinValid(formData.pincode)
+                                ? 'border-emerald-400 bg-emerald-50/20 focus:border-emerald-500'
+                                : 'border-gray-300 focus:border-px-primary'
+                            } outline-none`}
+                          />
+                          {fieldErrors.pincode && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.pincode}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Emergency Contact Name & Phone (Optional) */}
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Emergency Contact <span className="text-gray-400 font-normal">(Optional)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.emergency_contact}
+                            onChange={(e) => handleInputChange('emergency_contact', e.target.value)}
+                            placeholder="e.g. Sunita Patil (Wife) - 98220 45611"
+                            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-sm font-medium focus:border-px-primary outline-none"
                           />
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
 
-              {/* STEP 2: DRIVING LICENCE DETAILS */}
-              {currentStep === 2 && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h3 className="text-xl font-bold text-px-dark">Step 2: Driving Licence & Authorizations</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Enter official RTO licence numbers and authorized commercial vehicle categories.
-                    </p>
-                  </div>
+                    {/* Section B: Driving Licence Details */}
+                    <div className="pt-4 border-t border-gray-100">
+                      <h2 className="text-base sm:text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-purple-100 text-px-primary flex items-center justify-center text-xs">
+                          B
+                        </span>
+                        Driving Licence Details
+                      </h2>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Enter your Driving Licence details for instant verification.
+                      </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Driving Licence Number <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="licence_number"
-                        value={formData.licence_number}
-                        onChange={handleInputChange}
-                        placeholder="e.g. MH14 20120045612"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm font-mono uppercase"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Licence Type <span className="text-rose-500">*</span>
-                      </label>
-                      <select
-                        name="licence_type"
-                        value={formData.licence_type}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        <option value="Commercial Heavy Transport (TRANS)">Commercial Heavy Transport (TRANS)</option>
-                        <option value="Heavy Goods Motor Vehicle (HGMV)">Heavy Goods Motor Vehicle (HGMV)</option>
-                        <option value="Medium Goods Vehicle (MGV)">Medium Goods Vehicle (MGV)</option>
-                        <option value="Light Motor Vehicle (LMV - Commercial)">Light Motor Vehicle (LMV - Commercial)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Issuing RTO Authority <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="issuing_rto"
-                        value={formData.issuing_rto}
-                        onChange={handleInputChange}
-                        placeholder="e.g. MH-14 Pimpri Chinchwad RTO"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Licence Issue Date <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        name="licence_issue_date"
-                        value={formData.licence_issue_date}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Licence Expiry Date <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        name="licence_expiry_date"
-                        value={formData.licence_expiry_date}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Licence Issuing State <span className="text-rose-500">*</span>
-                      </label>
-                      <select
-                        name="licence_issuing_state"
-                        value={formData.licence_issuing_state}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        {INDIAN_STATES.map((st) => (
-                          <option key={st} value={st}>
-                            {st}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Multi-Select Vehicle Categories */}
-                    <div className="sm:col-span-2 pt-2">
-                      <label className="block text-xs font-bold text-gray-700 mb-2">
-                        Vehicle Categories Authorized (Select All Applicable) <span className="text-rose-500">*</span>
-                      </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                        {VEHICLE_CATEGORIES.map((cat) => {
-                          const selected = formData.vehicle_categories.includes(cat);
-                          return (
-                            <button
-                              type="button"
-                              key={cat}
-                              onClick={() => toggleCategory(cat)}
-                              className={`p-3 rounded-xl border text-xs font-bold text-left flex items-center justify-between transition-all ${
-                                selected
-                                  ? 'bg-purple-50 border-px-primary text-px-primary shadow-sm'
-                                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                              }`}
-                            >
-                              <span>{cat}</span>
-                              {selected && <CheckCircle2 className="w-4 h-4 text-px-primary shrink-0" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 3: DRIVING EXPERIENCE */}
-              {currentStep === 3 && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h3 className="text-xl font-bold text-px-dark">Step 3: Commercial Driving Experience</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Experience, vehicle models handled, and route preferences.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Total Driving Experience <span className="text-rose-500">*</span>
-                      </label>
-                      <select
-                        name="total_driving_experience"
-                        value={formData.total_driving_experience}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        <option value="3-5 Years">3-5 Years</option>
-                        <option value="5-8 Years">5-8 Years</option>
-                        <option value="8-10 Years">8-10 Years</option>
-                        <option value="10-15 Years">10-15 Years</option>
-                        <option value="15+ Years">15+ Years</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Heavy Vehicle Experience <span className="text-rose-500">*</span>
-                      </label>
-                      <select
-                        name="heavy_vehicle_experience"
-                        value={formData.heavy_vehicle_experience}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        <option value="2-3 Years">2-3 Years</option>
-                        <option value="4-6 Years">4-6 Years</option>
-                        <option value="7-10 Years">7-10 Years</option>
-                        <option value="10+ Years">10+ Years</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Previous Transporter / Company Name (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        name="previous_company_name"
-                        value={formData.previous_company_name}
-                        onChange={handleInputChange}
-                        placeholder="e.g. Western Carriers / VRL / Individual Fleet"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Preferred Work Location / Route <span className="text-rose-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="preferred_work_location"
-                        value={formData.preferred_work_location}
-                        onChange={handleInputChange}
-                        placeholder="e.g. Pune – Mumbai Expressway / Chakan Hub"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Expected Monthly Salary (₹ per month)
-                      </label>
-                      <input
-                        type="number"
-                        name="expected_monthly_salary"
-                        step={1000}
-                        value={formData.expected_monthly_salary}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1">
-                        Availability to Join <span className="text-rose-500">*</span>
-                      </label>
-                      <select
-                        name="availability_to_join"
-                        value={formData.availability_to_join}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:border-px-primary text-sm bg-white"
-                      >
-                        <option value="Immediate">Immediate</option>
-                        <option value="Within 7 Days">Within 7 Days</option>
-                        <option value="Within 15 Days">Within 15 Days</option>
-                      </select>
-                    </div>
-
-                    {/* Vehicle Models Multi-Select */}
-                    <div className="sm:col-span-2 pt-2">
-                      <label className="block text-xs font-bold text-gray-700 mb-2">
-                        Commercial Truck Models You Have Driven:
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {COMMON_VEHICLE_TYPES.map((model) => {
-                          const checked = formData.types_of_vehicles_driven.includes(model);
-                          return (
-                            <button
-                              type="button"
-                              key={model}
-                              onClick={() => toggleVehicleModel(model)}
-                              className={`p-2.5 rounded-xl border text-xs text-left flex items-center justify-between transition-all ${
-                                checked
-                                  ? 'bg-purple-50 border-px-primary text-px-primary font-bold'
-                                  : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                              }`}
-                            >
-                              <span>{model}</span>
-                              {checked && <CheckCircle2 className="w-4 h-4 text-px-primary shrink-0" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 4: DOCUMENT UPLOAD */}
-              {currentStep === 4 && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h3 className="text-xl font-bold text-px-dark">Step 4: Driver Document Upload</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Upload clear scans or photos for physical verification. Stored securely in dedicated storage.
-                    </p>
-                  </div>
-
-                  {/* Compliance Notice */}
-                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2">
-                    <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
-                    <span>
-                      <strong>Compliance & Privacy Notice:</strong> Do not upload Aadhaar cards. For statutory compliance, please upload standard Driving Licence, Photo, and Address Proof (Electricity bill / Voter ID).
-                    </span>
-                  </div>
-
-                  <div className="space-y-4">
-                    {/* 1. Driving Licence Front (Required) */}
-                    <div className="p-4 rounded-2xl border border-dashed border-purple-300 bg-purple-50/40">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="mt-4 space-y-4">
+                        {/* DL Number (Auto Uppercase) */}
                         <div>
-                          <p className="text-xs font-bold text-px-dark flex items-center gap-1.5">
-                            <CreditCard className="w-4 h-4 text-px-primary" />
-                            Driving Licence – Front Side <span className="text-rose-500">*</span>
-                          </p>
-                          <p className="text-[11px] text-gray-500">Color photo showing driver photo, name, licence number & validity</p>
-                        </div>
-                        {documents.driving_licence_front.filename ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-                              ✓ {documents.driving_licence_front.filename}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeDoc('driving_licence_front')}
-                              className="text-gray-400 hover:text-rose-500 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-px-primary text-white text-xs font-bold hover:bg-px-violet transition-all shadow-sm">
-                            <span>Upload DL Front</span>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={(e) => handleFileSelect('driving_licence_front', e.target.files?.[0] || null)}
-                            />
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Driving Licence Number <span className="text-red-500">*</span>
                           </label>
-                        )}
-                      </div>
-                    </div>
+                          <input
+                            type="text"
+                            value={formData.dl_number}
+                            onChange={(e) => handleInputChange('dl_number', e.target.value.toUpperCase())}
+                            placeholder="e.g. MH14 20120045612"
+                            className={`w-full px-3.5 py-2.5 rounded-xl border font-mono uppercase text-sm font-bold tracking-wider transition-all ${
+                              fieldErrors.dl_number
+                                ? 'border-red-400 bg-red-50/40 focus:border-red-500'
+                                : formData.dl_number.trim().length >= 8
+                                ? 'border-emerald-400 bg-emerald-50/20 focus:border-emerald-500'
+                                : 'border-gray-300 focus:border-px-primary'
+                            } outline-none`}
+                          />
+                          {fieldErrors.dl_number && (
+                            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.dl_number}
+                            </p>
+                          )}
+                        </div>
 
-                    {/* 2. Driving Licence Back (Required) */}
-                    <div className="p-4 rounded-2xl border border-dashed border-purple-300 bg-purple-50/40">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        {/* Vehicle Categories Authorized (Multi-Select Tappable Pills) */}
                         <div>
-                          <p className="text-xs font-bold text-px-dark flex items-center gap-1.5">
-                            <CreditCard className="w-4 h-4 text-px-primary" />
-                            Driving Licence – Back Side <span className="text-rose-500">*</span>
-                          </p>
-                          <p className="text-[11px] text-gray-500">Showing vehicle class endorsements (TRANS / HGV / LMV) and badge numbers</p>
-                        </div>
-                        {documents.driving_licence_back.filename ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-                              ✓ {documents.driving_licence_back.filename}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeDoc('driving_licence_back')}
-                              className="text-gray-400 hover:text-rose-500 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-px-primary text-white text-xs font-bold hover:bg-px-violet transition-all shadow-sm">
-                            <span>Upload DL Back</span>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={(e) => handleFileSelect('driving_licence_back', e.target.files?.[0] || null)}
-                            />
+                          <label className="block text-xs font-bold text-gray-700 mb-2">
+                            Vehicle Categories Authorized <span className="text-red-500">*</span>
+                            <span className="text-gray-400 font-normal ml-1">(Tap all that apply)</span>
                           </label>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 3. Recent Driver Photograph (Required) */}
-                    <div className="p-4 rounded-2xl border border-dashed border-purple-300 bg-purple-50/40">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-bold text-px-dark flex items-center gap-1.5">
-                            <Truck className="w-4 h-4 text-px-primary" />
-                            Recent Driver Photograph <span className="text-rose-500">*</span>
-                          </p>
-                          <p className="text-[11px] text-gray-500">Clear front-facing passport size color photo</p>
-                        </div>
-                        {documents.recent_photograph.filename ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-                              ✓ {documents.recent_photograph.filename}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeDoc('recent_photograph')}
-                              className="text-gray-400 hover:text-rose-500 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                          <div className="flex flex-wrap gap-2">
+                            {VEHICLE_CATEGORIES.map((cat) => {
+                              const isSelected = formData.vehicle_categories.includes(cat);
+                              return (
+                                <button
+                                  key={cat}
+                                  type="button"
+                                  onClick={() => toggleCategory(cat)}
+                                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150 flex items-center gap-1.5 border ${
+                                    isSelected
+                                      ? 'bg-purple-900 text-white border-purple-900 shadow-sm'
+                                      : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-purple-50 hover:border-purple-200'
+                                  }`}
+                                >
+                                  {isSelected && <Check className="w-3.5 h-3.5" />}
+                                  {cat}
+                                </button>
+                              );
+                            })}
                           </div>
-                        ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-px-primary text-white text-xs font-bold hover:bg-px-violet transition-all shadow-sm">
-                            <span>Upload Photograph</span>
-                            <input
-                              type="file"
-                              accept=".jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={(e) => handleFileSelect('recent_photograph', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 4. Address Proof (Optional) */}
-                    <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50/50">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            Address Proof (Voter ID / Light Bill / Ration Card) <span className="text-gray-400 font-normal">(Optional)</span>
-                          </p>
-                          <p className="text-[11px] text-gray-500">Official proof of residential address if available</p>
-                        </div>
-                        {documents.address_proof.filename ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-                              ✓ {documents.address_proof.filename}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeDoc('address_proof')}
-                              className="text-gray-400 hover:text-rose-500 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-white border border-gray-300 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all">
-                            <span>Upload Address Proof (Optional)</span>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={(e) => handleFileSelect('address_proof', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 5. Resume / Bio-Data (Optional) */}
-                    <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50/50">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-bold text-gray-700">Driver Bio-Data / Resume (Optional)</p>
-                          <p className="text-[11px] text-gray-500">Written bio-data or printed resume if available</p>
-                        </div>
-                        {documents.resume.filename ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-                              ✓ {documents.resume.filename}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeDoc('resume')}
-                              className="text-gray-400 hover:text-rose-500 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-white border border-gray-300 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all">
-                            <span>Upload Resume</span>
-                            <input
-                              type="file"
-                              accept=".pdf,.doc,.docx,.jpg,.png"
-                              className="hidden"
-                              onChange={(e) => handleFileSelect('resume', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 6. Experience Certificate (Optional) */}
-                    <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50/50">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-bold text-gray-700">Prior Transporter Experience Certificate (Optional)</p>
-                          <p className="text-[11px] text-gray-500">Letter of service from previous fleet operator</p>
-                        </div>
-                        {documents.experience_certificate.filename ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-                              ✓ {documents.experience_certificate.filename}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeDoc('experience_certificate')}
-                              className="text-gray-400 hover:text-rose-500 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-white border border-gray-300 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all">
-                            <span>Upload Certificate</span>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={(e) => handleFileSelect('experience_certificate', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 7. PAN Card (Optional) */}
-                    <div className="p-4 rounded-2xl border border-gray-200 bg-gray-50/50">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-bold text-gray-700">PAN Card (Optional)</p>
-                          <p className="text-[11px] text-gray-500">For banking and payout account setup</p>
-                        </div>
-                        {documents.pan_card.filename ? (
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200">
-                              ✓ {documents.pan_card.filename}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => removeDoc('pan_card')}
-                              className="text-gray-400 hover:text-rose-500 p-1"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <label className="cursor-pointer px-4 py-2 rounded-xl bg-white border border-gray-300 text-gray-700 text-xs font-bold hover:bg-gray-100 transition-all">
-                            <span>Upload PAN</span>
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              className="hidden"
-                              onChange={(e) => handleFileSelect('pan_card', e.target.files?.[0] || null)}
-                            />
-                          </label>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 5: REVIEW INFORMATION (5 DISTINCT EDITABLE SECTIONS) */}
-              {currentStep === 5 && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h3 className="text-xl font-bold text-px-dark">Step 5: Review Registration Summary</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Carefully review all details. Click "Edit" on any section to make corrections.
-                    </p>
-                  </div>
-
-                  {/* Section A: Personal Information */}
-                  <div className="p-4 rounded-2xl bg-px-bg border border-px-border space-y-2">
-                    <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                      <h4 className="font-bold text-px-deep text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <Truck className="w-3.5 h-3.5 text-px-primary" />
-                        A. Personal Information
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(1)}
-                        className="text-xs font-bold text-px-primary hover:underline flex items-center gap-1"
-                      >
-                        <Edit className="w-3.5 h-3.5" /> Edit
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-gray-700">
-                      <p><strong>Name:</strong> {formData.full_name || '—'}</p>
-                      <p><strong>DOB:</strong> {formData.date_of_birth || '—'}</p>
-                      <p><strong>Gender:</strong> {formData.gender}</p>
-                      <p className="sm:col-span-3"><strong>Address:</strong> {formData.current_address ? `${formData.current_address}, ` : ''}{formData.city}, {formData.state} - {formData.pin_code}</p>
-                    </div>
-                  </div>
-
-                  {/* Section B: Contact Information */}
-                  <div className="p-4 rounded-2xl bg-px-bg border border-px-border space-y-2">
-                    <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                      <h4 className="font-bold text-px-deep text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-px-primary" />
-                        B. Contact & Emergency Details
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(1)}
-                        className="text-xs font-bold text-px-primary hover:underline flex items-center gap-1"
-                      >
-                        <Edit className="w-3.5 h-3.5" /> Edit
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
-                      <p><strong>Primary Mobile:</strong> {formData.mobile_number || '—'}</p>
-                      <p><strong>Alternate Mobile:</strong> {formData.alternate_mobile_number || 'None'}</p>
-                      <p><strong>Emergency Contact:</strong> {formData.emergency_contact_name}</p>
-                      <p><strong>Emergency Phone:</strong> {formData.emergency_contact_number}</p>
-                    </div>
-                  </div>
-
-                  {/* Section C: Driving Licence Details */}
-                  <div className="p-4 rounded-2xl bg-px-bg border border-px-border space-y-2">
-                    <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                      <h4 className="font-bold text-px-deep text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <CreditCard className="w-3.5 h-3.5 text-px-primary" />
-                        C. Driving Licence Details
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(2)}
-                        className="text-xs font-bold text-px-primary hover:underline flex items-center gap-1"
-                      >
-                        <Edit className="w-3.5 h-3.5" /> Edit
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
-                      <p><strong>Licence No:</strong> <span className="font-mono font-bold text-px-primary">{formData.licence_number}</span></p>
-                      <p><strong>Issuing RTO:</strong> {formData.issuing_rto}</p>
-                      <p><strong>Issue Date:</strong> {formData.licence_issue_date}</p>
-                      <p><strong>Expiry Date:</strong> {formData.licence_expiry_date}</p>
-                      <div className="col-span-2">
-                        <strong>Vehicle Categories:</strong>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {formData.vehicle_categories.map((c) => (
-                            <span key={c} className="px-2 py-0.5 rounded-md bg-purple-100 text-px-deep text-[11px] font-bold">
-                              {c}
-                            </span>
-                          ))}
+                          {fieldErrors.vehicle_categories && (
+                            <p className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                              <AlertCircle className="w-3.5 h-3.5" /> {fieldErrors.vehicle_categories}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Section D: Driving Experience */}
-                  <div className="p-4 rounded-2xl bg-px-bg border border-px-border space-y-2">
-                    <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                      <h4 className="font-bold text-px-deep text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <History className="w-3.5 h-3.5 text-px-primary" />
-                        D. Driving Experience
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(3)}
-                        className="text-xs font-bold text-px-primary hover:underline flex items-center gap-1"
-                      >
-                        <Edit className="w-3.5 h-3.5" /> Edit
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
-                      <p><strong>Total Experience:</strong> {formData.total_driving_experience}</p>
-                      <p><strong>Heavy Experience:</strong> {formData.heavy_vehicle_experience}</p>
-                      <p><strong>Preferred Location:</strong> {formData.preferred_work_location}</p>
-                      <p><strong>Expected Salary:</strong> ₹{formData.expected_monthly_salary} / month</p>
-                      <p className="col-span-2"><strong>Vehicles Driven:</strong> {formData.types_of_vehicles_driven.join(', ')}</p>
-                    </div>
-                  </div>
-
-                  {/* Section E: Uploaded Documents */}
-                  <div className="p-4 rounded-2xl bg-px-bg border border-px-border space-y-2">
-                    <div className="flex items-center justify-between border-b border-gray-200 pb-2">
-                      <h4 className="font-bold text-px-deep text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <UploadCloud className="w-3.5 h-3.5 text-px-primary" />
-                        E. Uploaded Documents
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(4)}
-                        className="text-xs font-bold text-px-primary hover:underline flex items-center gap-1"
-                      >
-                        <Edit className="w-3.5 h-3.5" /> Edit
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-700">
-                      <p>DL Front: <strong className={documents.driving_licence_front.filename ? 'text-emerald-700' : 'text-rose-600'}>{documents.driving_licence_front.filename ? '✓ Uploaded' : 'Missing'}</strong></p>
-                      <p>DL Back: <strong className={documents.driving_licence_back.filename ? 'text-emerald-700' : 'text-rose-600'}>{documents.driving_licence_back.filename ? '✓ Uploaded' : 'Missing'}</strong></p>
-                      <p>Photograph: <strong className={documents.recent_photograph.filename ? 'text-emerald-700' : 'text-rose-600'}>{documents.recent_photograph.filename ? '✓ Uploaded' : 'Missing'}</strong></p>
-                      <p>Address Proof: <strong className={documents.address_proof.filename ? 'text-emerald-700' : 'text-rose-600'}>{documents.address_proof.filename ? '✓ Uploaded' : 'Missing'}</strong></p>
-                      {documents.resume.filename && <p>Resume: <strong className="text-emerald-700">✓ Uploaded</strong></p>}
-                      {documents.experience_certificate.filename && <p>Exp Certificate: <strong className="text-emerald-700">✓ Uploaded</strong></p>}
-                      {documents.pan_card.filename && <p>PAN Card: <strong className="text-emerald-700">✓ Uploaded</strong></p>}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 6: SUBMIT REGISTRATION */}
-              {currentStep === 6 && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-gray-100 pb-4">
-                    <h3 className="text-xl font-bold text-px-dark">Step 6: Declarations & Submit Registration</h3>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Please read and confirm the following statutory driver declarations and consents.
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    {/* Declaration 1 */}
-                    <label className="flex items-start gap-3 p-4 rounded-2xl bg-purple-50/70 border border-purple-200 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="declaration_accepted"
-                        checked={formData.declaration_accepted}
-                        onChange={handleInputChange}
-                        className="mt-1 h-4 w-4 rounded text-px-primary focus:ring-px-primary"
-                        required
-                      />
-                      <span className="text-xs text-gray-700 leading-relaxed">
-                        <strong className="text-px-deep">Driver Accuracy Declaration:</strong> "I declare that all details provided in this application and all documents submitted are true, complete, and authentic."
-                      </span>
-                    </label>
-
-                    {/* Declaration 2 */}
-                    <label className="flex items-start gap-3 p-4 rounded-2xl bg-purple-50/70 border border-purple-200 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="licence_review_authorized"
-                        checked={formData.licence_review_authorized}
-                        onChange={handleInputChange}
-                        className="mt-1 h-4 w-4 rounded text-px-primary focus:ring-px-primary"
-                        required
-                      />
-                      <span className="text-xs text-gray-700 leading-relaxed">
-                        <strong className="text-px-deep">RTO & Licence Review Authorization:</strong> "I authorize Prisha Xpress Pvt. Ltd. to review my application, verify my driving licence with the issuing RTO or relevant authorities, and conduct necessary background verification."
-                      </span>
-                    </label>
-
-                    {/* Declaration 3 */}
-                    <label className="flex items-start gap-3 p-4 rounded-2xl bg-purple-50/70 border border-purple-200 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="consent_accepted"
-                        checked={formData.consent_accepted}
-                        onChange={handleInputChange}
-                        className="mt-1 h-4 w-4 rounded text-px-primary focus:ring-px-primary"
-                        required
-                      />
-                      <span className="text-xs text-gray-700 leading-relaxed">
-                        <strong className="text-px-deep">Recruitment Evaluation Consent:</strong> "I understand and agree that this registration is for recruitment evaluation and does not constitute an offer of employment or a contract."
-                      </span>
-                    </label>
-
-                    {/* Declaration 4 */}
-                    <label className="flex items-start gap-3 p-4 rounded-2xl bg-purple-50/70 border border-purple-200 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="privacy_accepted"
-                        checked={formData.privacy_accepted}
-                        onChange={handleInputChange}
-                        className="mt-1 h-4 w-4 rounded text-px-primary focus:ring-px-primary"
-                        required
-                      />
-                      <span className="text-xs text-gray-700 leading-relaxed">
-                        <strong className="text-px-deep">Privacy Policy Agreement:</strong> "I have read, understood, and agree to the Prisha Xpress Recruitment Privacy Policy."
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-xs text-gray-600 leading-relaxed">
-                    <p className="font-bold text-gray-800 mb-1">Company Policy & Software Confirmation:</p>
-                    <p>
-                      By clicking Submit, your application will be saved to the secure Prisha Xpress driver registration database and forwarded to the Document Verification Cell. Application submission does not constitute an offer of employment or registration in official company software. Induction is subject to driving assessment, document verification, and background clearance.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Bottom Buttons */}
-              <div className="mt-8 pt-6 border-t border-gray-100">
-                {errorMsg && (
-                  <div className="mb-4 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm flex items-center gap-2 animate-fadeIn">
-                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
-                    <span className="font-semibold">{errorMsg}</span>
                   </div>
                 )}
-                <div className="flex items-center justify-between">
+
+                {/* STEP 2: Upload Documents */}
+                {currentStep === 2 && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div>
+                      <h2 className="text-base sm:text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+                        <UploadCloud className="w-5 h-5 text-px-primary" />
+                        Upload Your Documents
+                      </h2>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Take clear photos or upload files from your mobile phone or computer.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* DL Front */}
+                      <FileUploadBox
+                        idKey="dl_front"
+                        title="Driving Licence (Front Side)"
+                        required
+                        helperText="Ensure name, photo and DL number are clearly visible."
+                      />
+
+                      {/* DL Back */}
+                      <FileUploadBox
+                        idKey="dl_back"
+                        title="Driving Licence (Back Side)"
+                        required
+                        helperText="Ensure vehicle category authorization and address are visible."
+                      />
+
+                      {/* Aadhaar Front */}
+                      <FileUploadBox
+                        idKey="aadhaar_front"
+                        title="Aadhaar Card (Front Side)"
+                        required
+                        helperText="Ensure 12-digit Aadhaar number and photo are visible."
+                      />
+
+                      {/* Aadhaar Back */}
+                      <FileUploadBox
+                        idKey="aadhaar_back"
+                        title="Aadhaar Card (Back Side)"
+                        required
+                        helperText="Ensure permanent home address is clearly readable."
+                      />
+
+                      {/* PAN Card (Optional) */}
+                      <div className="sm:col-span-2">
+                        <FileUploadBox
+                          idKey="pan_card"
+                          title="PAN Card"
+                          helperText="Optional – Helps in fast-track salary processing."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Security & Privacy Reassurance */}
+                    <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-100 flex items-center gap-2.5 text-xs text-purple-900 font-medium">
+                      <ShieldCheck className="w-5 h-5 text-px-primary flex-shrink-0" />
+                      <span>
+                        🔒 Your documents are safe and used only for official driver verification with Prisha Xpress.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 3: Review & Submit */}
+                {currentStep === 3 && (
+                  <div className="space-y-6 animate-fadeIn">
+                    <div>
+                      <h2 className="text-base sm:text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-px-primary" />
+                        Review Your Details
+                      </h2>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Please review your application details before final submission.
+                      </p>
+                    </div>
+
+                    {/* Summary Card 1: Personal Details */}
+                    <div className="rounded-xl border border-gray-200 p-4 bg-gray-50/50">
+                      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Personal Information
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(1)}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-px-primary hover:text-px-deep"
+                        >
+                          <Edit className="w-3.5 h-3.5" /> Edit
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <p className="text-gray-500">Full Name</p>
+                          <p className="font-bold text-gray-900">{formData.full_name}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Mobile Number</p>
+                          <p className="font-bold text-gray-900">+91 {formData.mobile_number}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">WhatsApp</p>
+                          <p className="font-bold text-gray-900">
+                            {formData.whatsapp_number ? `+91 ${formData.whatsapp_number}` : 'Same as Mobile'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">Date of Birth</p>
+                          <p className="font-bold text-gray-900">
+                            {formData.date_of_birth} ({calculateAge(formData.date_of_birth)} yrs)
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500">City & PIN</p>
+                          <p className="font-bold text-gray-900">
+                            {formData.city} - {formData.pincode}
+                          </p>
+                        </div>
+                        {formData.emergency_contact && (
+                          <div>
+                            <p className="text-gray-500">Emergency Contact</p>
+                            <p className="font-bold text-gray-900">{formData.emergency_contact}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Summary Card 2: Driving Licence */}
+                    <div className="rounded-xl border border-gray-200 p-4 bg-gray-50/50">
+                      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Driving Licence
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(1)}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-px-primary hover:text-px-deep"
+                        >
+                          <Edit className="w-3.5 h-3.5" /> Edit
+                        </button>
+                      </div>
+                      <div className="space-y-2 text-xs">
+                        <div>
+                          <p className="text-gray-500">Licence Number</p>
+                          <p className="font-bold font-mono text-gray-900 text-sm">{formData.dl_number}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 mb-1">Authorized Categories</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {formData.vehicle_categories.map((c) => (
+                              <span
+                                key={c}
+                                className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 font-bold text-[11px]"
+                              >
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Summary Card 3: Uploaded Documents */}
+                    <div className="rounded-xl border border-gray-200 p-4 bg-gray-50/50">
+                      <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-200">
+                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          Uploaded Documents
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(2)}
+                          className="inline-flex items-center gap-1 text-xs font-bold text-px-primary hover:text-px-deep"
+                        >
+                          <Edit className="w-3.5 h-3.5" /> Edit
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div className="p-2 bg-white rounded-lg border border-gray-200 text-center">
+                          <p className="font-bold text-gray-800 text-[11px] truncate">DL Front</p>
+                          <span className="text-[10px] text-emerald-600 font-bold">✓ Attached</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-gray-200 text-center">
+                          <p className="font-bold text-gray-800 text-[11px] truncate">DL Back</p>
+                          <span className="text-[10px] text-emerald-600 font-bold">✓ Attached</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-gray-200 text-center">
+                          <p className="font-bold text-gray-800 text-[11px] truncate">Aadhaar Front</p>
+                          <span className="text-[10px] text-emerald-600 font-bold">✓ Attached</span>
+                        </div>
+                        <div className="p-2 bg-white rounded-lg border border-gray-200 text-center">
+                          <p className="font-bold text-gray-800 text-[11px] truncate">Aadhaar Back</p>
+                          <span className="text-[10px] text-emerald-600 font-bold">✓ Attached</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Declaration Checkbox */}
+                    <div className={`p-4 rounded-xl border transition-all ${
+                      fieldErrors.declaration_accepted
+                        ? 'border-red-400 bg-red-50/50'
+                        : 'border-purple-200 bg-purple-50/50'
+                    }`}>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.declaration_accepted}
+                          onChange={(e) => {
+                            handleInputChange('declaration_accepted', e.target.checked);
+                          }}
+                          className="mt-0.5 w-4 h-4 rounded text-px-primary focus:ring-purple-400 accent-px-primary cursor-pointer"
+                        />
+                        <span className="text-xs font-bold text-gray-800 leading-relaxed">
+                          I confirm that my Driving Licence is valid and all details shared above are true. <span className="text-red-500">*</span>
+                        </span>
+                      </label>
+                      {fieldErrors.declaration_accepted && (
+                        <p className="mt-2 text-xs text-red-600 font-semibold flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          {fieldErrors.declaration_accepted}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Navigation & Action Buttons (Thumb-friendly mobile layout) */}
+                <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
                   {currentStep > 1 ? (
                     <button
                       type="button"
-                      onClick={prevStep}
-                      className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold text-xs sm:text-sm hover:bg-gray-50 flex items-center gap-1.5 transition-all"
+                      onClick={handlePrev}
+                      disabled={isSubmitting}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm font-bold transition-colors"
                     >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Previous</span>
+                      <ArrowLeft className="w-4 h-4" /> Previous
                     </button>
                   ) : (
                     <div />
                   )}
 
-                  {currentStep < 6 ? (
+                  {currentStep < 3 ? (
                     <button
                       type="button"
-                      onClick={nextStep}
-                      className="inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] px-6 py-2.5 text-xs sm:text-sm bg-px-deep hover:bg-px-primary text-white shadow-md border border-px-deep/40 gap-1.5 cursor-pointer"
+                      onClick={handleNext}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-px-primary hover:bg-px-deep text-white text-sm font-bold shadow-md transition-all"
                     >
-                      <span>Next Step</span>
-                      <ArrowRight className="w-4 h-4" />
+                      Next Step <ArrowRight className="w-4 h-4" />
                     </button>
                   ) : (
                     <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                      className="inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-px-primary/50 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none px-8 py-3 text-xs sm:text-sm bg-px-deep hover:bg-px-primary text-white shadow-lg border border-px-deep/40 gap-1.5 cursor-pointer"
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-black shadow-lg transition-all disabled:opacity-50"
                     >
-                      {submitting ? 'Submitting Registration...' : 'SUBMIT DRIVER REGISTRATION'}
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Uploading & Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Submit Driver Application <Check className="w-4 h-4" />
+                        </>
+                      )}
                     </button>
                   )}
                 </div>
-              </div>
+              </form>
             </div>
           )}
         </div>
-      </section>
+      </div>
     </PageTransition>
   );
 };
