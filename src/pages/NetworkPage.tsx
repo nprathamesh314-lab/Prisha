@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PageTransition } from '../components/animations/PageTransition';
-import { PageHero } from '../components/common/PageHero';
+import { NetworkHeroSection } from '../components/sections/NetworkHeroSection';
 import { SectionHeading } from '../components/common/SectionHeading';
 import { FadeIn } from '../components/animations/FadeIn';
 import { CTASection } from '../components/common/CTASection';
@@ -91,18 +91,10 @@ export const NetworkPage: React.FC = () => {
   return (
     <PageTransition>
       {/* SECTION 1: HERO */}
-      <PageHero
-        badge="OUR TRANSPORT NETWORK"
-        title="Connecting Businesses Across India"
-        subtitle={`Our strong transport network connects Pune with important business areas and cities across India. We work with trusted transport partners and drivers to help move your goods from one place to another.
-
-With our growing network and transport support, we work to make goods delivery easier, smoother and more reliable for every customer.`}
-        image="/assets/images/network-map.jpg"
-        breadcrumbs={[{ label: 'Our Network' }]}
-      />
+      <NetworkHeroSection />
 
       {/* SECTION 2: OUR TRANSPORT NETWORK & ARCHITECTURE */}
-      <section className="py-16 sm:py-20 bg-white">
+      <section id="explore-network" className="py-16 sm:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
             badge="OUR TRANSPORT NETWORK"
