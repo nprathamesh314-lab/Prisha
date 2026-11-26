@@ -396,13 +396,18 @@ export const NetworkPage: React.FC = () => {
         </div>
       </section>
 
-      {/* SECTION 6: CTA */}
+      {/* SECTION 6: CTA / NETWORK ENQUIRY */}
       <CTASection
-        badge="Corridor Contracting"
-        title="Connect Your Supply Chain to Our Network"
-        subtitle="Speak with our Pune route planning team to book dedicated fleet capacity or evaluate contract transportation across our primary highway corridors."
-        primaryBtnText="Discuss Network Rates"
-        primaryBtnLink="/contact#enquiry"
+        badge="TRANSPORT SERVICES"
+        title="Connect Your Business with Our Transport Network"
+        subtitle="Looking for reliable transport services for your business? Contact our team in Pune to discuss your transport needs, vehicle requirements and delivery routes. We are here to help your business move goods across different cities."
+        highlights={[
+          'Safe and Reliable Transport',
+          'Verified Drivers',
+          'Operations Based in Pune',
+        ]}
+        primaryBtnText="Business Enquiry"
+        primaryBtnLink="/contact"
       />
     </PageTransition>
   );

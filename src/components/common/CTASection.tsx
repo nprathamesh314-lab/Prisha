@@ -8,6 +8,7 @@ interface CTASectionProps {
   badge?: string;
   title?: string;
   subtitle?: string;
+  highlights?: string[];
   primaryBtnText?: string;
   primaryBtnLink?: string;
   secondaryBtnText?: string;
@@ -19,6 +20,11 @@ export const CTASection: React.FC<CTASectionProps> = ({
   badge = 'Strategic Logistics Partnership',
   title = "Let's Build Better Transportation Solutions Together",
   subtitle = 'Partner with Prisha Xpress for dependable transportation, driver staffing, and intelligent fleet management tailored to your enterprise.',
+  highlights = [
+    'Disciplined Highway Operations',
+    'RTO Verified Drivers',
+    'Pune Operations Headquarters',
+  ],
   primaryBtnText = 'Discuss Your Requirements',
   primaryBtnLink = '/contact#enquiry',
   secondaryBtnText,
@@ -61,22 +67,18 @@ export const CTASection: React.FC<CTASectionProps> = ({
           </FadeIn>
 
           {/* Value badges */}
-          <FadeIn direction="up" delay={0.3}>
-            <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 text-xs sm:text-sm text-white font-medium">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Disciplined Highway Operations</span>
+          {highlights && highlights.length > 0 && (
+            <FadeIn direction="up" delay={0.3}>
+              <div className="flex flex-wrap items-center justify-center gap-y-2 gap-x-6 text-xs sm:text-sm text-white font-medium">
+                {highlights.map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>RTO Verified Drivers</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Pune Operations Headquarters</span>
-              </div>
-            </div>
-          </FadeIn>
+            </FadeIn>
+          )}
 
           {/* CTA Buttons */}
           <FadeIn direction="up" delay={0.4}>
