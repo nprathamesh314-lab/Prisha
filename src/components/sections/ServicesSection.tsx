@@ -35,8 +35,8 @@ export const ServicesSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <SectionHeading
           badge="End-to-End Logistics Portfolio"
-          title="Engineered for Scalable Transportation & Fleet Reliability"
-          subtitle="Discover five comprehensive pillars designed to empower shippers, fleet owners, and commercial operators across India."
+          title="Our Main Services"
+          subtitle="Easy truck transport, trusted drivers, and truck service support across India."
         />
 
         {/* Featured First 2 Cards */}

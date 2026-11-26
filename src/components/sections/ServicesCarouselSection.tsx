@@ -55,8 +55,8 @@ export const ServicesCarouselSection: React.FC = () => {
           <div>
             <SectionHeading
               badge="Logistics Solutions"
-              title="Our Core Service Capabilities"
-              subtitle="Specialized commercial transportation, vetted driver staffing, and fleet maintenance ecosystems."
+              title="Our Main Services"
+              subtitle="Easy truck transport, trusted drivers, and truck service support across India."
               className="mb-0 text-left"
             />
           </div>
@@ -131,7 +131,7 @@ export const ServicesCarouselSection: React.FC = () => {
                         <h3 className="text-lg sm:text-xl font-bold text-px-dark group-hover:text-px-primary transition-colors">
                           {service.title}
                         </h3>
-                        <p className="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+                        <p className="text-sm text-gray-700 leading-relaxed min-h-[44px]">
                           {service.description}
                         </p>
 
