@@ -301,32 +301,36 @@ export const NetworkPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 space-y-6">
               <span className="text-xs font-bold uppercase tracking-wider text-px-violet">
-                Fleet Reliability
+                FLEET RELIABILITY
               </span>
-              <h2 className="text-3xl font-extrabold text-px-dark">
-                Modern Heavy Fleet Operations & Mechanical Assurance
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-px-dark tracking-tight leading-tight">
+                Well-Maintained Vehicles for Reliable Transport
               </h2>
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                A dependable network is only as strong as the vehicles that traverse it. Prisha Xpress enforces strict mechanical readiness across all participating commercial vehicles, combining scheduled multi-point checks, express service turnaround, and direct access to genuine OEM spare parts.
+                At Prisha Xpress, we take care of our vehicles to provide safe and reliable transportation. Our vehicles are regularly checked and maintained before every trip. We focus on vehicle safety, good performance and reliable service.
               </p>
 
               <div className="space-y-3 pt-1">
-                <div className="p-4 rounded-2xl bg-px-bg border border-px-border flex items-start gap-3">
+                <div className="p-4 rounded-2xl bg-px-bg border border-px-border flex items-start gap-3 hover:border-purple-300 transition-colors">
                   <Truck className="w-5 h-5 text-px-primary shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-px-dark">Multi-Axle & Container Capability</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Configured for diverse commercial cargo needs—from FMCG pallets to heavy industrial equipment.
+                    <h4 className="text-sm sm:text-base font-bold text-px-dark">
+                      Different Types of Trucks and Containers
+                    </h4>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5 leading-relaxed">
+                      Our fleet supports different types of goods, from small packages to heavy industrial materials.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-px-bg border border-px-border flex items-start gap-3">
+                <div className="p-4 rounded-2xl bg-px-bg border border-px-border flex items-start gap-3 hover:border-purple-300 transition-colors">
                   <ShieldCheck className="w-5 h-5 text-px-primary shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-px-dark">Pre-Trip Safety & Fitness Check</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Brakes, tires, electricals, and engine vitals are thoroughly inspected before vehicle dispatch.
+                    <h4 className="text-sm sm:text-base font-bold text-px-dark">
+                      Vehicle Safety Checks Before Every Trip
+                    </h4>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-0.5 leading-relaxed">
+                      We check brakes, tyres, lights and engine condition before sending vehicles on the road.
                     </p>
                   </div>
                 </div>
