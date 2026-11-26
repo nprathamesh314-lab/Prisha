@@ -78,7 +78,7 @@ interface FormState {
 const enquiryTranslations = {
   en: {
     leftBadge: 'CORPORATE FLEET PARTNERSHIP',
-    leftHeading: 'Request a Tailored Logistics & Fleet Solution',
+    leftHeading: 'Find the Right Transport Solution for Your Business',
     leftDescription:
       'Tell us about your transport or fleet requirements. Our team will review your needs and contact you to discuss a suitable solution.',
     point1Title: 'Personalised Business Support',
@@ -131,7 +131,7 @@ const enquiryTranslations = {
   },
   hi: {
     leftBadge: 'कॉर्पोरेट बेड़ा साझेदारी',
-    leftHeading: 'अनुकूलित लॉजिस्टिक्स और बेड़ा समाधान का अनुरोध करें',
+    leftHeading: 'अपने व्यवसाय के लिए सही परिवहन समाधान खोजें',
     leftDescription:
       'अपनी परिवहन या बेड़ा आवश्यकताओं के बारे में हमें बताएं। हमारी टीम आपकी आवश्यकताओं की समीक्षा करेगी और उपयुक्त समाधान पर चर्चा करने के लिए आपसे संपर्क करेगी।',
     point1Title: 'व्यक्तिगत व्यावसायिक सहायता',
@@ -184,7 +184,7 @@ const enquiryTranslations = {
   },
   mr: {
     leftBadge: 'कॉर्पोरेट ताफा भागीदारी',
-    leftHeading: 'अनुकूलित वाहतूक आणि ताफा उपायांची मागणी करा',
+    leftHeading: 'तुमच्या व्यवसायासाठी योग्य वाहतूक उपाय शोधा',
     leftDescription:
       'तुमच्या वाहतूक किंवा ताफ्याच्या गरजांबद्दल आम्हाला सांगा. आमची टीम तुमच्या गरजांचा आढावा घेईल आणि योग्य उपायावर चर्चा करण्यासाठी तुमच्याशी संपर्क साधेल.',
     point1Title: 'वैयक्तिकृत व्यावसायिक सहाय्य',
