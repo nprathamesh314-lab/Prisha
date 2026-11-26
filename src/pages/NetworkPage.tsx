@@ -255,9 +255,9 @@ export const NetworkPage: React.FC = () => {
                 {/* Map Visual with Motion Path */}
                 <div className="relative rounded-2xl overflow-hidden border border-white/15 bg-black/40">
                   <img
-                    src="/assets/images/network-map.jpg"
+                    src="/assets/images/corridor-network-map.jpg"
                     alt={selectedCorridor.name}
-                    className="w-full h-56 sm:h-64 object-cover filter brightness-90"
+                    className="w-full h-64 sm:h-72 lg:h-80 object-cover filter brightness-95"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
