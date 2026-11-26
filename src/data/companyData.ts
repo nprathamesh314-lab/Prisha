@@ -50,6 +50,7 @@ export interface CsrInitiativeItem {
   category: string;
   summary: string;
   description: string;
+  image: string;
   keyActivities: string[];
   operationalStatus: string;
 }
@@ -267,6 +268,7 @@ export const authenticCsrInitiatives: CsrInitiativeItem[] = [
     title: 'Eye Checkups for Drivers',
     category: 'Health & Vision Support',
     summary: 'Regular free eye checkups and vision glasses support for commercial truck drivers.',
+    image: '/assets/images/csr/csr-eye-checkup.jpg',
     description:
       'Clear vision is very important for road safety. We organize regular eye checkup camps for truck drivers along transport routes to check eyesight and prevent night driving problems.',
     keyActivities: [
@@ -282,6 +284,7 @@ export const authenticCsrInitiatives: CsrInitiativeItem[] = [
     title: "Children's Education Support",
     category: 'Family & Children Care',
     summary: 'School supplies and learning support for the children of commercial truck drivers.',
+    image: '/assets/images/csr/csr-education.webp',
     description:
       'Truck drivers stay away from home for many weeks to do their work. We support their families by helping their children with school kits, books and guidance for higher schooling.',
     keyActivities: [
@@ -297,6 +300,7 @@ export const authenticCsrInitiatives: CsrInitiativeItem[] = [
     title: 'Driver Safety & Training',
     category: 'Driving Skills & Road Safety',
     summary: 'Helpful training in road safety rules, safe driving at night, and customer etiquette.',
+    image: '/assets/images/csr/csr-training.webp',
     description:
       'Safe driving protects everyone on the road. We arrange practical training sessions on safe highway driving, blind spots, vehicle safety checks, and polite communication with clients.',
     keyActivities: [
@@ -312,6 +316,7 @@ export const authenticCsrInitiatives: CsrInitiativeItem[] = [
     title: 'Respect at Work',
     category: 'Respecting Drivers & Fair Treatment',
     summary: 'Giving dignity, social respect and fair recognition to commercial truck drivers.',
+    image: '/assets/images/csr/csr-respect.webp',
     description:
       'Truck drivers do hard and honest work. They deserve polite and respectful treatment from everyone. We follow strict rules against any unfair treatment at company offices, hubs and client sites.',
     keyActivities: [
@@ -327,6 +332,7 @@ export const authenticCsrInitiatives: CsrInitiativeItem[] = [
     title: 'Highway Rest Stops',
     category: 'Rest Areas & Clean Water',
     summary: 'Safe highway stops with clean water, washrooms, and shaded parking for long trips.',
+    image: '/assets/images/csr/csr-pit-stops.webp',
     description:
       'Driving continuously for long hours makes drivers tired. We help drivers find clean and safe highway stops where they can rest, get clean drinking water, and use proper washrooms.',
     keyActivities: [
@@ -342,6 +348,7 @@ export const authenticCsrInitiatives: CsrInitiativeItem[] = [
     title: 'On-Time Bank Payments',
     category: 'Clear & Reliable Payments',
     summary: 'Guaranteed on-time trip payments credited directly into driver bank accounts.',
+    image: '/assets/images/csr/csr-payments.webp',
     description:
       'Drivers work hard to support their families. We ensure all trip payments, allowances, and settlements are credited directly to their bank accounts on time, with full and clear rate details.',
     keyActivities: [
