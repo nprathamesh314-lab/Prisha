@@ -100,8 +100,10 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
 
   const isHomePage = location.pathname === '/';
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   useEffect(() => {
+    if (isAdminRoute) return;
     const handleScroll = () => {
       const scrolled = window.scrollY > 30;
       setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
@@ -110,7 +112,7 @@ export const Navbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isAdminRoute]);
 
   // Close menus on route change
   useEffect(() => {
@@ -120,6 +122,10 @@ export const Navbar: React.FC = () => {
     setMobileServicesOpen(false);
     setMobileDriversOpen(false);
   }, [location.pathname]);
+
+  if (isAdminRoute) {
+    return null;
+  }
 
   const isNavbarTransparent = isHomePage && !isScrolled;
 

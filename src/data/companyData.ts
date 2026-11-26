@@ -51,7 +51,7 @@ export interface CsrInitiativeItem {
   summary: string;
   description: string;
   keyActivities: string[];
-  operationalStatus: 'Active Ground Initiative' | 'Ongoing Driver Welfare Program' | 'Future Expansion Commitment';
+  operationalStatus: string;
 }
 
 export interface ServiceItem {
@@ -264,92 +264,92 @@ export const authenticCsrInitiatives: CsrInitiativeItem[] = [
   {
     id: 'csr-1',
     themeNumber: 1,
-    title: 'Eye Checkup',
-    category: 'Driver Healthcare & Vision Safety',
-    summary: 'Regular free eye checkups and vision correction camps for commercial truck drivers.',
+    title: 'Eye Checkups for Drivers',
+    category: 'Health & Vision Support',
+    summary: 'Regular free eye checkups and vision glasses support for commercial truck drivers.',
     description:
-      'Clear vision is the cornerstone of highway road safety. Prisha Xpress conducts regular vision screening camps for heavy vehicle drivers across logistics corridors, helping detect refractive errors and night blindness risks early.',
+      'Clear vision is very important for road safety. We organize regular eye checkup camps for truck drivers along transport routes to check eyesight and prevent night driving problems.',
     keyActivities: [
-      'Periodic free optical screening camps at major logistics hubs',
-      'Prescription eyeglasses support for drivers in need',
-      'Night-vision assessment and highway fatigue awareness',
+      'Regular free eye checkup camps at transport hubs',
+      'Free eyeglasses support for drivers who need them',
+      'Night vision checks and road safety tips',
     ],
-    operationalStatus: 'Active Ground Initiative',
+    operationalStatus: 'Active Ground Support',
   },
   {
     id: 'csr-2',
     themeNumber: 2,
-    title: 'Education',
-    category: 'Community & Family Welfare',
-    summary: 'Educational assistance and learning support for the children of commercial drivers.',
+    title: "Children's Education Support",
+    category: 'Family & Children Care',
+    summary: 'School supplies and learning support for the children of commercial truck drivers.',
     description:
-      'Drivers spend long weeks away from their families to keep the nation moving. We support their children’s education through school supply distribution, scholarship guidance, and educational motivation programs.',
+      'Truck drivers stay away from home for many weeks to do their work. We support their families by helping their children with school kits, books and guidance for higher schooling.',
     keyActivities: [
-      'School kit and academic book distribution drives',
-      'Educational guidance and counseling for driver families',
-      'Encouraging formal schooling for children in rural transport pockets',
+      'School bags, notebooks and stationery kit distribution',
+      'Guidance and counseling for driver families on education',
+      'Encouraging children in transport communities to stay in school',
     ],
-    operationalStatus: 'Active Ground Initiative',
+    operationalStatus: 'Active Ground Support',
   },
   {
     id: 'csr-3',
     themeNumber: 3,
-    title: 'Training',
-    category: 'Skill Building & Highway Safety',
-    summary: 'Continuous professional training in road safety, defensive driving, and professional etiquette.',
+    title: 'Driver Safety & Training',
+    category: 'Driving Skills & Road Safety',
+    summary: 'Helpful training in road safety rules, safe driving at night, and customer etiquette.',
     description:
-      'Beyond obtaining a commercial licence, professional driving requires continuous skill refinement. We provide structured coaching on defensive highway techniques, safe cargo handling, emergency response, and courteous customer etiquette.',
+      'Safe driving protects everyone on the road. We arrange practical training sessions on safe highway driving, blind spots, vehicle safety checks, and polite communication with clients.',
     keyActivities: [
-      'Defensive driving and blind-spot avoidance workshops',
-      'Driver etiquette, cleanliness, and client communication training',
-      'Fuel-efficient driving habits and speed limiter compliance',
+      'Safe driving tips and blind spot awareness workshops',
+      'Good manners, cleanliness and polite communication training',
+      'Fuel-saving driving habits and speed safety rules',
     ],
-    operationalStatus: 'Active Ground Initiative',
+    operationalStatus: 'Active Ground Support',
   },
   {
     id: 'csr-4',
     themeNumber: 4,
-    title: 'Respect At Work',
-    category: 'Workplace Dignity & Fair Practices',
-    summary: 'Fostering dignity, social respect, and professional recognition for heavy commercial drivers.',
+    title: 'Respect at Work',
+    category: 'Respecting Drivers & Fair Treatment',
+    summary: 'Giving dignity, social respect and fair recognition to commercial truck drivers.',
     description:
-      'Commercial truck drivers are essential economic contributors who deserve dignity and respect. Prisha Xpress promotes zero-tolerance for unfair treatment, ensuring clean, safe, and respectful interactions at every depot and client site.',
+      'Truck drivers do hard and honest work. They deserve polite and respectful treatment from everyone. We follow strict rules against any unfair treatment at company offices, hubs and client sites.',
     keyActivities: [
-      'Zero-tolerance policy against driver disrespect and harassment',
-      'Recognizing and honoring exemplary drivers through company awards',
-      'Fostering micro-entrepreneurial dignity across the driver ecosystem',
+      'Strict rules against rude behaviour or unfair treatment of drivers',
+      'Recognizing and honoring safe and experienced drivers with awards',
+      'Treating drivers as respected partners of our business',
     ],
-    operationalStatus: 'Ongoing Driver Welfare Program',
+    operationalStatus: 'Ongoing Driver Care',
   },
   {
     id: 'csr-5',
     themeNumber: 5,
-    title: 'Pit Stops For Rest',
-    category: 'Highway Amenities & Fatigue Prevention',
-    summary: 'Establishing dedicated rest stops and hygienic facilities for long-haul drivers.',
+    title: 'Highway Rest Stops',
+    category: 'Rest Areas & Clean Water',
+    summary: 'Safe highway stops with clean water, washrooms, and shaded parking for long trips.',
     description:
-      'Driver fatigue is a leading cause of highway accidents. We facilitate and plan designated highway pit stops equipped with clean drinking water, shaded resting areas, and sanitary restrooms where long-haul drivers can recharge safely.',
+      'Driving continuously for long hours makes drivers tired. We help drivers find clean and safe highway stops where they can rest, get clean drinking water, and use proper washrooms.',
     keyActivities: [
-      'Designating verified rest areas along primary freight corridors',
-      'Clean hygiene amenities, washrooms, and shaded resting zones',
-      'Enforcing mandatory rest intervals during continuous long-haul transit',
+      'Safe rest stops identified along major transport routes',
+      'Clean drinking water, washrooms and shaded parking areas',
+      'Encouraging proper rest and sleep during long highway trips',
     ],
-    operationalStatus: 'Ongoing Driver Welfare Program',
+    operationalStatus: 'Ongoing Driver Care',
   },
   {
     id: 'csr-6',
     themeNumber: 6,
-    title: 'Assured On-Time Payments',
-    category: 'Financial Reliability & Transparency',
-    summary: 'Guaranteed punctual payment settlements without arbitrary deductions.',
+    title: 'On-Time Bank Payments',
+    category: 'Clear & Reliable Payments',
+    summary: 'Guaranteed on-time trip payments credited directly into driver bank accounts.',
     description:
-      'Financial security empowers drivers and builds lasting trust. We maintain transparent settlement cycles, ensuring commercial drivers receive their trip compensation and allowances on schedule without bureaucratic delays or unverified deductions.',
+      'Drivers work hard to support their families. We ensure all trip payments, allowances, and settlements are credited directly to their bank accounts on time, with full and clear rate details.',
     keyActivities: [
-      'Punctual settlement cycles directly into driver bank accounts',
-      'Transparent trip accounting with clear rate breakdowns',
-      'Financial literacy assistance to help drivers manage savings',
+      'Fast and on-time payments directly into driver bank accounts',
+      'Clear trip accounts with simple rate explanations',
+      'Simple guidance to help drivers save and manage money',
     ],
-    operationalStatus: 'Ongoing Driver Welfare Program',
+    operationalStatus: 'Ongoing Driver Care',
   },
 ];
 

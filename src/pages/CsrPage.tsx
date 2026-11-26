@@ -35,30 +35,30 @@ export const CsrPage: React.FC = () => {
     <PageTransition>
       {/* SECTION 1: HERO */}
       <PageHero
-        badge="Corporate Social Responsibility"
-        title="Driver Welfare & Highway Community Initiatives"
-        subtitle="Upholding the dignity, health, safety, and financial well-being of commercial truck drivers across Indian logistics corridors."
+        badge="CARING FOR OUR DRIVERS"
+        title="Driver Care & Highway Support"
+        subtitle="We care about our truck drivers and their families. We want to support drivers by focusing on their health, safety and daily needs. Our aim is to make their journeys safer and their lives better."
         image="/assets/images/csr-welfare.jpg"
         breadcrumbs={[{ label: 'CSR' }]}
       />
 
       {/* SECTION 2: INTRODUCTION */}
-      <section className="py-20 bg-white">
+      <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Social Responsibility"
-            title="Our Commitment to Driver Dignity & Safety"
-            subtitle="Commercial truck drivers keep India's economy moving. Prisha Xpress Pvt. Ltd. is dedicated to supporting their health, families, and livelihood."
+            badge="SUPPORTING OUR DRIVERS"
+            title="Our Promise to Support and Respect Every Driver"
+            subtitle="Truck drivers keep goods moving across India. At Prisha Xpress Pvt. Ltd., we stand with our drivers to support their health, safety and families."
           />
 
           <div className="max-w-4xl mx-auto text-center space-y-4">
             <p className="text-base text-gray-700 leading-relaxed">
-              At <strong>Prisha Xpress Pvt. Ltd.</strong>, we recognize that true logistics efficiency begins with the people behind the wheel. Our CSR commitments are organized around six essential human pillars: preventative health, family education, professional safety coaching, dignity at work, clean highway rest amenities, and reliable on-time compensation.
+              At <strong>Prisha Xpress Pvt. Ltd.</strong>, we believe good transport service starts with the person behind the wheel. We focus on six practical areas: free eye checkups, school support for children, road safety training, respect at work, safe rest stops on highways, and on-time payments.
             </p>
             <div className="inline-flex items-center gap-2 p-3 rounded-2xl bg-purple-50 border border-purple-200 text-xs text-px-deep text-left">
               <AlertCircle className="w-4 h-4 text-px-primary shrink-0" />
               <span>
-                <strong>Operational Transparency:</strong> In accordance with our company policy, ground programs currently operational are distinguished from expanding welfare commitments.
+                <strong>Clear Information:</strong> We share genuine information about our active programs and ongoing support for drivers on the ground.
               </span>
             </div>
           </div>
@@ -66,12 +66,12 @@ export const CsrPage: React.FC = () => {
       </section>
 
       {/* SECTION 3: THE 6 AUTHENTIC CSR THEMES */}
-      <section className="py-20 bg-px-bg">
+      <section className="py-16 sm:py-20 bg-px-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
-            badge="Official CSR Themes"
-            title="Six Pillars of Driver Community Support"
-            subtitle="The verified social themes established by Prisha Xpress to create sustainable impact on highway lives."
+            badge="OUR 6 KEY INITIATIVES"
+            title="Six Ways We Support Our Drivers"
+            subtitle="Simple, practical programs created by Prisha Xpress to help truck drivers and their families on and off the road."
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -122,7 +122,7 @@ export const CsrPage: React.FC = () => {
                       {/* Key Activities */}
                       <div className="pt-3 border-t border-gray-100 space-y-2">
                         <p className="text-xs font-bold uppercase tracking-wider text-px-violet">
-                          Focus Activities:
+                          Key Activities:
                         </p>
                         {item.keyActivities.map((act, aIdx) => (
                           <div key={aIdx} className="flex items-start gap-2 text-xs sm:text-sm text-gray-800 font-medium">
@@ -145,10 +145,10 @@ export const CsrPage: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="p-8 rounded-3xl bg-px-lavender/40 border border-purple-200 text-center space-y-3">
             <h3 className="text-xl font-bold text-px-deep">
-              Driving Tangible Social Progress Across Maharashtra & Beyond
+              Working Together for Highway Safety Across Maharashtra
             </h3>
             <p className="text-sm text-gray-700 max-w-3xl mx-auto leading-relaxed font-normal">
-              Prisha Xpress Pvt. Ltd. adheres to responsible corporate governance principles. Our CSR activities are planned directly with driver communities and local transport associations to ensure every program delivers realistic, verifiable welfare on Indian highways.
+              Prisha Xpress Pvt. Ltd. works directly with drivers and transport groups in Pune and Maharashtra. We want every initiative to provide real, helpful support that drivers and their families can count on every day.
             </p>
           </div>
         </div>
@@ -156,13 +156,13 @@ export const CsrPage: React.FC = () => {
 
       {/* SECTION 5: CTA */}
       <CTASection
-        badge="Join Our Mission"
-        title="Support Responsible & Dignified Logistics"
-        subtitle="Partner with Prisha Xpress for transportation solutions that value safety, transparency, and driver welfare."
-        primaryBtnText="Contact CSR Desk"
+        badge="PARTNER WITH US"
+        title="Join Hands for Safe Transport & Driver Care"
+        subtitle="Work with Prisha Xpress for honest, reliable transport services that take care of goods, vehicles and drivers."
+        primaryBtnText="Talk to Our Team"
         primaryBtnLink="/contact"
-        secondaryBtnText="Register as Driver"
-        secondaryBtnLink="/careers/driver-registration"
+        secondaryBtnText="Register as a Driver"
+        secondaryBtnLink="/careers/driver"
       />
     </PageTransition>
   );
