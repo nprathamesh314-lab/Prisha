@@ -366,25 +366,29 @@ export const NetworkPage: React.FC = () => {
 
             <div className="lg:col-span-6 order-1 lg:order-2 space-y-6">
               <span className="text-xs font-bold uppercase tracking-wider text-px-violet">
-                Human Infrastructure
+                OUR DRIVERS
               </span>
-              <h2 className="text-3xl font-extrabold text-px-dark">
-                The Backbone of Our Network: 1,000+ Skilled Drivers
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-px-dark tracking-tight leading-tight">
+                Our Drivers Make Our Network Strong
               </h2>
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                Prisha Xpress views commercial drivers as respected partners and micro-entrepreneurs. Our vetted drivers are trained in customer etiquette, vehicle care, road safety, and digital proof-of-delivery, ensuring high service quality on every trip.
+                Our drivers are an important part of Prisha Xpress. We value their hard work and treat them as important partners. They are trained to provide good customer service, take care of vehicles, follow road safety rules and confirm deliveries. Together, we work to provide safe and reliable transportation to our customers.
               </p>
 
-              <div className="grid grid-cols-2 gap-4 pt-1">
-                <div className="p-4 rounded-2xl bg-white border border-px-border">
-                  <p className="text-2xl font-black text-px-primary">1,000+</p>
-                  <p className="text-xs font-bold text-px-dark mt-1">Documented Drivers</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">Background-verified crew</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="p-5 rounded-2xl bg-white border border-px-border shadow-xs hover:shadow-soft-purple transition-all duration-300">
+                  <p className="text-2xl sm:text-3xl font-black text-px-primary">1,000+</p>
+                  <p className="text-sm font-bold text-px-dark mt-1">Verified Drivers</p>
+                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                    Experienced drivers supporting our transport network.
+                  </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-white border border-px-border">
-                  <p className="text-2xl font-black text-px-primary">100%</p>
-                  <p className="text-xs font-bold text-px-dark mt-1">Trip Insured</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">Comprehensive driver safety</p>
+                <div className="p-5 rounded-2xl bg-white border border-px-border shadow-xs hover:shadow-soft-purple transition-all duration-300">
+                  <p className="text-2xl sm:text-3xl font-black text-px-primary">100%</p>
+                  <p className="text-sm font-bold text-px-dark mt-1">Trip Insurance</p>
+                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                    Insurance support for covered trips.
+                  </p>
                 </div>
               </div>
             </div>
