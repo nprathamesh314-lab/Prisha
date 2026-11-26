@@ -29,58 +29,58 @@ interface CorridorData {
 const corridorList: CorridorData[] = [
   {
     id: 'western',
-    name: 'Western Industrial Corridors',
-    tag: 'Primary Operations Belt',
+    name: 'Western India Network',
+    tag: 'Main Transport Route',
     regions: 'Pune • Mumbai • Ahmedabad • Surat • Nashik',
     description:
-      'High-volume freight corridors connecting automotive clusters, heavy manufacturing, and export shipping hubs through continuous dispatch and monitored transit.',
-    transitHours: 'Express Next-Day Transit',
+      'We connect major business and industrial cities across Western India and help businesses move their goods safely and on time.',
+    transitHours: 'Regular Transport Service',
     activeFeatures: [
-      'Central control operations headquartered in Pune',
-      'High-frequency industrial container and trailer movement',
-      'Dedicated driver change points and rest stops',
+      'Operations managed from Pune',
+      'Regular goods transportation',
+      'Dedicated drivers and transport support',
     ],
   },
   {
     id: 'northern',
-    name: 'Northern Freight Network',
-    tag: 'Strategic Transit Link',
+    name: 'Northern India Network',
+    tag: 'North India Routes',
     regions: 'Delhi NCR • Gurgaon • Jaipur • Chandigarh • Ludhiana',
     description:
-      'Connecting western and central manufacturing zones to key northern consumer hubs, retail warehouses, and agricultural supply chains.',
-    transitHours: 'Scheduled Highway Line-Haul',
+      'We connect important cities across North India to support the smooth movement of goods for businesses.',
+    transitHours: 'Regular Transport Service',
     activeFeatures: [
-      'National highway corridor transit monitoring',
-      'Dual-driver long-haul options for time-sensitive cargo',
-      'Trained highway emergency support response',
+      'Transportation across major highways',
+      'Experienced drivers for long-distance trips',
+      'Support during transportation',
     ],
   },
   {
     id: 'southern',
-    name: 'Southern Commercial Belt',
-    tag: 'Tech & Electronics Transit',
+    name: 'Southern India Network',
+    tag: 'South India Routes',
     regions: 'Bengaluru • Chennai • Hyderabad • Coimbatore • Hosur',
     description:
-      'Precision freight operations serving electronic manufacturing, retail distribution centers, and consumer goods distribution networks.',
-    transitHours: 'Standard 36-48 Hr Express',
+      'We provide transportation services across major business and industrial cities in South India.',
+    transitHours: 'Regular Transport Service',
     activeFeatures: [
-      'Strict cargo security protocols and sealed container trucks',
-      'Route-experienced commercial drivers familiar with southern routes',
-      'Verified service station support near major junction points',
+      'Regular transportation support',
+      'Goods movement for different industries',
+      'Reliable transport services',
     ],
   },
   {
     id: 'eastern',
-    name: 'Eastern Transit Corridors',
-    tag: 'Industrial Raw & Finished Goods',
+    name: 'Eastern India Network',
+    tag: 'East India Routes',
     regions: 'Kolkata • Bhubaneswar • Raipur • Jamshedpur',
     description:
-      'Heavy freight lines supporting steel, infrastructure, industrial materials, and commercial distribution across eastern national highway routes.',
-    transitHours: 'Heavy Freight Schedules',
+      'We connect important cities in Eastern India and support businesses with their transportation needs.',
+    transitHours: 'Regular Transport Service',
     activeFeatures: [
-      'Heavy multi-axle vehicle operation expertise',
-      'Over-dimensional and bulk cargo route survey capabilities',
-      'Statutory interstate checkpoint compliance assurance',
+      'Industrial goods transportation',
+      'Support for business deliveries',
+      'Transport services across major routes',
     ],
   },
 ];
@@ -192,16 +192,16 @@ export const NetworkPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <SectionHeading
             theme="dark"
-            badge="Interactive Route Experience"
-            title="Freight Corridors & Synchronized Route Mapping"
-            subtitle="Click on any regional corridor to inspect specific highway connections and operational capabilities."
+            badge="OUR TRANSPORT NETWORK"
+            title="Our Transport Network"
+            subtitle="Explore our major transport routes across India. Select any route to see the cities we connect and the services we provide."
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left: Corridor Selection Tabs (5 cols) */}
             <div className="lg:col-span-5 space-y-3">
               <p className="text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
-                Select Freight Corridor:
+                Select Transport Route:
               </p>
               {corridorList.map((c) => {
                 const isSelected = selectedCorridor.id === c.id;
@@ -240,7 +240,7 @@ export const NetworkPage: React.FC = () => {
                 <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-white/10">
                   <div>
                     <span className="text-xs font-bold uppercase tracking-wider text-purple-200">
-                      Corridor Specification
+                      Route Details
                     </span>
                     <h3 className="text-2xl font-extrabold text-white mt-1">
                       {selectedCorridor.name}
@@ -264,12 +264,12 @@ export const NetworkPage: React.FC = () => {
                   {/* Illustrative Route Line Indicator */}
                   <div className="absolute top-4 left-4 p-2.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 text-xs text-purple-200 flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                    <span>Illustrative corridor routing: {selectedCorridor.regions}</span>
+                    <span>Cities connected: {selectedCorridor.regions}</span>
                   </div>
 
                   <div className="absolute bottom-4 left-4 right-4 text-xs text-gray-200">
-                    <p className="font-semibold text-white">Central Transit Node: Pune, Maharashtra</p>
-                    <p className="text-xs text-purple-200 font-medium">All routes monitored with centralized driver check-ins.</p>
+                    <p className="font-semibold text-white">Main Operations Office: Pune, Maharashtra</p>
+                    <p className="text-xs text-purple-200 font-medium">Our Pune team supports driver coordination and journey updates across all routes.</p>
                   </div>
                 </div>
 
@@ -280,7 +280,7 @@ export const NetworkPage: React.FC = () => {
                 {/* Features List */}
                 <div className="space-y-2 pt-2 border-t border-white/10">
                   <p className="text-xs font-bold uppercase tracking-wider text-purple-200">
-                    Operational Highlights
+                    Key Service Highlights
                   </p>
                   {selectedCorridor.activeFeatures.map((feat, fIdx) => (
                     <div key={fIdx} className="flex items-center gap-2.5 text-xs sm:text-sm text-white font-medium">
