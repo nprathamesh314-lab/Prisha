@@ -12,6 +12,8 @@ import {
   Wrench,
   Cog,
   Users,
+  UserCheck,
+  UserPlus,
 } from 'lucide-react';
 import { companyInfo } from '../../data/companyData';
 import { Button } from '../common/Button';
@@ -22,17 +24,35 @@ interface NavItem {
   label: string;
   href: string;
   hasDropdown?: boolean;
+  dropdownType?: 'services' | 'drivers';
 }
 
 const navItems: NavItem[] = [
   { label: 'Home', href: '/' },
   { label: 'About Us', href: '/about' },
-  { label: 'Services', href: '/services', hasDropdown: true },
+  { label: 'Services', href: '/services', hasDropdown: true, dropdownType: 'services' },
   { label: 'Our Network', href: '/network' },
-  { label: 'Truck Drivers', href: '/drivers' },
+  { label: 'Truck Drivers', href: '/drivers', hasDropdown: true, dropdownType: 'drivers' },
   { label: 'Careers', href: '/careers' },
   { label: 'CSR', href: '/csr' },
   { label: 'Contact Us', href: '/contact' },
+];
+
+const driverDropdownItems = [
+  {
+    title: 'Hire Drivers',
+    href: '/services/truck-drivers-on-hire',
+    desc: 'Hire vetted, trained and verified commercial truck drivers',
+    icon: UserCheck,
+    badge: 'Hire',
+  },
+  {
+    title: 'Register as a Driver',
+    href: '/careers/driver',
+    desc: 'Join our pan-India network of 1,000+ commercial drivers',
+    icon: UserPlus,
+    badge: 'Register',
+  },
 ];
 
 const serviceDropdownItems = [
@@ -74,7 +94,9 @@ export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+  const [driversDropdownOpen, setDriversDropdownOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
+  const [mobileDriversOpen, setMobileDriversOpen] = useState(false);
   const location = useLocation();
 
   const isHomePage = location.pathname === '/';
@@ -94,7 +116,9 @@ export const Navbar: React.FC = () => {
   useEffect(() => {
     setMobileMenuOpen(false);
     setServicesDropdownOpen(false);
+    setDriversDropdownOpen(false);
     setMobileServicesOpen(false);
+    setMobileDriversOpen(false);
   }, [location.pathname]);
 
   const isNavbarTransparent = isHomePage && !isScrolled;
@@ -141,43 +165,57 @@ export const Navbar: React.FC = () => {
                     : location.pathname.startsWith(item.href);
 
                 if (item.hasDropdown) {
+                  const isServices = item.dropdownType === 'services';
+                  const isDropdownOpen = isServices ? servicesDropdownOpen : driversDropdownOpen;
+                  const setDropdownOpen = isServices ? setServicesDropdownOpen : setDriversDropdownOpen;
+                  const isItemActive = isServices
+                    ? location.pathname.startsWith('/services')
+                    : location.pathname.startsWith('/drivers') ||
+                      location.pathname === '/services/truck-drivers-on-hire' ||
+                      location.pathname.startsWith('/careers/driver');
+                  const dropdownItems = isServices ? serviceDropdownItems : driverDropdownItems;
+                  const dropdownTitle = isServices ? 'Core Logistics Capabilities' : 'Driver Solutions';
+                  const bottomLink = isServices
+                    ? { href: '/services', label: 'View all logistics services' }
+                    : { href: '/drivers', label: 'View driver network overview' };
+
                   return (
                     <div
                       key={item.label}
                       className="relative"
-                      onMouseEnter={() => setServicesDropdownOpen(true)}
-                      onMouseLeave={() => setServicesDropdownOpen(false)}
-                      onFocus={() => setServicesDropdownOpen(true)}
+                      onMouseEnter={() => setDropdownOpen(true)}
+                      onMouseLeave={() => setDropdownOpen(false)}
+                      onFocus={() => setDropdownOpen(true)}
                     >
                       <button
-                        onClick={() => setServicesDropdownOpen(!servicesDropdownOpen)}
+                        onClick={() => setDropdownOpen(!isDropdownOpen)}
                         onKeyDown={(e) => {
-                          if (e.key === 'Escape') setServicesDropdownOpen(false);
+                          if (e.key === 'Escape') setDropdownOpen(false);
                         }}
                         className={`flex items-center gap-1 px-2.5 xl:px-3 py-2 text-xs xl:text-sm font-semibold rounded-lg transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-px-primary ${
                           isNavbarTransparent
-                            ? isActive
+                            ? isItemActive
                               ? 'text-white bg-white/20'
                               : 'text-gray-100 hover:text-white hover:bg-white/10'
-                            : isActive
+                            : isItemActive
                             ? 'text-px-primary bg-px-lavender/60'
                             : 'text-px-dark hover:text-px-primary hover:bg-px-lavender/40'
                         }`}
-                        aria-expanded={servicesDropdownOpen}
+                        aria-expanded={isDropdownOpen}
                         aria-haspopup="true"
-                        aria-label="Services dropdown menu"
+                        aria-label={`${item.label} dropdown menu`}
                       >
                         <span>{item.label}</span>
                         <ChevronDown
                           className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                            servicesDropdownOpen ? 'rotate-180' : ''
+                            isDropdownOpen ? 'rotate-180' : ''
                           }`}
                         />
                       </button>
 
                       {/* Dropdown Menu */}
                       <AnimatePresence>
-                        {servicesDropdownOpen && (
+                        {isDropdownOpen && (
                           <motion.div
                             initial={{ opacity: 0, y: 10, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -185,24 +223,24 @@ export const Navbar: React.FC = () => {
                             transition={{ duration: 0.2 }}
                             className="absolute top-full left-0 w-80 mt-1 py-3 bg-white rounded-2xl shadow-xl border border-px-border/80 z-50 overflow-hidden"
                             role="menu"
-                            aria-label="Logistics Services Submenu"
+                            aria-label={`${item.label} Submenu`}
                           >
                             <div className="px-4 pb-2 mb-2 border-b border-gray-100">
                               <p className="text-xs font-bold uppercase tracking-wider text-px-violet">
-                                Core Logistics Capabilities
+                                {dropdownTitle}
                               </p>
                             </div>
                             <div className="space-y-1 px-2">
-                              {serviceDropdownItems.map((service) => {
-                                const IconComponent = service.icon;
+                              {dropdownItems.map((subItem) => {
+                                const IconComponent = subItem.icon;
                                 return (
                                   <Link
-                                    key={service.title}
-                                    to={service.href}
+                                    key={subItem.title}
+                                    to={subItem.href}
                                     role="menuitem"
-                                    onMouseEnter={() => prefetchRoute(service.href)}
-                                    onTouchStart={() => prefetchRoute(service.href)}
-                                    onClick={() => setServicesDropdownOpen(false)}
+                                    onMouseEnter={() => prefetchRoute(subItem.href)}
+                                    onTouchStart={() => prefetchRoute(subItem.href)}
+                                    onClick={() => setDropdownOpen(false)}
                                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-px-lavender/40 transition-colors group focus:outline-none focus-visible:bg-px-lavender/50"
                                   >
                                     <div className="p-2 rounded-lg bg-px-lavender text-px-primary group-hover:bg-px-primary group-hover:text-white transition-colors shrink-0">
@@ -211,16 +249,16 @@ export const Navbar: React.FC = () => {
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center justify-between">
                                         <p className="text-sm font-bold text-px-dark group-hover:text-px-primary truncate">
-                                          {service.title}
+                                          {subItem.title}
                                         </p>
-                                        {service.badge && (
+                                        {subItem.badge && (
                                           <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-px-lavender text-px-primary">
-                                            {service.badge}
+                                            {subItem.badge}
                                           </span>
                                         )}
                                       </div>
                                       <p className="text-xs text-gray-600 line-clamp-1 mt-0.5 font-normal">
-                                        {service.desc}
+                                        {subItem.desc}
                                       </p>
                                     </div>
                                   </Link>
@@ -229,14 +267,14 @@ export const Navbar: React.FC = () => {
                             </div>
                             <div className="mt-2 pt-2 px-3 border-t border-gray-100 bg-gray-50/50">
                               <Link
-                                to="/services"
+                                to={bottomLink.href}
                                 role="menuitem"
-                                onMouseEnter={() => prefetchRoute('/services')}
-                                onTouchStart={() => prefetchRoute('/services')}
-                                onClick={() => setServicesDropdownOpen(false)}
+                                onMouseEnter={() => prefetchRoute(bottomLink.href)}
+                                onTouchStart={() => prefetchRoute(bottomLink.href)}
+                                onClick={() => setDropdownOpen(false)}
                                 className="flex items-center justify-between text-xs font-bold text-px-primary hover:text-px-deep py-1"
                               >
-                                <span>View all logistics services</span>
+                                <span>{bottomLink.label}</span>
                                 <ArrowRight className="w-3.5 h-3.5" />
                               </Link>
                             </div>
@@ -378,22 +416,30 @@ export const Navbar: React.FC = () => {
                       : location.pathname.startsWith(item.href);
 
                   if (item.hasDropdown) {
+                    const isServices = item.dropdownType === 'services';
+                    const isMobileOpen = isServices ? mobileServicesOpen : mobileDriversOpen;
+                    const setMobileOpen = isServices ? setMobileServicesOpen : setMobileDriversOpen;
+                    const dropdownItems = isServices ? serviceDropdownItems : driverDropdownItems;
+                    const viewAllLink = isServices
+                      ? { href: '/services', label: 'View All Services →' }
+                      : { href: '/drivers', label: 'View Drivers Overview →' };
+
                     return (
                       <div key={item.label} className="border-b border-gray-100 pb-2">
                         <button
-                          onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                          onClick={() => setMobileOpen(!isMobileOpen)}
                           className="flex items-center justify-between w-full p-3 font-bold text-px-dark hover:text-px-primary rounded-xl"
                         >
                           <span>{item.label}</span>
                           <ChevronDown
                             className={`w-4 h-4 transition-transform duration-200 ${
-                              mobileServicesOpen ? 'rotate-180' : ''
+                              isMobileOpen ? 'rotate-180' : ''
                             }`}
                           />
                         </button>
-                        {mobileServicesOpen && (
+                        {isMobileOpen && (
                           <div className="ml-3 pl-3 border-l-2 border-px-lavender space-y-1 mt-1">
-                            {serviceDropdownItems.map((s) => (
+                            {dropdownItems.map((s) => (
                               <Link
                                 key={s.title}
                                 to={s.href}
@@ -402,17 +448,24 @@ export const Navbar: React.FC = () => {
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="block py-2 px-3 text-sm font-medium text-gray-700 hover:text-px-primary hover:bg-px-lavender/30 rounded-lg"
                               >
-                                {s.title}
+                                <div className="flex items-center justify-between">
+                                  <span>{s.title}</span>
+                                  {s.badge && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-semibold bg-px-lavender text-px-primary">
+                                      {s.badge}
+                                    </span>
+                                  )}
+                                </div>
                               </Link>
                             ))}
                             <Link
-                              to="/services"
-                              onMouseEnter={() => prefetchRoute('/services')}
-                              onTouchStart={() => prefetchRoute('/services')}
+                              to={viewAllLink.href}
+                              onMouseEnter={() => prefetchRoute(viewAllLink.href)}
+                              onTouchStart={() => prefetchRoute(viewAllLink.href)}
                               onClick={() => setMobileMenuOpen(false)}
                               className="block py-2 px-3 text-xs font-bold text-px-primary"
                             >
-                              View All Services →
+                              {viewAllLink.label}
                             </Link>
                           </div>
                         )}
