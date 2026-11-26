@@ -31,6 +31,8 @@ import {
   MessageSquare,
   Check,
   RotateCcw,
+  X,
+  RefreshCw,
 } from 'lucide-react';
 
 const MAHARASHTRA_CITIES = [
@@ -89,6 +91,154 @@ export const DriverRegistrationPage: React.FC = () => {
 
   // Preview URLs for instant thumbnail render
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+
+  // Camera Capture Modal State
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [cameraTargetKey, setCameraTargetKey] = useState<keyof DriverUploadedFiles | null>(null);
+  const [cameraTargetTitle, setCameraTargetTitle] = useState<string>('');
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [capturedBlobUrl, setCapturedBlobUrl] = useState<string | null>(null);
+  const [capturedFile, setCapturedFile] = useState<File | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Clean up camera stream on unmount
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
+  // Synchronize video element with stream
+  useEffect(() => {
+    if (cameraModalOpen && cameraStream && videoRef.current && !capturedBlobUrl) {
+      videoRef.current.srcObject = cameraStream;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [cameraModalOpen, cameraStream, capturedBlobUrl]);
+
+  const startCamera = async (mode: 'user' | 'environment' = facingMode) => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+    setCameraError(null);
+    setCapturedBlobUrl(null);
+    setCapturedFile(null);
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError('Camera is not supported on this browser. Please upload an image file from your device.');
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: mode },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+        },
+        audio: false,
+      });
+      setCameraStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+      }
+    } catch {
+      try {
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        setCameraStream(fallbackStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = fallbackStream;
+          videoRef.current.play().catch(() => {});
+        }
+      } catch {
+        setCameraError('Camera permission was denied or camera is unavailable. Please allow camera permissions in your browser or upload an image file from your device.');
+      }
+    }
+  };
+
+  const openCameraModal = (key: keyof DriverUploadedFiles, title: string) => {
+    setCameraTargetKey(key);
+    setCameraTargetTitle(title);
+    setCameraModalOpen(true);
+    setCapturedBlobUrl(null);
+    setCapturedFile(null);
+    setFacingMode('environment');
+    startCamera('environment');
+  };
+
+  const closeCameraModal = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+      setCameraStream(null);
+    }
+    if (capturedBlobUrl && capturedBlobUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(capturedBlobUrl);
+    }
+    setCapturedBlobUrl(null);
+    setCapturedFile(null);
+    setCameraTargetKey(null);
+    setCameraModalOpen(false);
+    setCameraError(null);
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    const width = video.videoWidth || 1280;
+    const height = video.videoHeight || 720;
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.drawImage(video, 0, 0, width, height);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        const filename = `${cameraTargetKey || 'document'}_${Date.now()}.jpg`;
+        const file = new File([blob], filename, { type: 'image/jpeg' });
+        const url = URL.createObjectURL(blob);
+        setCapturedBlobUrl(url);
+        setCapturedFile(file);
+      },
+      'image/jpeg',
+      0.92
+    );
+  };
+
+  const retakePhoto = () => {
+    if (capturedBlobUrl && capturedBlobUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(capturedBlobUrl);
+    }
+    setCapturedBlobUrl(null);
+    setCapturedFile(null);
+    if (videoRef.current && cameraStream) {
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const confirmCapturedPhoto = () => {
+    if (capturedFile && cameraTargetKey) {
+      handleFileSelect(cameraTargetKey, capturedFile);
+    }
+    closeCameraModal();
+  };
+
+  const toggleCameraFacingMode = () => {
+    const newMode = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(newMode);
+    startCamera(newMode);
+  };
 
   // Restore draft on mount
   useEffect(() => {
@@ -386,7 +536,7 @@ export const DriverRegistrationPage: React.FC = () => {
   }> = ({ idKey, title, required, helperText }) => {
     const file = files[idKey];
     const preview = previewUrls[idKey];
-    const inputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const hasError = Boolean(fieldErrors[idKey]);
 
     return (
@@ -397,7 +547,7 @@ export const DriverRegistrationPage: React.FC = () => {
           ? 'border-emerald-300 bg-emerald-50/30'
           : 'border-gray-200 bg-white hover:border-purple-300'
       }`}>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1.5">
           <label className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
             {title} {required && <span className="text-red-500 font-bold">*</span>}
           </label>
@@ -410,15 +560,16 @@ export const DriverRegistrationPage: React.FC = () => {
 
         {helperText && <p className="text-xs text-gray-500 mb-3">{helperText}</p>}
 
+        {/* Regular file picker for device storage / PDF */}
         <input
-          ref={inputRef}
+          ref={fileInputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp,application/pdf"
-          capture="environment"
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0] || null;
             handleFileSelect(idKey, f);
+            e.target.value = '';
           }}
         />
 
@@ -441,36 +592,69 @@ export const DriverRegistrationPage: React.FC = () => {
               <p className="text-[11px] text-gray-500">{(file.size / 1024).toFixed(0)} KB</p>
             </div>
 
-            {/* Replace & Remove Buttons */}
-            <div className="flex items-center gap-1.5">
+            {/* Action Buttons: Camera Retake / Replace Upload / Remove */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <button
                 type="button"
-                onClick={() => inputRef.current?.click()}
-                className="text-xs font-medium text-purple-700 hover:text-purple-900 px-2.5 py-1.5 bg-purple-50 rounded hover:bg-purple-100 transition-colors"
+                onClick={() => openCameraModal(idKey, title)}
+                className="text-[11px] font-bold text-purple-700 hover:text-purple-900 px-2.5 py-1.5 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors flex items-center gap-1"
+                title="Retake photo using camera"
               >
-                Replace
+                <Camera className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Camera</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-[11px] font-bold text-gray-700 hover:text-gray-900 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center gap-1"
+                title="Choose different file from device"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Upload</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleRemoveFile(idKey)}
-                className="text-xs font-medium text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded transition-colors"
-                title="Remove file"
+                className="text-xs font-medium text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                title="Remove document"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
         ) : (
-          <div
-            onClick={() => inputRef.current?.click()}
-            className="border-2 border-dashed border-gray-300 hover:border-px-primary/60 rounded-lg p-5 text-center cursor-pointer transition-colors bg-gray-50/50 hover:bg-purple-50/30"
-          >
-            <div className="flex justify-center items-center gap-2 mb-2 text-purple-700">
-              <Camera className="w-5 h-5" />
-              <UploadCloud className="w-5 h-5" />
-            </div>
-            <p className="text-xs font-bold text-gray-700">Tap to Take Photo or Upload</p>
-            <p className="text-[11px] text-gray-500 mt-0.5">JPG, PNG, or PDF up to 5 MB</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {/* Primary Action: Take Photo with Camera */}
+            <button
+              type="button"
+              onClick={() => openCameraModal(idKey, title)}
+              className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-purple-300 hover:border-px-primary bg-purple-50/60 hover:bg-purple-100/70 transition-all text-left group"
+            >
+              <div className="w-10 h-10 rounded-lg bg-px-primary text-white flex items-center justify-center flex-shrink-0 shadow group-hover:scale-105 transition-transform">
+                <Camera className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold text-purple-950 flex items-center gap-1">
+                  Take Photo
+                </p>
+                <p className="text-[11px] text-purple-700/90 font-medium">Use Camera</p>
+              </div>
+            </button>
+
+            {/* Secondary Action: Upload Document / File */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-3 p-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-500 bg-gray-50 hover:bg-gray-100/80 transition-all text-left group"
+            >
+              <div className="w-10 h-10 rounded-lg bg-gray-700 text-white flex items-center justify-center flex-shrink-0 shadow group-hover:scale-105 transition-transform">
+                <UploadCloud className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-extrabold text-gray-900">Upload File</p>
+                <p className="text-[11px] text-gray-500 font-medium">Device, Gallery or PDF</p>
+              </div>
+            </button>
           </div>
         )}
 
@@ -1283,6 +1467,167 @@ export const DriverRegistrationPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Live Camera Viewfinder & Photo Capture Modal */}
+      {cameraModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden flex flex-col max-h-[92vh] animate-fadeIn">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-4 py-3 bg-[#160424] text-white">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-purple-300" />
+                <div>
+                  <h3 className="text-sm font-bold leading-tight">Document Camera</h3>
+                  <p className="text-[11px] text-purple-200 truncate max-w-[240px] sm:max-w-xs">
+                    {cameraTargetTitle || 'Take Document Photo'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={closeCameraModal}
+                className="p-1.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                title="Close Camera"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body: Camera Viewfinder or Captured Preview */}
+            <div className="p-4 flex-1 flex flex-col items-center justify-center bg-gray-950 overflow-hidden relative min-h-[300px] sm:min-h-[380px]">
+              {cameraError ? (
+                <div className="text-center p-6 text-white max-w-sm">
+                  <div className="w-12 h-12 rounded-full bg-red-500/20 text-red-400 mx-auto flex items-center justify-center mb-3">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <h4 className="text-sm font-bold mb-1">Camera Not Available</h4>
+                  <p className="text-xs text-gray-300 mb-4 leading-relaxed">
+                    {cameraError}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => startCamera(facingMode)}
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Try Again
+                    </button>
+                    <label className="px-4 py-2 bg-white/15 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5">
+                      <UploadCloud className="w-3.5 h-3.5" /> Select from Gallery / Files
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f && cameraTargetKey) {
+                            handleFileSelect(cameraTargetKey, f);
+                            closeCameraModal();
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : capturedBlobUrl ? (
+                // Captured Photo Preview
+                <div className="relative w-full h-full flex flex-col items-center justify-center">
+                  <div className="relative max-h-[340px] sm:max-h-[380px] w-full rounded-xl overflow-hidden border-2 border-emerald-500/80 shadow-lg bg-black flex items-center justify-center">
+                    <img
+                      src={capturedBlobUrl}
+                      alt="Captured Document"
+                      className="max-h-[340px] sm:max-h-[380px] w-full object-contain"
+                    />
+                    <div className="absolute top-2 left-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow flex items-center gap-1">
+                      <Check className="w-3 h-3" /> Photo Captured
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-gray-300 text-center mt-2.5">
+                    Please ensure document details (name, photo, numbers) are clearly readable.
+                  </p>
+                </div>
+              ) : (
+                // Live Video Stream Viewfinder
+                <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-xl bg-black">
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-[320px] sm:h-[380px] object-cover rounded-xl"
+                  />
+
+                  {/* Document Alignment Frame Guide */}
+                  <div className="absolute inset-4 sm:inset-6 border-2 border-dashed border-white/70 rounded-xl pointer-events-none flex flex-col justify-between p-3">
+                    <span className="text-[10px] uppercase font-bold tracking-wider text-white bg-black/60 px-2 py-0.5 rounded self-start backdrop-blur-sm">
+                      Align document inside box
+                    </span>
+                    <span className="text-[10px] text-white/90 bg-black/60 px-2 py-0.5 rounded self-center text-center backdrop-blur-sm">
+                      Keep steady & in good light
+                    </span>
+                  </div>
+
+                  {/* Flip Camera Switch Button (Mobile devices with front/back camera) */}
+                  <button
+                    type="button"
+                    onClick={toggleCameraFacingMode}
+                    className="absolute top-3 right-3 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm transition-all border border-white/20 shadow-md"
+                    title="Flip camera (Front / Rear)"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Hidden Canvas for Frame Capture */}
+              <canvas ref={canvasRef} className="hidden" />
+            </div>
+
+            {/* Modal Controls / Footer */}
+            <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200">
+              {capturedBlobUrl ? (
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={retakePhoto}
+                    className="flex-1 py-2.5 px-4 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5"
+                  >
+                    <RotateCcw className="w-4 h-4" /> Retake Photo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmCapturedPhoto}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 shadow-md"
+                  >
+                    <Check className="w-4 h-4" /> Use This Photo
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={closeCameraModal}
+                    className="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-100 text-xs font-bold transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={capturePhoto}
+                    disabled={Boolean(cameraError)}
+                    className="flex-1 py-3 px-6 rounded-xl bg-px-primary hover:bg-px-deep text-white text-xs sm:text-sm font-black transition-all inline-flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 group"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Camera className="w-4 h-4" />
+                    </div>
+                    Take Photo Now
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </PageTransition>
   );
 };
