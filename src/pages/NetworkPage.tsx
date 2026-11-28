@@ -4,7 +4,6 @@ import { NetworkHeroSection } from '../components/sections/NetworkHeroSection';
 import { SectionHeading } from '../components/common/SectionHeading';
 import { FadeIn } from '../components/animations/FadeIn';
 import { CTASection } from '../components/common/CTASection';
-import { NetworkLogisticsVideo } from '../components/sections/NetworkLogisticsVideo';
 import {
   Radio,
   Truck,
@@ -100,11 +99,7 @@ export const NetworkPage: React.FC = () => {
             badge="OUR TRANSPORT NETWORK"
             title="Connecting Businesses Across India"
             subtitle="Prisha Xpress helps businesses transport goods between different cities across India. Our road and air transport network helps move goods from one place to another."
-            className="mb-4"
           />
-
-          {/* Logistics Animation Video Player */}
-          <NetworkLogisticsVideo />
 
           {/* The Four Core Network Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
