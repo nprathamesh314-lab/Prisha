@@ -380,9 +380,9 @@ export const NetworkPage: React.FC = () => {
                 </div>
                 <div className="p-5 rounded-2xl bg-white border border-px-border shadow-xs hover:shadow-soft-purple transition-all duration-300">
                   <p className="text-2xl sm:text-3xl font-black text-px-primary">100%</p>
-                  <p className="text-sm font-bold text-px-dark mt-1">Trip Insurance</p>
+                  <p className="text-sm font-bold text-px-dark mt-1">Goods Safety</p>
                   <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                    Insurance support for covered trips.
+                    Every trip is secure with transport protection.
                   </p>
                 </div>
               </div>
