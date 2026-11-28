@@ -191,10 +191,10 @@ export const TransportHero: React.FC = () => {
               {t.title}
             </motion.h1>
 
-            {/* Description (Deep High-Contrast Gray for 100% Crisp Visibility) */}
+            {/* Description (Rich High-Contrast Blue for Clear Visibility) */}
             <motion.p
               variants={itemVariants}
-              className="text-sm sm:text-base text-gray-700 leading-relaxed font-medium"
+              className="text-sm sm:text-base text-blue-900 font-semibold leading-relaxed"
             >
               {t.desc}
             </motion.p>
