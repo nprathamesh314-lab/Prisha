@@ -25,19 +25,19 @@ export const StationCTA: React.FC = () => {
           <FadeIn direction="down">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-purple-200">
               <Wrench className="w-4 h-4 text-purple-300" />
-              Commercial Fleet Maintenance Contracting
+              Commercial Vehicle Care
             </span>
           </FadeIn>
 
           <FadeIn direction="up" delay={0.1}>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight max-w-3xl mx-auto">
-              Keep Your Heavy Commercial Vehicles Highway-Ready
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight max-w-3xl mx-auto text-white">
+              Keep Your Trucks Running Smoothly on Every Trip
             </h2>
           </FadeIn>
 
           <FadeIn direction="up" delay={0.2}>
             <p className="text-base sm:text-lg text-gray-200 max-w-2xl mx-auto leading-relaxed">
-              Inquire about corporate service agreements, express lane reservations, or preventive fleet health checkup packages at our Pune service stations.
+              Get complete vehicle checkups, express repair lanes, and trusted maintenance support for your fleet in Pune.
             </p>
           </FadeIn>
 
@@ -49,7 +49,7 @@ export const StationCTA: React.FC = () => {
                 size="lg"
                 icon={<ArrowRight className="w-5 h-5 text-px-primary" />}
               >
-                Inquire for Service Station
+                Business Enquiry
               </Button>
               <Button
                 href={`tel:${companyInfo.phone}`}
