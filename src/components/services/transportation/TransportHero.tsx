@@ -160,6 +160,7 @@ export const TransportHero: React.FC = () => {
               { label: 'Transportation' },
             ]}
             theme="dark"
+            className="bg-black/40 text-white border-white/30 backdrop-blur-md shadow-md"
           />
         </div>
 
@@ -169,31 +170,31 @@ export const TransportHero: React.FC = () => {
             initial="hidden"
             animate="visible"
             variants={panelVariants}
-            className="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/92 backdrop-blur-md border border-white/70 shadow-2xl space-y-5 sm:space-y-6 text-px-dark relative overflow-hidden"
+            className="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/98 backdrop-blur-xl border border-white shadow-[0_20px_50px_rgba(30,10,60,0.25)] space-y-5 sm:space-y-6 text-px-dark relative overflow-hidden"
           >
             {/* Fine Top Border Shine */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-300 via-px-primary to-purple-300 opacity-60" />
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-400 via-px-primary to-purple-400 opacity-80" />
 
             {/* Small Label Badge */}
             <motion.div variants={itemVariants} className="flex justify-start">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100/90 border border-purple-200 text-xs sm:text-sm font-bold uppercase tracking-wider text-px-primary shadow-2xs">
+              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100 border border-purple-200 text-xs sm:text-sm font-bold uppercase tracking-wider text-px-primary shadow-2xs">
                 <Truck className="w-4 h-4 text-px-primary" />
                 <span>{t.badge}</span>
               </span>
             </motion.div>
 
-            {/* Main Heading (Pure Dark Purple, Simple & Direct Indian English) */}
+            {/* Main Heading (Pure Crisp High-Contrast Charcoal / Black) */}
             <motion.h1
               variants={itemVariants}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-px-dark tracking-tight leading-[1.2]"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-gray-950 tracking-tight leading-[1.2]"
             >
               {t.title}
             </motion.h1>
 
-            {/* Description (Readable, Clear, Plain English) */}
+            {/* Description (Deep High-Contrast Gray for 100% Crisp Visibility) */}
             <motion.p
               variants={itemVariants}
-              className="text-sm sm:text-base text-[#F5C7FF] drop-shadow-[0_1px_2px_rgba(26,5,46,0.85)] leading-relaxed font-normal"
+              className="text-sm sm:text-base text-gray-700 leading-relaxed font-medium"
             >
               {t.desc}
             </motion.p>
@@ -208,12 +209,12 @@ export const TransportHero: React.FC = () => {
                 return (
                   <div
                     key={idx}
-                    className="p-2.5 sm:p-3 rounded-2xl bg-purple-50/80 border border-purple-100/90 flex items-center gap-2.5 text-xs font-bold text-px-dark shadow-2xs hover:bg-purple-100/70 transition-colors"
+                    className="p-3 rounded-2xl bg-purple-50/90 border border-purple-200/90 flex items-center gap-2.5 text-xs font-bold text-gray-900 shadow-xs hover:bg-purple-100/90 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-xl bg-white border border-purple-200/60 flex items-center justify-center text-px-primary shrink-0 shadow-2xs">
+                    <div className="w-8 h-8 rounded-xl bg-white border border-purple-200 flex items-center justify-center text-px-primary shrink-0 shadow-xs">
                       <Icon className="w-4 h-4 text-px-primary" />
                     </div>
-                    <span className="leading-tight">{item.label}</span>
+                    <span className="leading-tight font-bold text-gray-900">{item.label}</span>
                   </div>
                 );
               })}
@@ -236,7 +237,7 @@ export const TransportHero: React.FC = () => {
               {/* Secondary Button */}
               <Link
                 to="/services"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-purple-50 text-px-primary font-bold text-sm border border-purple-200 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 transition-all duration-300"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-px-primary font-bold text-sm border border-purple-200 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 transition-all duration-300"
               >
                 <span>{t.btnExplore}</span>
               </Link>
