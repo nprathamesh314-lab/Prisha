@@ -1477,7 +1477,7 @@ export const DriverRegistrationPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Camera className="w-5 h-5 text-purple-300" />
                 <div>
-                  <h3 className="text-sm font-bold leading-tight">Document Camera</h3>
+                  <h3 className="text-sm font-bold text-white leading-tight">Document Camera</h3>
                   <p className="text-[11px] text-purple-200 truncate max-w-[240px] sm:max-w-xs">
                     {cameraTargetTitle || 'Take Document Photo'}
                   </p>

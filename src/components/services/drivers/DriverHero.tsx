@@ -141,21 +141,37 @@ export const DriverHero: React.FC = () => {
   const t = heroTranslations[lang] || heroTranslations.en;
 
   return (
-    <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-[#0F172A] text-white">
-      {/* Background Natural Daylight Commercial Driver & Fleet Photography */}
-      <div className="absolute inset-0 z-0">
+    <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-[#150326] text-white">
+      {/* Background Natural Daylight Commercial Driver & Fleet Photography - Sharp, Colorful & Clearly Visible */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <img
           src="/assets/images/careers-driver.jpg"
           alt="Professional Commercial Driver at Prisha Xpress"
-          className="w-full h-full object-cover object-[75%_center] md:object-center filter brightness-90 contrast-105"
+          className="w-full h-full object-cover object-[70%_center] md:object-center filter brightness-95 contrast-105"
         />
-        {/* Deep Midnight Navy Background Overlay (#0F172A at 85% opacity) */}
-        <div className="absolute inset-0 bg-[#0F172A]/85 pointer-events-none" />
+        {/* Subtle Darkening Tint to maintain high contrast while keeping photography vivid */}
+        <div className="absolute inset-0 bg-black/25 pointer-events-none" />
+
+        {/* Directional Brand Purple Gradient Overlays - preserves clear visibility of the smiling driver & truck */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#170326]/85 via-[#25043B]/60 to-[#170326]/40 hidden md:block pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#170326]/90 via-[#25043B]/70 to-[#170326]/40 md:hidden pointer-events-none" />
+
+        {/* Ambient light shimmer across background */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent skew-x-12 pointer-events-none"
+          animate={{ x: ['-100%', '200%'] }}
+          transition={{
+            repeat: Infinity,
+            duration: 14,
+            ease: 'linear',
+          }}
+        />
       </div>
 
-      {/* Decorative Ambient Brand Purple Highlights (#6D28D9) */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#6D28D9]/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-[#6D28D9]/15 rounded-full blur-3xl pointer-events-none" />
+      {/* Decorative Ambient Brand Purple & Fuchsia Highlights */}
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[480px] h-[480px] bg-fuchsia-600/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-purple-500/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full py-8">
         {/* Breadcrumb Navigation */}
@@ -166,22 +182,22 @@ export const DriverHero: React.FC = () => {
               { label: t.breadcrumbCurrent },
             ]}
             theme="dark"
-            className="bg-slate-900/60 text-slate-200 border-white/[0.12] backdrop-blur-md"
+            className="bg-white/10 text-purple-100 border-white/20 backdrop-blur-md shadow-sm"
           />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Left Column: Heading, Description & Action Buttons inside Frosted Slate Card */}
+          {/* Left Column: Heading, Description & Action Buttons inside Frosted Purple Glass Card */}
           <div className="lg:col-span-7">
-            <div className="p-6 sm:p-10 lg:p-12 rounded-[24px] bg-[#1E293B]/65 backdrop-blur-xl border border-white/[0.12] shadow-[0_16px_40px_0_rgba(0,0,0,0.35)] space-y-6 text-white relative overflow-hidden">
+            <div className="p-6 sm:p-10 lg:p-12 rounded-[28px] bg-[#220638]/70 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(15,2,25,0.5)] hover:border-purple-300/40 transition-all duration-300 space-y-6 text-white relative overflow-hidden">
               {/* Top Glass Reflection Highlight */}
-              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/[0.15] via-white/[0.04] to-transparent rounded-t-[24px] pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/20 via-white/5 to-transparent rounded-t-[28px] pointer-events-none" />
 
-              {/* Small Label Badge with Brand Purple (#6D28D9) Accent */}
+              {/* Small Label Badge with Brand Purple Accent */}
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative z-10 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#6D28D9]/25 backdrop-blur-md border border-[#6D28D9]/40 text-xs sm:text-sm font-bold text-purple-200 uppercase tracking-wider shadow-sm"
+                className="relative z-10 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/25 backdrop-blur-md border border-purple-400/40 text-xs sm:text-sm font-bold text-purple-200 uppercase tracking-wider shadow-sm"
               >
                 <ShieldCheck className="w-4 h-4 text-purple-300" />
                 <span>{t.badge}</span>
@@ -192,10 +208,10 @@ export const DriverHero: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.6 }}
-                className="relative z-10 text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.18]"
+                className="relative z-10 text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.18] drop-shadow-sm"
               >
                 {t.title}
-                <span className="block mt-2 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-100 to-purple-300">
+                <span className="block mt-2 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-pink-200 to-purple-300">
                   {t.highlightTitle}
                 </span>
               </motion.h1>
@@ -205,7 +221,7 @@ export const DriverHero: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.6 }}
-                className="relative z-10 text-base sm:text-lg text-slate-200 leading-relaxed font-normal"
+                className="relative z-10 text-base sm:text-lg text-purple-100/90 leading-relaxed font-normal"
               >
                 {t.description}
               </motion.p>
@@ -217,22 +233,22 @@ export const DriverHero: React.FC = () => {
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="relative z-10 flex flex-wrap items-center gap-4 pt-2"
               >
-                {/* Primary CTA: High-Visibility Amber / Gold (#F59E0B with #0F172A dark text) */}
+                {/* Primary CTA: High-Contrast Crisp White Button with Royal Purple text */}
                 <Button
                   to="/contact?service=truck-drivers-on-hire"
+                  variant="white"
                   size="lg"
-                  className="bg-[#F59E0B] hover:bg-[#D97706] text-[#0F172A] hover:text-[#0F172A] font-extrabold shadow-lg shadow-amber-500/25 border border-amber-400/60 transition-all duration-300"
-                  icon={<ArrowRight className="w-5 h-5 text-[#0F172A] group-hover:translate-x-1 transition-transform" />}
+                  icon={<ArrowRight className="w-5 h-5 text-px-primary group-hover:translate-x-1 transition-transform" />}
                 >
                   {t.hireBtn}
                 </Button>
 
-                {/* Secondary CTA: Transparent white outline (rgba(255, 255, 255, 0.15) fill with #FFFFFF text) */}
+                {/* Secondary CTA: Frosted Glass Button with White text */}
                 <Button
                   to="/careers/driver"
+                  variant="glass"
                   size="lg"
-                  className="bg-white/[0.15] hover:bg-white/25 text-white font-bold backdrop-blur-md border border-white/30 shadow-md transition-all duration-300"
-                  icon={<UserPlus className="w-4 h-4 text-white" />}
+                  icon={<UserPlus className="w-4 h-4 text-purple-100" />}
                 >
                   {t.registerBtn}
                 </Button>
@@ -240,27 +256,27 @@ export const DriverHero: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Driver Support Frosted Slate Glassmorphism Card */}
+          {/* Right Column: Driver Support Frosted Purple Glassmorphism Card */}
           <div className="lg:col-span-5">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 25 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.7 }}
-              className="relative p-6 sm:p-8 rounded-[24px] bg-[#1E293B]/65 backdrop-blur-xl border border-white/[0.12] shadow-[0_16px_40px_0_rgba(0,0,0,0.35)] hover:border-white/20 transition-all duration-300 space-y-6 overflow-hidden"
+              className="relative p-6 sm:p-8 rounded-[28px] bg-[#220638]/70 backdrop-blur-xl border border-white/20 shadow-[0_20px_50px_rgba(15,2,25,0.5)] hover:border-purple-300/40 transition-all duration-300 space-y-6 overflow-hidden"
             >
               {/* Top Glass Reflection Highlight */}
-              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/[0.15] via-white/[0.04] to-transparent rounded-t-[24px] pointer-events-none" />
+              <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-white/20 via-white/5 to-transparent rounded-t-[28px] pointer-events-none" />
 
-              {/* Card Header with Brand Purple (#6D28D9) Icon Accent */}
-              <div className="relative z-10 flex items-center gap-3.5 pb-4 border-b border-white/[0.12]">
-                <div className="p-3 rounded-2xl bg-[#6D28D9]/25 border border-[#6D28D9]/40 text-purple-200 shadow-xs">
+              {/* Card Header with Brand Purple Icon Accent */}
+              <div className="relative z-10 flex items-center gap-3.5 pb-4 border-b border-white/15">
+                <div className="p-3 rounded-2xl bg-purple-500/25 border border-purple-400/40 text-purple-200 shadow-sm">
                   <Users className="w-6 h-6 text-purple-200" />
                 </div>
                 <div>
                   <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                     {t.card.heading}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 font-medium">
+                  <p className="text-xs sm:text-sm text-purple-200/90 font-medium">
                     {t.card.subtitle}
                   </p>
                 </div>
@@ -273,16 +289,16 @@ export const DriverHero: React.FC = () => {
                   return (
                     <div
                       key={idx}
-                      className="p-4 rounded-2xl bg-slate-800/40 hover:bg-slate-800/70 border border-white/[0.08] hover:border-[#6D28D9]/40 transition-all duration-200 flex items-start gap-3.5 group"
+                      className="p-4 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 hover:border-purple-300/40 transition-all duration-200 flex items-start gap-3.5 group"
                     >
-                      <div className="p-2.5 rounded-xl bg-[#6D28D9]/20 border border-[#6D28D9]/30 text-purple-200 shrink-0 group-hover:scale-110 group-hover:text-white transition-all duration-200">
+                      <div className="p-2.5 rounded-xl bg-purple-500/25 border border-purple-400/35 text-purple-200 shrink-0 group-hover:scale-110 group-hover:text-white group-hover:bg-purple-500/40 transition-all duration-200 shadow-sm">
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="space-y-1">
                         <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-purple-200 transition-colors">
                           {feature.title}
                         </h4>
-                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
+                        <p className="text-xs sm:text-sm text-purple-100/85 leading-relaxed font-normal">
                           {feature.description}
                         </p>
                       </div>
@@ -292,12 +308,12 @@ export const DriverHero: React.FC = () => {
               </div>
 
               {/* Bottom Reassurance Strip */}
-              <div className="relative z-10 pt-4 border-t border-white/[0.12] flex items-center justify-between text-xs text-slate-300 font-medium">
+              <div className="relative z-10 pt-4 border-t border-white/15 flex items-center justify-between text-xs text-purple-200 font-medium">
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                   {t.card.footerBadge}
                 </span>
-                <span className="font-semibold text-white/90">
+                <span className="font-bold text-white">
                   {t.card.footerLocation}
                 </span>
               </div>
