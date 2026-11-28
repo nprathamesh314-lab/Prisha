@@ -164,16 +164,16 @@ export const TransportHero: React.FC = () => {
           />
         </div>
 
-        {/* Content Glass Panel */}
+        {/* Content Panel (Solid Crisp White with 100% Opaque High Contrast) */}
         <div className="w-full lg:max-w-2xl xl:max-w-[640px]">
           <motion.div
             initial="hidden"
             animate="visible"
             variants={panelVariants}
-            className="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white/98 backdrop-blur-xl border border-white shadow-[0_20px_50px_rgba(30,10,60,0.25)] space-y-5 sm:space-y-6 text-px-dark relative overflow-hidden"
+            className="p-6 sm:p-8 lg:p-10 rounded-3xl bg-white border border-purple-100 shadow-[0_24px_60px_rgba(26,5,46,0.22)] space-y-5 sm:space-y-6 text-px-dark relative overflow-hidden"
           >
             {/* Fine Top Border Shine */}
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-400 via-px-primary to-purple-400 opacity-80" />
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-purple-400 via-px-primary to-purple-400 opacity-90" />
 
             {/* Small Label Badge */}
             <motion.div variants={itemVariants} className="flex justify-start">
@@ -191,13 +191,15 @@ export const TransportHero: React.FC = () => {
               {t.title}
             </motion.h1>
 
-            {/* Description (Rich High-Contrast Blue for Clear Visibility) */}
-            <motion.p
+            {/* Description (Highlighted High-Contrast Blue Container for Crystal-Clear Visibility) */}
+            <motion.div
               variants={itemVariants}
-              className="text-sm sm:text-base text-blue-900 font-semibold leading-relaxed"
+              className="p-4 sm:p-4.5 rounded-2xl bg-blue-50/95 border border-blue-200 shadow-2xs"
             >
-              {t.desc}
-            </motion.p>
+              <p className="text-sm sm:text-base text-blue-950 font-bold leading-relaxed">
+                {t.desc}
+              </p>
+            </motion.div>
 
             {/* 3 Visual Highlights */}
             <motion.div
